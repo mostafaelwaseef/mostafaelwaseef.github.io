@@ -161,7 +161,8 @@ def render_blocks(blocks, slug, depth=0):
 
         elif btype == "quote":
             text = rt(data.get("rich_text", []))
-            html += f"{indent}<blockquote>{text}</blockquote>\n"
+            children_html = render_blocks(b.get("_children", []), slug, depth+1) if b.get("_children") else ""
+            html += f"{indent}<blockquote>{text}{children_html}</blockquote>\n"
 
         elif btype == "code":
             lang = data.get("language", "")
