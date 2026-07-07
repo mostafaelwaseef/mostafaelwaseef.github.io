@@ -105,7 +105,7 @@
   </section>
   <section id="machines">
     <div class="section-label">// 02. write-ups</div>
-    <h2>CTF Machines</h2>
+    <h2>Vulnerable Machines</h2>
     <div class="cards">
 <!-- AUTO:MACHINES:START -->
       <a href="writeups/machines/pickle-rick.html" class="card" style="text-decoration:none;">
@@ -158,11 +158,25 @@
     <h2>Get in Touch</h2>
     <p style="color:var(--muted);margin-bottom:1.5rem;">Open to internships, junior security roles, and bug bounty collaborations.</p>
     <div class="contact-links">
-      <a href="https://github.com/mostafaelwaseef" class="contact-link" target="_blank" rel="noopener">GitHub</a>
       <a href="https://www.linkedin.com/in/mostafa-elwaseef/" class="contact-link" target="_blank" rel="noopener">LinkedIn</a>
       <a href="mailto:m.waseef97@gmail.com" class="contact-link">Email</a>
     </div>
   </section>
-  <footer>Built with <span>♥</span> by Mostafa Elwaseef &nbsp;·&nbsp; Cybersecurity Portfolio</footer>
+  <footer>Built with <span>♥</span> by Waseef &nbsp;·&nbsp; Cybersecurity Portfolio</footer>
+  <script>
+    (function () {
+      var sections = document.querySelectorAll('section[id]');
+      if (!('IntersectionObserver' in window) || !sections.length) return;
+      var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            var id = '#' + entry.target.id;
+            if (location.hash !== id) history.replaceState(null, '', id);
+          }
+        });
+      }, { rootMargin: '-45% 0px -50% 0px', threshold: 0 });
+      sections.forEach(function (s) { observer.observe(s); });
+    })();
+  </script>
 </body>
 </html>

@@ -478,7 +478,7 @@ LEAF_TEMPLATE = """<!DOCTYPE html>
 __BODY__
 </div>
 
-<footer>Built by Mostafa Elwaseef · <a href="__ROOT__index.html">Back to Portfolio</a></footer>
+<footer>Built by Waseef · <a href="__ROOT__index.html">Back to Portfolio</a></footer>
 </body>
 </html>
 """
@@ -513,7 +513,7 @@ __CARDS__
   </div>
 </div>
 
-<footer>Built by Mostafa Elwaseef · <a href="__ROOT__index.html">Back to Portfolio</a></footer>
+<footer>Built by Waseef · <a href="__ROOT__index.html">Back to Portfolio</a></footer>
 </body>
 </html>
 """
