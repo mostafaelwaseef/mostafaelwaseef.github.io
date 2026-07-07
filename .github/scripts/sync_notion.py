@@ -460,7 +460,7 @@ LEAF_TEMPLATE = """<!DOCTYPE html>
 </head>
 <body>
 <nav>
-  <span class="nav-logo">Mostafa Elwaseef</span>
+  <span class="nav-logo">Waseef</span>
   <a href="__ROOT__index.html" class="nav-back">← Back to Portfolio</a>
 </nav>
 
@@ -495,7 +495,7 @@ CATEGORY_TEMPLATE = """<!DOCTYPE html>
 </head>
 <body>
 <nav>
-  <span class="nav-logo">Mostafa Elwaseef</span>
+  <span class="nav-logo">Waseef</span>
   <a href="__ROOT__index.html" class="nav-back">← Back to Portfolio</a>
 </nav>
 
