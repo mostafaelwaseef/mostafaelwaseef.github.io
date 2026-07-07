@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 3 — CSRF where token validation depends on token being present — Waseef's Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --bg2: #161b22; --bg3: #21262d;
+      --border: #30363d; --text: #e6edf3; --muted: #8b949e;
+      --accent: #58a6ff; --accent2: #3fb950; --red: #f85149;
+      --orange: #d29922; --radius: 8px;
+      --c-red: #f85149; --c-blue: #58a6ff; --c-green: #3fb950;
+      --c-yellow: #d29922; --c-purple: #bc8cff; --c-pink: #ff7b72;
+      --c-gray: #8b949e;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.7; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    nav { position: sticky; top: 0; z-index: 100; background: rgba(13,17,23,.9); backdrop-filter: blur(12px);
+          border-bottom: 1px solid var(--border); padding: .75rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { font-weight: 600; font-size: 1rem; color: var(--text); }
+    .nav-back { font-size: .85rem; color: var(--muted); display: flex; align-items: center; gap: .4rem; }
+    .nav-back:hover { color: var(--accent); text-decoration: none; }
+    .hero { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 3rem 2rem 2.5rem; }
+    .hero-inner { max-width: 860px; margin: 0 auto; }
+    .breadcrumb { font-size: .8rem; color: var(--muted); margin-bottom: 1rem; }
+    .breadcrumb a { color: var(--muted); }
+    .breadcrumb a:hover { color: var(--accent); }
+    .hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
+    .hero p.desc { color: var(--muted); max-width: 640px; margin-top: .5rem; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+    .badge { display: inline-flex; align-items: center; gap: .3rem; padding: .25rem .7rem;
+             border-radius: 20px; font-size: .75rem; font-weight: 500; }
+    .badge-platform { background: #1f3a5f; color: #58a6ff; border: 1px solid #1f4080; }
+    .badge-easy { background: #1a3a2a; color: #3fb950; border: 1px solid #2ea043; }
+    .badge-medium { background: #3a2a1a; color: #d29922; border: 1px solid #9e6a03; }
+    .badge-hard { background: #3a1a1a; color: #f85149; border: 1px solid #da3633; }
+    .badge-beginner { background: #1a3a2a; color: #56d364; border: 1px solid #2ea043; }
+    .badge-os { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .badge-date { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .content { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+    h1, h2, h3 { color: var(--text); font-weight: 600; margin: 2rem 0 .75rem; }
+    h2 { font-size: 1.35rem; padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 1.1rem; color: var(--accent); }
+    p { margin: .6rem 0; color: #c9d1d9; }
+    ul, ol { margin: .5rem 0 .5rem 1.5rem; }
+    li { margin: .3rem 0; color: #c9d1d9; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    blockquote { border-left: 3px solid var(--accent); padding: .5rem 1rem; margin: .75rem 0;
+                 background: var(--bg2); border-radius: 0 var(--radius) var(--radius) 0; color: var(--muted); }
+    pre { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+          padding: 1rem 1.25rem; overflow-x: auto; margin: .75rem 0; }
+    code { font-family: 'Fira Code', monospace; font-size: .85rem; color: #e6edf3; }
+    p code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; color: var(--accent); font-size: .82rem; }
+    strong code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; }
+    figure { margin: 1.25rem 0; }
+    img { max-width: 100%; border-radius: var(--radius); border: 1px solid var(--border);
+          display: block; margin: 0 auto; }
+    figcaption { text-align: center; font-size: .8rem; color: var(--muted); margin-top: .4rem; }
+    .callout { display: flex; gap: .75rem; align-items: flex-start; background: var(--bg2);
+               border: 1px solid var(--border); border-radius: var(--radius); padding: .9rem 1rem; margin: .75rem 0; }
+    .callout-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: .1rem; }
+    details { border: 1px solid var(--border); border-radius: var(--radius); margin: .5rem 0; }
+    summary { padding: .6rem 1rem; cursor: pointer; font-weight: 500; background: var(--bg2); border-radius: var(--radius); }
+    details[open] summary { border-radius: var(--radius) var(--radius) 0 0; border-bottom: 1px solid var(--border); }
+    details > *:not(summary) { padding: .75rem 1rem; }
+    .table-wrap { overflow-x: auto; margin: .75rem 0; }
+    table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+    th, td { padding: .6rem .9rem; border: 1px solid var(--border); text-align: left; }
+    th { background: var(--bg3); font-weight: 600; }
+    tr:nth-child(even) { background: rgba(33,38,45,.5); }
+    .columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin: .75rem 0; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem;
+            transition: border-color .15s, transform .15s; display: block; }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); text-decoration: none; }
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: .6rem; gap: .5rem; }
+    .card-title { font-size: 14px; font-weight: 600; color: var(--text); }
+    .card-meta { font-size: 12px; color: var(--muted); margin-bottom: .4rem; }
+    .card-desc { font-size: 13px; color: var(--muted); }
+    footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--muted); font-size: .85rem; }
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-logo">Waseef</span>
+  <a href="../../../index.html" class="nav-back">← Back to Portfolio</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#labs">Labs</a> / <a href="index.html">CSRF</a> / Lab 3 — CSRF where token validation depends on token being present</div>
+    <h1>Lab 3 — CSRF where token validation depends on token being present</h1>
+    <div class="meta-row">
+      <span class="badge badge-os">⚪ 🟡 Medium</span>
+      <span class="badge badge-date">📅 2026-06-19</span>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+<h2 id="finding-summary">📋 Finding Summary</h2>
+<div class='table-wrap'><table>
+  <tr><th>Field</th><th>Value</th></tr>
+  <tr><td><strong>Type</strong></td><td>Web App</td></tr>
+  <tr><td><strong>Severity</strong></td><td>🟡 Medium</td></tr>
+  <tr><td><strong>CVE / CWE</strong></td><td>CWE-352</td></tr>
+  <tr><td><strong>Date</strong></td><td>2026-06-19</td></tr>
+</table></div>
+<hr>
+<h2 id="description">🔍 Description</h2>
+<p>Cross-Site Request Forgery (CSRF) token validation that depends on the token being present is a flawed defense pattern where the server only validates the CSRF token if it is included in the request — but skips validation entirely when the parameter is omitted. An attacker can exploit this by crafting a request that simply does not include the <code>csrf</code> parameter. Because the server never checks for a missing token, the forged request is accepted as legitimate, and the victim’s session cookie is still sent automatically by the browser.</p>
+<hr>
+<h2 id="end-goals">🎯 End Goals</h2>
+<ul>
+  <li>Identify that the email change endpoint only validates the CSRF token when it is present in the request</li>
+  <li>Demonstrate that omitting the <code>csrf</code> parameter entirely bypasses token validation</li>
+  <li>Craft a CSRF PoC that changes the victim’s email without a token and deliver it through the exploit server</li>
+</ul>
+<hr>
+<h2 id="steps-to-reproduce">🪜 Steps to Reproduce</h2>
+<ol>
+  <li>Log in as <code>wiener</code> and navigate to the My Account page.</li>
+  <li>Submit an email change and capture the POST request in Burp Repeater.</li>
+  <li>Remove the <code>csrf</code> parameter from the request body and resend.</li>
+  <li>Confirm the server accepts the request without a token (HTTP 302).</li>
+  <li>Right-click the request → Engagement tools → Generate CSRF PoC.</li>
+  <li>Paste the PoC into the exploit server and deliver it to the victim.</li>
+</ol>
+<hr>
+<h2 id="analysis">🧠 Analysis</h2>
+<p><strong>Step 1 — Access the lab</strong></p>
+<p>The lab was launched and the homepage loaded. The lab is flagged as Practitioner level and targets a CSRF defense that only activates when a token is present in the request.</p>
+<blockquote>  <figure><img src="images/lab-3-csrf-where-token-validation-depends-on-token-being-present/384b75237172808e93f6ee3c2dbd6f8e.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 2 — Log in and identify email change form</strong></p>
+<p>Authenticated as <code>wiener:peter</code> and navigated to the My Account page. The current email was <code>wiener@normal-user.net</code>. A test email <code>test1@test.com</code> was entered into the email field in preparation for submission.</p>
+<blockquote>  <figure><img src="images/lab-3-csrf-where-token-validation-depends-on-token-being-present/384b75237172808cb4b1ec971574f8fc.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 3 — Capture POST request with CSRF token</strong></p>
+<p>The email change was submitted. Burp Repeater captured the POST to <code>/my-account/change-email</code> with body <code>email=test1%40test.com&amp;csrf=JUBmVKr...</code>. The CSRF token was present in the request body, confirming the application uses token-based CSRF protection.</p>
+<blockquote>  <figure><img src="images/lab-3-csrf-where-token-validation-depends-on-token-being-present/384b752371728051a482dae23b2fd779.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 4 — Remove CSRF token and confirm bypass</strong></p>
+<p>The <code>csrf</code> parameter was deleted from the request body entirely, leaving only <code>email=test1%40test.com</code>. The modified request was sent — the server returned HTTP 302 and redirected to <code>/my-account?id=wiener</code>, confirming the email change was accepted with no token present. This demonstrated that the server skips validation when the <code>csrf</code> parameter is absent.</p>
+<blockquote>  <figure><img src="images/lab-3-csrf-where-token-validation-depends-on-token-being-present/384b7523717280108386fb7cc1abe905.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 5 — Confirm email updated</strong></p>
+<p>Navigated to the My Account page. The email had been updated to <code>test2@test.com</code>, confirming the token-less request was processed successfully by the server.</p>
+<blockquote>  <figure><img src="images/lab-3-csrf-where-token-validation-depends-on-token-being-present/384b7523717280f1ae4de42e239d46e9.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 6 — Generate CSRF PoC</strong></p>
+<p>Right-clicked the request in Burp Repeater → Engagement tools → Generate CSRF PoC. Burp was used to auto-generate an HTML form that targets the <code>/my-account/change-email</code> endpoint without a CSRF token.</p>
+<blockquote>  <figure><img src="images/lab-3-csrf-where-token-validation-depends-on-token-being-present/384b7523717280de9bafd610cefe2102.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 7 — Review PoC in CSRF generator</strong></p>
+<p>The Burp CSRF PoC generator displayed the generated HTML — a form with a hidden <code>email</code> field set to <code>test3@test.com</code> that auto-submits on page load via JavaScript. No <code>csrf</code> field was included in the form, exploiting the token-absent bypass.</p>
+<blockquote>  <figure><img src="images/lab-3-csrf-where-token-validation-depends-on-token-being-present/384b752371728026beaee6c2c9bb1053.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 8 — Deliver exploit and solve</strong></p>
+<p>The generated PoC HTML was pasted into the exploit server body and “Deliver exploit to victim” was clicked. The victim’s browser silently submitted the form, changing their email to <code>test3@test.com</code>. The lab banner updated to <strong>Solved</strong>, confirming the CSRF attack succeeded.</p>
+<blockquote><em>(Drag 08.png here)</em>  <figure><img src="images/lab-3-csrf-where-token-validation-depends-on-token-being-present/384b752371728088a42fec090540eafe.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<h2 id="impact">🎯 Impact</h2>
+<p>An attacker who can lure an authenticated user to visit a malicious page can silently change the victim’s email address without needing to steal or forge a valid CSRF token — by simply omitting it. This bypasses the CSRF defense entirely and can be chained with a password reset to achieve full account takeover.</p>
+<hr>
+<h2 id="references">📚 References</h2>
+<ul>
+  <li><a href="https://portswigger.net/web-security/csrf/bypassing-token-validation" target="_blank" rel="noopener">PortSwigger Web Security Academy — Bypassing CSRF token validation</a></li>
+  <li><a href="https://cwe.mitre.org/data/definitions/352.html" target="_blank" rel="noopener">CWE-352: Cross-Site Request Forgery</a></li>
+  <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html" target="_blank" rel="noopener">OWASP CSRF Prevention Cheat Sheet</a></li>
+</ul>
+<hr>
+<blockquote>🤖 Documented with Claude pentest-findings skill</blockquote>
+
+</div>
+
+<footer>Built by Waseef · <a href="../../../index.html">Back to Portfolio</a></footer>
+</body>
+</html>

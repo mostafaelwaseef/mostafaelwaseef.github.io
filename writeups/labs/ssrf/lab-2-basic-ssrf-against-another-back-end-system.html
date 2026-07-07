@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 2 — Basic SSRF against another back-end system — Waseef's Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --bg2: #161b22; --bg3: #21262d;
+      --border: #30363d; --text: #e6edf3; --muted: #8b949e;
+      --accent: #58a6ff; --accent2: #3fb950; --red: #f85149;
+      --orange: #d29922; --radius: 8px;
+      --c-red: #f85149; --c-blue: #58a6ff; --c-green: #3fb950;
+      --c-yellow: #d29922; --c-purple: #bc8cff; --c-pink: #ff7b72;
+      --c-gray: #8b949e;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.7; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    nav { position: sticky; top: 0; z-index: 100; background: rgba(13,17,23,.9); backdrop-filter: blur(12px);
+          border-bottom: 1px solid var(--border); padding: .75rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { font-weight: 600; font-size: 1rem; color: var(--text); }
+    .nav-back { font-size: .85rem; color: var(--muted); display: flex; align-items: center; gap: .4rem; }
+    .nav-back:hover { color: var(--accent); text-decoration: none; }
+    .hero { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 3rem 2rem 2.5rem; }
+    .hero-inner { max-width: 860px; margin: 0 auto; }
+    .breadcrumb { font-size: .8rem; color: var(--muted); margin-bottom: 1rem; }
+    .breadcrumb a { color: var(--muted); }
+    .breadcrumb a:hover { color: var(--accent); }
+    .hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
+    .hero p.desc { color: var(--muted); max-width: 640px; margin-top: .5rem; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+    .badge { display: inline-flex; align-items: center; gap: .3rem; padding: .25rem .7rem;
+             border-radius: 20px; font-size: .75rem; font-weight: 500; }
+    .badge-platform { background: #1f3a5f; color: #58a6ff; border: 1px solid #1f4080; }
+    .badge-easy { background: #1a3a2a; color: #3fb950; border: 1px solid #2ea043; }
+    .badge-medium { background: #3a2a1a; color: #d29922; border: 1px solid #9e6a03; }
+    .badge-hard { background: #3a1a1a; color: #f85149; border: 1px solid #da3633; }
+    .badge-beginner { background: #1a3a2a; color: #56d364; border: 1px solid #2ea043; }
+    .badge-os { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .badge-date { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .content { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+    h1, h2, h3 { color: var(--text); font-weight: 600; margin: 2rem 0 .75rem; }
+    h2 { font-size: 1.35rem; padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 1.1rem; color: var(--accent); }
+    p { margin: .6rem 0; color: #c9d1d9; }
+    ul, ol { margin: .5rem 0 .5rem 1.5rem; }
+    li { margin: .3rem 0; color: #c9d1d9; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    blockquote { border-left: 3px solid var(--accent); padding: .5rem 1rem; margin: .75rem 0;
+                 background: var(--bg2); border-radius: 0 var(--radius) var(--radius) 0; color: var(--muted); }
+    pre { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+          padding: 1rem 1.25rem; overflow-x: auto; margin: .75rem 0; }
+    code { font-family: 'Fira Code', monospace; font-size: .85rem; color: #e6edf3; }
+    p code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; color: var(--accent); font-size: .82rem; }
+    strong code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; }
+    figure { margin: 1.25rem 0; }
+    img { max-width: 100%; border-radius: var(--radius); border: 1px solid var(--border);
+          display: block; margin: 0 auto; }
+    figcaption { text-align: center; font-size: .8rem; color: var(--muted); margin-top: .4rem; }
+    .callout { display: flex; gap: .75rem; align-items: flex-start; background: var(--bg2);
+               border: 1px solid var(--border); border-radius: var(--radius); padding: .9rem 1rem; margin: .75rem 0; }
+    .callout-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: .1rem; }
+    details { border: 1px solid var(--border); border-radius: var(--radius); margin: .5rem 0; }
+    summary { padding: .6rem 1rem; cursor: pointer; font-weight: 500; background: var(--bg2); border-radius: var(--radius); }
+    details[open] summary { border-radius: var(--radius) var(--radius) 0 0; border-bottom: 1px solid var(--border); }
+    details > *:not(summary) { padding: .75rem 1rem; }
+    .table-wrap { overflow-x: auto; margin: .75rem 0; }
+    table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+    th, td { padding: .6rem .9rem; border: 1px solid var(--border); text-align: left; }
+    th { background: var(--bg3); font-weight: 600; }
+    tr:nth-child(even) { background: rgba(33,38,45,.5); }
+    .columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin: .75rem 0; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem;
+            transition: border-color .15s, transform .15s; display: block; }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); text-decoration: none; }
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: .6rem; gap: .5rem; }
+    .card-title { font-size: 14px; font-weight: 600; color: var(--text); }
+    .card-meta { font-size: 12px; color: var(--muted); margin-bottom: .4rem; }
+    .card-desc { font-size: 13px; color: var(--muted); }
+    footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--muted); font-size: .85rem; }
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-logo">Waseef</span>
+  <a href="../../../index.html" class="nav-back">← Back to Portfolio</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#labs">Labs</a> / <a href="index.html">SSRF</a> / Lab 2 — Basic SSRF against another back-end system</div>
+    <h1>Lab 2 — Basic SSRF against another back-end system</h1>
+    <div class="meta-row">
+      <span class="badge badge-os">⚪ 🟠 High</span>
+      <span class="badge badge-date">📅 2026-07-03</span>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+<h2 id="finding-summary">📋 Finding Summary</h2>
+<div class='table-wrap'><table>
+  <tr><th>Field</th><th>Value</th></tr>
+  <tr><td><strong>Type</strong></td><td>Web App</td></tr>
+  <tr><td><strong>Severity</strong></td><td>🟠 High</td></tr>
+  <tr><td><strong>CVE / CWE</strong></td><td>CWE-918</td></tr>
+  <tr><td><strong>Date</strong></td><td>2026-07-03</td></tr>
+</table></div>
+<hr>
+<h2 id="description">🔍 Description</h2>
+<p>Server-Side Request Forgery (SSRF) is a vulnerability that allows an attacker to induce a server-side application to make HTTP requests to an arbitrary destination of the attacker’s choosing. The application’s stock-check feature accepts a <code>stockApi</code> parameter containing the full URL the back-end server should fetch to retrieve stock data. In this variant, the parameter is restricted to internal IP addresses (the <code>192.168.0.X</code> range), rather than allowing arbitrary hostnames. Because no further restriction limits which internal hosts or ports can be targeted, an attacker can enumerate the internal network by fuzzing the address range, identify a second internal back-end system that is not the primary application server, and reach its admin interface directly — something normally impossible from outside the internal network.</p>
+<hr>
+<h2 id="end-goals">🎯 End Goals</h2>
+<ul>
+  <li>Identify the stock-check feature and confirm the <code>stockApi</code> parameter accepts internal IP addresses</li>
+  <li>Scan the internal <code>192.168.0.X</code> range on port <code>8080</code> to discover a second back-end system</li>
+  <li>Locate the admin interface on the discovered host and enumerate its users</li>
+  <li>Delete the user <code>carlos</code> via the admin interface to solve the lab</li>
+</ul>
+<hr>
+<h2 id="steps-to-reproduce">🪜 Steps to Reproduce</h2>
+<ol>
+  <li>Open the lab and browse the shop homepage.</li>
+  <li>Navigate to a product page and use Burp Suite to intercept the stock-check request.</li>
+  <li>Identify the <code>stockApi</code> parameter and confirm it targets an internal IP address on port 8080.</li>
+  <li>Send the request to Intruder and fuzz the last octet of the internal IP range.</li>
+  <li>Review the attack results to identify a host that responds differently from the rest.</li>
+  <li>Confirm the discovered host is live and probe it for an admin interface.</li>
+  <li>Enumerate the admin panel’s users, attempt the delete link directly in the browser, and inspect why it fails.</li>
+  <li>Route the delete request through the <code>stockApi</code> parameter to reach the internal host directly.</li>
+  <li>Confirm the lab is solved and the target user has been deleted.</li>
+</ol>
+<hr>
+<h2 id="analysis">🧠 Analysis</h2>
+<p><strong>Step 1 — Access the lab</strong></p>
+<p>The lab was launched and the shop homepage loaded successfully.</p>
+<blockquote>  <figure><img src="images/lab-2-basic-ssrf-against-another-back-end-system/392b7523717280a7a73bdccd6dd6a17b.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 2 — Locate the stock-check feature and capture the baseline request</strong></p>
+<p>Navigating to a product page revealed a stock-check feature with a store-location dropdown. With Burp Suite intercepting traffic, submitting the stock check captured a request containing a <code>stockApi</code> parameter with the URL-encoded value <code>http://192.168.0.1:8080/product/stock/check?productId=1&amp;storeId=1</code>. The response returned <code>HTTP/2 200</code> with a plain-text body of <code>136</code>. Unlike the first SSRF lab, the parameter already targets a raw internal IP address rather than a hostname, indicating the internal network itself would need to be probed.</p>
+<blockquote>  <figure><img src="images/lab-2-basic-ssrf-against-another-back-end-system/392b7523717280bd8f70d4685a5dae5e.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-2-basic-ssrf-against-another-back-end-system/392b75237172803fb0c5ee9757bf9160.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 3 — Inconclusive probe</strong></p>
+<p>The <code>stockApi</code> value was truncated to <code>http://192.168.0.1:8080/</code>, with no path or query string. The response was <code>HTTP/2 400 Bad Request</code> with the body <code>"Missing parameter"</code>. This confirmed <code>192.168.0.1</code> is itself a live, real endpoint (most likely the application’s own back-end), but did not yet reveal anything about the rest of the internal network.</p>
+<blockquote>  <figure><img src="images/lab-2-basic-ssrf-against-another-back-end-system/392b752371728043896ef8c8e74414cf.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 4 — Prepare an internal IP-range scan with Intruder</strong></p>
+<p>The request was sent to Burp Intruder to fuzz the internal network for other live hosts on port 8080. A Sniper attack was configured with the payload position on the last octet of the address, <code>192.168.0.§1§:8080/</code>, using a numeric payload set from 1 to 255.</p>
+<blockquote>  <figure><img src="images/lab-2-basic-ssrf-against-another-back-end-system/392b7523717280e79f1afc1a661538f5.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-2-basic-ssrf-against-another-back-end-system/392b7523717280b48b86c78291193f47.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 5 — Identify a live host from the scan</strong></p>
+<p>Reviewing the attack results sorted by status code showed the vast majority of addresses returning <code>HTTP/2 500</code> with an identical response length of <code>2581</code> bytes — the application’s generic error page for a failed internal connection, indicating nothing is listening at those addresses. One entry, host <code>238</code>, stood out with a <code>404</code> status and a much shorter response length of <code>198</code> bytes, a genuine HTTP response rather than a connection failure, marking it as worth investigating further.</p>
+<blockquote>  <figure><img src="images/lab-2-basic-ssrf-against-another-back-end-system/392b752371728048a6e0f86f43e79d4e.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 6 — Confirm and locate the admin panel on the discovered host</strong></p>
+<p>Sending a request with <code>stockApi=http://192.168.0.238:8080/</code> independently reproduced the <code>HTTP/2 404 Not Found</code> response with the body <code>"Not Found"</code>, confirming a real service is listening at that address rather than the scan result being a fluke. Guessing the path <code>/admin</code> on the same host returned <code>HTTP/2 200 OK</code> with HTML titled “Basic SSRF against another back-end system,” revealing the admin interface of a second internal back-end system.</p>
+<blockquote>  <figure><img src="images/lab-2-basic-ssrf-against-another-back-end-system/392b7523717280d9b0daf88f71098b28.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-2-basic-ssrf-against-another-back-end-system/392b7523717280e99c81ef13604836c9.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 7 — Enumerate users, attempt the delete link, and discover why it fails</strong></p>
+<p>The browser’s navigation bar now showed a new “Admin panel” link. Following it displayed a “Users” page listing two accounts, <code>wiener</code> and <code>carlos</code>, each with a “Delete” link. Hovering over the “Delete” link for <code>carlos</code> previewed a target combining the lab’s own domain with the internal URL. Clicking it directly in the browser requested that literal path on the lab’s own domain rather than reaching the internal host, and the response returned was simply <code>"Not Found"</code>. Inspecting the element in DevTools revealed why: the underlying <code>href</code> was <code>/http://192.168.0.238:8080/admin/delete?username=carlos</code> — note the leading slash, which makes browsers treat the entire internal URL as a same-origin relative path rather than an absolute link to the internal host, so the click could never reach the internal admin server.</p>
+<blockquote>  <figure><img src="images/lab-2-basic-ssrf-against-another-back-end-system/392b75237172804b849bd7fc99a7e0ba.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-2-basic-ssrf-against-another-back-end-system/392b752371728021a5a1f5634eebdf16.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-2-basic-ssrf-against-another-back-end-system/392b7523717280eba0b9c736486f8248.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-2-basic-ssrf-against-another-back-end-system/392b75237172808085f9eb2fe7f7acee.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 8 — Exploit via SSRF to delete carlos</strong></p>
+<p>The <code>stockApi</code> parameter was set to <code>http://192.168.0.238:8080/admin/delete?username=carlos</code> and sent through Repeater. The response was <code>HTTP/2 302 Found</code> with a <code>Location: http://192.168.0.238:8080/admin</code> redirect, indicating the deletion request succeeded when routed server-side through the <code>stockApi</code> parameter, bypassing the browser’s inability to reach the internal host directly.</p>
+<blockquote>  <figure><img src="images/lab-2-basic-ssrf-against-another-back-end-system/392b75237172803aabeff9d50c9fdbbb.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 9 — Verify and solve</strong></p>
+<p>The lab banner updated to display “Congratulations, you solved the lab!” with status <strong>Solved</strong>. The admin panel was re-confirmed reachable via the <code>stockApi</code> parameter, and a final refresh of the product page showed “User deleted successfully!” with the Users list now containing only <code>wiener</code>, confirming <code>carlos</code> had been removed via the SSRF exploit.</p>
+<blockquote>  <figure><img src="images/lab-2-basic-ssrf-against-another-back-end-system/392b7523717280f786d0f028e67904f6.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-2-basic-ssrf-against-another-back-end-system/392b7523717280f38655c4d9c6b7ea45.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<h2 id="impact">🎯 Impact</h2>
+<p>An attacker who can control a server-side request’s destination can use the vulnerable server as a scanning proxy into networks that are otherwise unreachable from outside. In this lab, that capability allowed an unauthenticated attacker to fuzz an internal IP range, discover a second back-end system never intended to be exposed, and reach its admin interface to perform a destructive action — deleting a user account — despite the admin interface being unreachable through any direct, intended browser navigation path. In a real deployment, the same technique could be used to map internal infrastructure and reach internal APIs, management interfaces, or metadata services with no direct network access of their own.</p>
+<hr>
+<h2 id="references">📚 References</h2>
+<ul>
+  <li><a href="https://portswigger.net/web-security/ssrf" target="_blank" rel="noopener">PortSwigger Web Security Academy — SSRF</a></li>
+  <li><a href="https://portswigger.net/web-security/ssrf/lab-basic-ssrf-against-backend-system" target="_blank" rel="noopener">PortSwigger Lab — Basic SSRF against another back-end system</a></li>
+  <li><a href="https://cwe.mitre.org/data/definitions/918.html" target="_blank" rel="noopener">CWE-918: Server-Side Request Forgery (SSRF)</a></li>
+</ul>
+<hr>
+<blockquote>🤖 Documented with Claude pentest-findings skill</blockquote>
+
+</div>
+
+<footer>Built by Waseef · <a href="../../../index.html">Back to Portfolio</a></footer>
+</body>
+</html>

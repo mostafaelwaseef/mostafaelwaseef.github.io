@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pickle Rick — TryHackMe — Waseef's Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --bg2: #161b22; --bg3: #21262d;
+      --border: #30363d; --text: #e6edf3; --muted: #8b949e;
+      --accent: #58a6ff; --accent2: #3fb950; --red: #f85149;
+      --orange: #d29922; --radius: 8px;
+      --c-red: #f85149; --c-blue: #58a6ff; --c-green: #3fb950;
+      --c-yellow: #d29922; --c-purple: #bc8cff; --c-pink: #ff7b72;
+      --c-gray: #8b949e;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.7; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    nav { position: sticky; top: 0; z-index: 100; background: rgba(13,17,23,.9); backdrop-filter: blur(12px);
+          border-bottom: 1px solid var(--border); padding: .75rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { font-weight: 600; font-size: 1rem; color: var(--text); }
+    .nav-back { font-size: .85rem; color: var(--muted); display: flex; align-items: center; gap: .4rem; }
+    .nav-back:hover { color: var(--accent); text-decoration: none; }
+    .hero { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 3rem 2rem 2.5rem; }
+    .hero-inner { max-width: 860px; margin: 0 auto; }
+    .breadcrumb { font-size: .8rem; color: var(--muted); margin-bottom: 1rem; }
+    .breadcrumb a { color: var(--muted); }
+    .breadcrumb a:hover { color: var(--accent); }
+    .hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
+    .hero p.desc { color: var(--muted); max-width: 640px; margin-top: .5rem; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+    .badge { display: inline-flex; align-items: center; gap: .3rem; padding: .25rem .7rem;
+             border-radius: 20px; font-size: .75rem; font-weight: 500; }
+    .badge-platform { background: #1f3a5f; color: #58a6ff; border: 1px solid #1f4080; }
+    .badge-easy { background: #1a3a2a; color: #3fb950; border: 1px solid #2ea043; }
+    .badge-medium { background: #3a2a1a; color: #d29922; border: 1px solid #9e6a03; }
+    .badge-hard { background: #3a1a1a; color: #f85149; border: 1px solid #da3633; }
+    .badge-beginner { background: #1a3a2a; color: #56d364; border: 1px solid #2ea043; }
+    .badge-os { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .badge-date { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .content { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+    h1, h2, h3 { color: var(--text); font-weight: 600; margin: 2rem 0 .75rem; }
+    h2 { font-size: 1.35rem; padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 1.1rem; color: var(--accent); }
+    p { margin: .6rem 0; color: #c9d1d9; }
+    ul, ol { margin: .5rem 0 .5rem 1.5rem; }
+    li { margin: .3rem 0; color: #c9d1d9; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    blockquote { border-left: 3px solid var(--accent); padding: .5rem 1rem; margin: .75rem 0;
+                 background: var(--bg2); border-radius: 0 var(--radius) var(--radius) 0; color: var(--muted); }
+    pre { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+          padding: 1rem 1.25rem; overflow-x: auto; margin: .75rem 0; }
+    code { font-family: 'Fira Code', monospace; font-size: .85rem; color: #e6edf3; }
+    p code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; color: var(--accent); font-size: .82rem; }
+    strong code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; }
+    figure { margin: 1.25rem 0; }
+    img { max-width: 100%; border-radius: var(--radius); border: 1px solid var(--border);
+          display: block; margin: 0 auto; }
+    figcaption { text-align: center; font-size: .8rem; color: var(--muted); margin-top: .4rem; }
+    .callout { display: flex; gap: .75rem; align-items: flex-start; background: var(--bg2);
+               border: 1px solid var(--border); border-radius: var(--radius); padding: .9rem 1rem; margin: .75rem 0; }
+    .callout-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: .1rem; }
+    details { border: 1px solid var(--border); border-radius: var(--radius); margin: .5rem 0; }
+    summary { padding: .6rem 1rem; cursor: pointer; font-weight: 500; background: var(--bg2); border-radius: var(--radius); }
+    details[open] summary { border-radius: var(--radius) var(--radius) 0 0; border-bottom: 1px solid var(--border); }
+    details > *:not(summary) { padding: .75rem 1rem; }
+    .table-wrap { overflow-x: auto; margin: .75rem 0; }
+    table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+    th, td { padding: .6rem .9rem; border: 1px solid var(--border); text-align: left; }
+    th { background: var(--bg3); font-weight: 600; }
+    tr:nth-child(even) { background: rgba(33,38,45,.5); }
+    .columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin: .75rem 0; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem;
+            transition: border-color .15s, transform .15s; display: block; }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); text-decoration: none; }
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: .6rem; gap: .5rem; }
+    .card-title { font-size: 14px; font-weight: 600; color: var(--text); }
+    .card-meta { font-size: 12px; color: var(--muted); margin-bottom: .4rem; }
+    .card-desc { font-size: 13px; color: var(--muted); }
+    footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--muted); font-size: .85rem; }
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-logo">Waseef</span>
+  <a href="../../index.html" class="nav-back">← Back to Portfolio</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="breadcrumb"><a href="../../index.html">Portfolio</a> / <a href="../../index.html#machines">Machines</a> / Pickle Rick — TryHackMe</div>
+    <h1>Pickle Rick — TryHackMe</h1>
+    <div class="meta-row">
+      <span class="badge badge-platform">🖥 TryHackMe</span>
+      <span class="badge badge-easy">🟢 Easy</span>
+      <span class="badge badge-os">🐧 Linux (Ubuntu)</span>
+      <span class="badge badge-date">📅 2026-07-05</span>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+<h1 id="pickle-rick-penetration-test-report">Pickle Rick — Penetration Test Report</h1>
+<h2 id="machine-info">Machine Info</h2>
+<div class='table-wrap'><table>
+  <tr><th>Field</th><th>Value</th></tr>
+  <tr><td><strong>Machine</strong></td><td>Pickle Rick</td></tr>
+  <tr><td><strong>Platform</strong></td><td>TryHackMe</td></tr>
+  <tr><td><strong>IP Address</strong></td><td><code>&lt;TARGET_IP&gt;</code></td></tr>
+  <tr><td><strong>OS</strong></td><td>Linux (Ubuntu)</td></tr>
+  <tr><td><strong>Difficulty</strong></td><td>Easy</td></tr>
+  <tr><td><strong>Date</strong></td><td>2026-07-05</td></tr>
+</table></div>
+<hr>
+<h2 id="executive-summary">Executive Summary</h2>
+<p>The Pickle Rick machine was fully compromised through a chain of information disclosure and command injection vulnerabilities. Cleartext credentials were recovered from the web application’s HTML source code and <code>robots.txt</code> file, granting access to an authenticated command execution panel. A weak command blacklist was bypassed using alternative file-reading utilities. The web server process (<code>www-data</code>) was configured with unrestricted passwordless sudo access, enabling immediate escalation to root. An attacker with this level of access would have full control of the server — including the ability to read all files, install persistence mechanisms, pivot to other hosts on the network, and exfiltrate sensitive data.</p>
+<hr>
+<h2 id="reconnaissance">Reconnaissance</h2>
+<h3 id="objective">Objective</h3>
+<p>Identify open ports, running services, and the target operating system to map the attack surface.</p>
+<h3 id="findings">Findings</h3>
+<p>An Nmap service and OS detection scan revealed two open ports: SSH on port 22 running OpenSSH 8.2p1 on Ubuntu, and HTTP on port 80 running Apache 2.4.41. Nmap could not find an exact OS match but service info confirmed the target is running Linux. With only two services exposed, the HTTP server was the primary target for further enumeration.</p>
+<p><strong>PoC:</strong>
+- <strong>Tools used</strong>: Nmap
+- <strong>Command</strong>: <code>nmap -sV -O &lt;TARGET_IP&gt;</code>
+- <strong>Result</strong>: Two open ports — 22/tcp (OpenSSH 8.2p1 Ubuntu) and 80/tcp (Apache httpd 2.4.41). No exact OS match; service info confirmed Linux.</p>
+<p>Navigating to the web server on port 80 presented a themed page requesting help finding three secret ingredients — confirming this is the target application.</p>
+<blockquote>  <figure><img src="images/pickle-rick/394b75237172805e9608fc139b0a8946.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/pickle-rick/394b75237172803296bff1d66e408a0b.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<h2 id="enumeration">Enumeration</h2>
+<h3 id="objective">Objective</h3>
+<p>Discover hidden content, credentials, and additional attack surface on the web application.</p>
+<h3 id="findings">Findings</h3>
+<p>Source Code Inspection</p>
+<p>Viewing the page source revealed an HTML comment containing a username in cleartext — a common developer oversight where debug or reminder comments are left in production code.</p>
+<p><strong>PoC:</strong>
+- <strong>Tools used</strong>: Browser
+- <strong>Command</strong>: View page source (<code>Ctrl+U</code>)
+- <strong>Result</strong>: HTML comment containing a username in cleartext [REDACTED]</p>
+<blockquote>  <figure><img src="images/pickle-rick/394b7523717280b591d3e0e10343a790.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<p>Directory and File Enumeration</p>
+<p>Gobuster was used to brute-force directories and files with <code>php</code> and <code>html</code> extensions. The scan revealed several interesting endpoints: <code>/login.php</code> (a login form), <code>/portal.php</code> (redirecting to login — suggesting authenticated content behind it), <code>/robots.txt</code>, and <code>/denied.php</code>. The <code>/server-status</code> endpoint returned 403 Forbidden.</p>
+<p><strong>PoC:</strong>
+- <strong>Tools used</strong>: Gobuster
+- <strong>Command</strong>: <code>gobuster dir -u http://&lt;TARGET_IP&gt; -w /usr/share/wordlists/dirb/common.txt -x php,html -t 50</code>
+- <strong>Result</strong>: Discovered <code>/login.php</code> (200), <code>/portal.php</code> (302 → /login.php), <code>/robots.txt</code> (200), <code>/assets/</code> (301), <code>/denied.php</code> (302 → /login.php)</p>
+<blockquote>  <figure><img src="images/pickle-rick/394b7523717280bcbf69f6265f1f5ba7.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<p>robots.txt</p>
+<p>The <code>robots.txt</code> file contained a single string that did not correspond to any directory or user-agent — instead, it appeared to be a password. Combined with the username found in the page source, this formed a complete credential pair.</p>
+<p><strong>PoC:</strong>
+- <strong>Tools used</strong>: Browser
+- <strong>Command</strong>: Navigate to <code>http://&lt;TARGET_IP&gt;/robots.txt</code>
+- <strong>Result</strong>: Single string identified as a potential password [REDACTED]</p>
+<blockquote>  <figure><img src="images/pickle-rick/394b75237172802693fbe23b160cc96d.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<p>SSH Login Attempt (Failed)</p>
+<p>Before using the credentials on the web application, an SSH login was attempted to test credential reuse. The connection was rejected with “Permission denied (publickey)” — the server only accepts public key authentication and does not allow password-based logins. This eliminated SSH as a viable entry point.</p>
+<p><strong>PoC:</strong>
+- <strong>Tools used</strong>: SSH client
+- <strong>Command</strong>: <code>ssh &lt;USERNAME&gt;@&lt;TARGET_IP&gt;</code>
+- <strong>Result</strong>: Permission denied (publickey)</p>
+<blockquote>  <figure><img src="images/pickle-rick/394b752371728017bca0cc9995c652b0.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<h2 id="exploitation-initial-foothold">Exploitation — Initial Foothold</h2>
+<h3 id="description">Description</h3>
+<p>The credentials discovered during enumeration were used to log in to <code>/login.php</code>. After authentication, a “Command Panel” was presented at <code>/portal.php</code> — a web-based interface that directly executes OS commands on the underlying server. This constitutes a command injection vulnerability, as user input is passed to the system shell without adequate sanitization. A command blacklist blocks certain utilities like <code>cat</code>, but the filter is trivially bypassed using alternatives such as <code>less</code> or <code>strings</code>.</p>
+<h3 id="poc-steps-to-reproduce">PoC — Steps to Reproduce</h3>
+<ol>
+  <li>Navigate to <code>http://&lt;TARGET_IP&gt;/login.php</code> and authenticate with the discovered credentials</li>
+  <li>The Command Panel at <code>/portal.php</code> accepts arbitrary OS commands</li>
+  <li>Run <code>ls</code> to list the working directory — reveals several files including the first ingredient file and a clue file</li>
+  <li>Run <code>cat Sup3rS3cretPickl3Ingred.txt</code> — blocked by a “Command disabled” filter</li>
+  <li>Run <code>less Sup3rS3cretPickl3Ingred.txt</code> — bypasses the blacklist and retrieves the first ingredient</li>
+</ol>
+<blockquote>  <figure><img src="images/pickle-rick/394b75237172802ca5c0e4b2660d0741.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/pickle-rick/394b752371728064a138ec0d440c39c4.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/pickle-rick/394b7523717280139f30c09b6b796b0e.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/pickle-rick/394b752371728038aa59c5f8f714e724.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/pickle-rick/394b752371728074b02ced72015a6bbe.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/pickle-rick/394b7523717280babd79ce5d56f0d458.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/pickle-rick/394b7523717280a792d5d05799a57af7.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<h3 id="ingredient-1">Ingredient 1</h3>
+<p>Retrieved from a text file in the web server’s working directory.</p>
+<hr>
+<h2 id="post-exploitation-file-system-exploration">Post-Exploitation — File System Exploration</h2>
+<h3 id="objective">Objective</h3>
+<p>Explore the file system to locate the remaining ingredients, guided by the clue file found during exploitation.</p>
+<h3 id="findings">Findings</h3>
+<p>The clue file hinted to look elsewhere on the file system. Enumerating <code>/home</code> revealed two user directories. The second ingredient was found in a file within one of those directories, readable by the <code>www-data</code> user without any privilege escalation — indicating overly permissive file permissions.</p>
+<h3 id="poc-steps-to-reproduce">PoC — Steps to Reproduce</h3>
+<ol>
+  <li>Run <code>less clue.txt</code> — returns a hint to explore the file system</li>
+  <li>Run <code>ls /home</code> — discovers two user directories: <code>rick</code> and <code>ubuntu</code></li>
+  <li>Run <code>ls /home/rick</code> — finds a “second ingredients” file</li>
+  <li>Run <code>less "/home/rick/second ingredients"</code> — retrieves the second ingredient</li>
+</ol>
+<blockquote>  <figure><img src="images/pickle-rick/394b7523717280f09615c62acf28a844.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/pickle-rick/394b7523717280c7bb8dc2d692b84d32.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/pickle-rick/394b7523717280edb329f488a1f786ec.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/pickle-rick/394b7523717280d198f6e7d390f5759a.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<h3 id="ingredient-2">Ingredient 2</h3>
+<p>Retrieved from a file in a user’s home directory, accessible without elevated privileges.</p>
+<hr>
+<h2 id="privilege-escalation">Privilege Escalation</h2>
+<h3 id="description">Description</h3>
+<p>Running <code>whoami</code> confirmed the command panel executes as <code>www-data</code>. Checking sudo permissions revealed that <code>www-data</code> can run any command as any user without a password (<code>(ALL) NOPASSWD: ALL</code>) — a critical misconfiguration that grants the web server process full root-equivalent access. This allowed reading the final ingredient from <code>/root</code> without needing to spawn a root shell or exploit any additional vulnerability.</p>
+<h3 id="poc-steps-to-reproduce">PoC — Steps to Reproduce</h3>
+<ol>
+  <li>Run <code>whoami</code> — confirms current user is <code>www-data</code></li>
+  <li>Run <code>sudo -l</code> — reveals <code>(ALL) NOPASSWD: ALL</code></li>
+  <li>Run <code>sudo ls /root</code> — lists the root directory, identifies <code>3rd.txt</code></li>
+  <li>Run <code>sudo less /root/3rd.txt</code> — reads the final ingredient</li>
+</ol>
+<blockquote>  <figure><img src="images/pickle-rick/394b7523717280a79192f7662ee4a926.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/pickle-rick/394b75237172806298cdc4a043aa9ff0.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/pickle-rick/394b752371728035997fc1f38d8e9308.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/pickle-rick/394b7523717280828786c8d127f279f2.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<h3 id="ingredient-3">Ingredient 3</h3>
+<p>Retrieved from a file in <code>/root</code> via sudo.</p>
+<hr>
+<h2 id="lessons-learned">Lessons Learned</h2>
+<ol>
+  <li><strong>Credentials in source code and robots.txt</strong> — the username and password were stored in two publicly accessible locations: an HTML comment and <code>robots.txt</code>. In real engagements, always inspect page source, JavaScript files, comments, and common metadata files (<code>robots.txt</code>, <code>sitemap.xml</code>, <code>.git/</code>) for leaked credentials or internal information.</li>
+  <li><strong>Authentication method matters for credential reuse</strong> — the SSH server rejected password authentication entirely (publickey only), so the discovered credentials were only useful against the web login. When testing credential reuse, understanding the authentication mechanism of each service determines whether the credentials are even applicable.</li>
+  <li><strong>Blacklist-based input filtering is inherently weak</strong> — blocking <code>cat</code> while leaving <code>less</code>, <code>strings</code>, <code>head</code>, <code>tail</code>, <code>tac</code>, <code>nl</code>, <code>awk</code>, <code>sed</code>, and dozens of other file-reading utilities unfiltered renders the blacklist useless. Effective command restriction requires whitelisting allowed commands, not blacklisting dangerous ones.</li>
+  <li><strong>Unrestricted sudo for service accounts is a critical finding</strong> — <code>www-data</code> having <code>NOPASSWD: ALL</code> means any command injection vulnerability instantly becomes full root compromise. Web server processes should run with minimal privileges and never have sudo access. In a real engagement, this would be flagged as critical severity requiring immediate remediation.</li>
+  <li><strong>File permissions reveal defense-in-depth failures</strong> — the second ingredient was readable by <code>www-data</code> without sudo, meaning even without the sudo misconfiguration, sensitive data in user home directories was accessible to the web server. Proper file permissions would have contained the impact of the initial compromise.</li>
+</ol>
+
+</div>
+
+<footer>Built by Waseef · <a href="../../index.html">Back to Portfolio</a></footer>
+</body>
+</html>

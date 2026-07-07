@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 5 — CSRF where token is tied to non-session cookie — Waseef's Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --bg2: #161b22; --bg3: #21262d;
+      --border: #30363d; --text: #e6edf3; --muted: #8b949e;
+      --accent: #58a6ff; --accent2: #3fb950; --red: #f85149;
+      --orange: #d29922; --radius: 8px;
+      --c-red: #f85149; --c-blue: #58a6ff; --c-green: #3fb950;
+      --c-yellow: #d29922; --c-purple: #bc8cff; --c-pink: #ff7b72;
+      --c-gray: #8b949e;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.7; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    nav { position: sticky; top: 0; z-index: 100; background: rgba(13,17,23,.9); backdrop-filter: blur(12px);
+          border-bottom: 1px solid var(--border); padding: .75rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { font-weight: 600; font-size: 1rem; color: var(--text); }
+    .nav-back { font-size: .85rem; color: var(--muted); display: flex; align-items: center; gap: .4rem; }
+    .nav-back:hover { color: var(--accent); text-decoration: none; }
+    .hero { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 3rem 2rem 2.5rem; }
+    .hero-inner { max-width: 860px; margin: 0 auto; }
+    .breadcrumb { font-size: .8rem; color: var(--muted); margin-bottom: 1rem; }
+    .breadcrumb a { color: var(--muted); }
+    .breadcrumb a:hover { color: var(--accent); }
+    .hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
+    .hero p.desc { color: var(--muted); max-width: 640px; margin-top: .5rem; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+    .badge { display: inline-flex; align-items: center; gap: .3rem; padding: .25rem .7rem;
+             border-radius: 20px; font-size: .75rem; font-weight: 500; }
+    .badge-platform { background: #1f3a5f; color: #58a6ff; border: 1px solid #1f4080; }
+    .badge-easy { background: #1a3a2a; color: #3fb950; border: 1px solid #2ea043; }
+    .badge-medium { background: #3a2a1a; color: #d29922; border: 1px solid #9e6a03; }
+    .badge-hard { background: #3a1a1a; color: #f85149; border: 1px solid #da3633; }
+    .badge-beginner { background: #1a3a2a; color: #56d364; border: 1px solid #2ea043; }
+    .badge-os { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .badge-date { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .content { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+    h1, h2, h3 { color: var(--text); font-weight: 600; margin: 2rem 0 .75rem; }
+    h2 { font-size: 1.35rem; padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 1.1rem; color: var(--accent); }
+    p { margin: .6rem 0; color: #c9d1d9; }
+    ul, ol { margin: .5rem 0 .5rem 1.5rem; }
+    li { margin: .3rem 0; color: #c9d1d9; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    blockquote { border-left: 3px solid var(--accent); padding: .5rem 1rem; margin: .75rem 0;
+                 background: var(--bg2); border-radius: 0 var(--radius) var(--radius) 0; color: var(--muted); }
+    pre { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+          padding: 1rem 1.25rem; overflow-x: auto; margin: .75rem 0; }
+    code { font-family: 'Fira Code', monospace; font-size: .85rem; color: #e6edf3; }
+    p code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; color: var(--accent); font-size: .82rem; }
+    strong code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; }
+    figure { margin: 1.25rem 0; }
+    img { max-width: 100%; border-radius: var(--radius); border: 1px solid var(--border);
+          display: block; margin: 0 auto; }
+    figcaption { text-align: center; font-size: .8rem; color: var(--muted); margin-top: .4rem; }
+    .callout { display: flex; gap: .75rem; align-items: flex-start; background: var(--bg2);
+               border: 1px solid var(--border); border-radius: var(--radius); padding: .9rem 1rem; margin: .75rem 0; }
+    .callout-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: .1rem; }
+    details { border: 1px solid var(--border); border-radius: var(--radius); margin: .5rem 0; }
+    summary { padding: .6rem 1rem; cursor: pointer; font-weight: 500; background: var(--bg2); border-radius: var(--radius); }
+    details[open] summary { border-radius: var(--radius) var(--radius) 0 0; border-bottom: 1px solid var(--border); }
+    details > *:not(summary) { padding: .75rem 1rem; }
+    .table-wrap { overflow-x: auto; margin: .75rem 0; }
+    table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+    th, td { padding: .6rem .9rem; border: 1px solid var(--border); text-align: left; }
+    th { background: var(--bg3); font-weight: 600; }
+    tr:nth-child(even) { background: rgba(33,38,45,.5); }
+    .columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin: .75rem 0; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem;
+            transition: border-color .15s, transform .15s; display: block; }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); text-decoration: none; }
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: .6rem; gap: .5rem; }
+    .card-title { font-size: 14px; font-weight: 600; color: var(--text); }
+    .card-meta { font-size: 12px; color: var(--muted); margin-bottom: .4rem; }
+    .card-desc { font-size: 13px; color: var(--muted); }
+    footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--muted); font-size: .85rem; }
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-logo">Waseef</span>
+  <a href="../../../index.html" class="nav-back">← Back to Portfolio</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#labs">Labs</a> / <a href="index.html">CSRF</a> / Lab 5 — CSRF where token is tied to non-session cookie</div>
+    <h1>Lab 5 — CSRF where token is tied to non-session cookie</h1>
+    <div class="meta-row">
+      <span class="badge badge-os">⚪ 🟡 Medium</span>
+      <span class="badge badge-date">📅 2026-06-21</span>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+<h2 id="finding-summary">📋 Finding Summary</h2>
+<div class='table-wrap'><table>
+  <tr><th>Field</th><th>Value</th></tr>
+  <tr><td><strong>Type</strong></td><td>Web App</td></tr>
+  <tr><td><strong>Severity</strong></td><td>🟡 Medium</td></tr>
+  <tr><td><strong>CVE / CWE</strong></td><td>CWE-352</td></tr>
+  <tr><td><strong>Date</strong></td><td>2026-06-21</td></tr>
+</table></div>
+<hr>
+<h2 id="description">🔍 Description</h2>
+<p>Cross-Site Request Forgery (CSRF) tokens that are tied to a non-session cookie (rather than to the user’s actual session cookie) are vulnerable if that non-session cookie can be overwritten by the attacker. In this lab, the CSRF token is validated against a separate <code>csrfKey</code> cookie rather than the session cookie itself. The application’s search feature is vulnerable to CRLF (carriage return line feed) injection, allowing an attacker to inject an arbitrary <code>Set-Cookie</code> header into the response. This can be used to overwrite the victim’s <code>csrfKey</code> cookie with a value chosen by the attacker, who also knows the matching CSRF token. Once both the cookie and the token are attacker-controlled and paired correctly, the forged request passes validation.</p>
+<hr>
+<h2 id="end-goals">🎯 End Goals</h2>
+<ul>
+  <li>Identify that the CSRF token is validated against a <code>csrfKey</code> cookie, not the session cookie</li>
+  <li>Discover a CRLF injection vulnerability in the blog search feature that allows arbitrary cookie injection</li>
+  <li>Use the cookie injection to overwrite the victim’s <code>csrfKey</code> cookie with an attacker-known value</li>
+  <li>Craft a CSRF PoC combining the cookie injection with the email change form and deliver it through the exploit server</li>
+</ul>
+<hr>
+<h2 id="steps-to-reproduce">🪜 Steps to Reproduce</h2>
+<ol>
+  <li>Log in as <code>wiener</code> and submit an email change; capture the POST request in Burp.</li>
+  <li>Confirm the CSRF token is tied to a separate <code>csrfKey</code> cookie, not the session cookie.</li>
+  <li>Log in as <code>carlos</code> and inspect his <code>csrfKey</code> cookie and CSRF token pairing.</li>
+  <li>Test the blog search feature for CRLF/header injection.</li>
+  <li>Craft a request that injects a <code>Set-Cookie: csrfKey=&lt;attacker value&gt;</code> via the search parameter.</li>
+  <li>Build a CSRF PoC combining the cookie injection with the email change form, using a CSRF token that matches the injected cookie value.</li>
+  <li>Paste the PoC into the exploit server and deliver it to the victim.</li>
+</ol>
+<hr>
+<h2 id="analysis">🧠 Analysis</h2>
+<p><strong>Step 1 — Access the lab</strong></p>
+<p>The lab was launched and the homepage loaded, showing the blog with a search box. The lab is Practitioner level and involves a CSRF token that is tied to a cookie other than the session cookie.</p>
+<blockquote>  <figure><img src="images/lab-5-csrf-where-token-is-tied-to-non-session-cookie/386b75237172808aa69bcb4f8b5e9871.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 2 — Log in as wiener</strong></p>
+<p>Authenticated as <code>wiener:peter</code> and navigated to the My Account page. The current email was <code>wiener@normal-user.net</code>.</p>
+<blockquote>  <figure><img src="images/lab-5-csrf-where-token-is-tied-to-non-session-cookie/386b7523717280bda8cff69cef530155.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 3 — Submit email change</strong></p>
+<p>A test email <code>test1@test.com</code> was entered into the email field in preparation for submission.</p>
+<blockquote>  <figure><img src="images/lab-5-csrf-where-token-is-tied-to-non-session-cookie/386b7523717280b196f2f4aad6eaa7d9.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 4 — Capture POST request</strong></p>
+<p>The email change was submitted and captured in Burp Repeater. The POST to <code>/my-account/change-email</code> included a <code>csrf</code> token in the body and a <code>csrfKey</code> cookie in the request headers, separate from the session cookie.</p>
+<blockquote>  <figure><img src="images/lab-5-csrf-where-token-is-tied-to-non-session-cookie/386b75237172809f8746f49b3cbd7ed6.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 5 — Probe with stale token</strong></p>
+<p>The captured request was resent after some delay. The server returned HTTP 400 “Invalid CSRF token”, confirming the token must match its paired <code>csrfKey</code> cookie value at time of submission.</p>
+<blockquote>  <figure><img src="images/lab-5-csrf-where-token-is-tied-to-non-session-cookie/386b7523717280608bc5e02a16b96f85.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 6 — Inspect carlos’s account</strong></p>
+<p>Logged in as <code>carlos:montoya</code> in a private browsing window and navigated to the My Account page.</p>
+<blockquote>  <figure><img src="images/lab-5-csrf-where-token-is-tied-to-non-session-cookie/386b752371728044bc94c15dbe1fd19c.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 7 — Inspect carlos’s hidden csrf field</strong></p>
+<p>Browser DevTools were used to inspect the email change form, revealing carlos’s hidden <code>csrf</code> input field value.</p>
+<blockquote>  <figure><img src="images/lab-5-csrf-where-token-is-tied-to-non-session-cookie/386b7523717280518bcfdc7ddff0520d.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 8 — Probe with mismatched cookie/token pairing</strong></p>
+<p>A request was sent using a CSRF token that did not match the current <code>csrfKey</code> cookie value. The server returned HTTP 400 “Invalid CSRF token” again, confirming strict pairing is enforced between the token and the <code>csrfKey</code> cookie specifically — not the session cookie.</p>
+<blockquote>  <figure><img src="images/lab-5-csrf-where-token-is-tied-to-non-session-cookie/386b7523717280a2b825faa309e38263.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 9 — Inspect carlos’s cookies</strong></p>
+<p>DevTools Network tab was used to inspect carlos’s request cookies, confirming both a <code>csrfKey</code> cookie and a separate <code>session</code> cookie were present and distinct from one another.</p>
+<blockquote>  <figure><img src="images/lab-5-csrf-where-token-is-tied-to-non-session-cookie/386b75237172802f8dfede2644ac70f9.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 10 — Confirm valid replay succeeds</strong></p>
+<p>A request was sent with a CSRF token correctly paired to its matching <code>csrfKey</code> cookie value. The server returned HTTP 302 Found, confirming the email change was accepted when the token and cookie were properly paired.</p>
+<blockquote>  <figure><img src="images/lab-5-csrf-where-token-is-tied-to-non-session-cookie/386b7523717280eb9f83f3ddba0efe64.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 11 — Confirm email updated</strong></p>
+<p>wiener’s My Account page reflected the updated email <code>test4@test.com</code>, confirming the paired token/cookie replay succeeded.</p>
+<blockquote>  <figure><img src="images/lab-5-csrf-where-token-is-tied-to-non-session-cookie/386b75237172805a82fddab7b48ca6e1.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 12 — Search reflection probe</strong></p>
+<p>The blog homepage’s search box was identified as a candidate for further probing, since the application reflects search terms back in its response.</p>
+<blockquote>  <figure><img src="images/lab-5-csrf-where-token-is-tied-to-non-session-cookie/386b75237172806a895bce842f6cf574.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 13 — Test search query</strong></p>
+<p>A search for “test” was submitted, returning “3 search results for ‘test’”, confirming the search term is reflected in the page response.</p>
+<blockquote>  <figure><img src="images/lab-5-csrf-where-token-is-tied-to-non-session-cookie/386b752371728051a99ef90a54c2b4d3.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 14 — Craft CRLF cookie injection and confirm response</strong></p>
+<p>A request was crafted as <code>GET /search?test%0d%0aSet-Cookie:%20csrfKey=MC0LM2ngnfTEOSWKnRb5QwzniwWeiktk%3b%20SameSite=None</code> — injecting a CRLF sequence (<code>%0d%0a</code>) followed by an arbitrary <code>Set-Cookie</code> header into the search parameter. The response confirmed both the injected <code>Set-Cookie: csrfKey=...</code> header and an additional <code>Set-Cookie: LastSearchTerm=test</code> header were reflected back successfully, proving the search endpoint is vulnerable to HTTP response header injection via CRLF.</p>
+<blockquote>  <figure><img src="images/lab-5-csrf-where-token-is-tied-to-non-session-cookie/386b7523717280e99a79da810cb39564.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 15 — Generate CSRF PoC</strong></p>
+<p>Right-clicked the request in Burp Repeater → Engagement tools → Generate CSRF PoC to begin building the combined exploit.</p>
+<blockquote>  <figure><img src="images/lab-5-csrf-where-token-is-tied-to-non-session-cookie/386b75237172807ba98adf5fd7b4cd4d.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<figure><img src="images/lab-5-csrf-where-token-is-tied-to-non-session-cookie/386b752371728018ae24d078da61cec1.png" alt="screenshot" loading="lazy"></figure>
+<hr>
+<p><strong>Step 16 — Review combined PoC HTML</strong></p>
+<p>The Burp CSRF PoC generator was used to build a combined exploit: a hidden <code>&lt;img&gt;</code> tag pointing to the vulnerable search endpoint with the CRLF-injected <code>Set-Cookie: csrfKey=...</code> payload, alongside a form targeting <code>/my-account/change-email</code> with a CSRF token pre-matched to the injected cookie value. When loaded, the image tag fires first, overwriting the victim’s <code>csrfKey</code> cookie, after which the form submits using the now-matching token.</p>
+<blockquote>  <figure><img src="images/lab-5-csrf-where-token-is-tied-to-non-session-cookie/386b7523717280f29208fec03c554e8d.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 17 — Paste PoC into exploit server</strong></p>
+<p>The combined PoC HTML was pasted into the exploit server body field, ready for delivery.</p>
+<blockquote>  <figure><img src="images/lab-5-csrf-where-token-is-tied-to-non-session-cookie/386b75237172803483efd6a90e5bf38c.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 18 — Deliver exploit and solve</strong></p>
+<p>“Deliver exploit to victim” was clicked. The victim’s browser first loaded the hidden image (overwriting their <code>csrfKey</code> cookie with the attacker’s chosen value), then submitted the email change form using the matching CSRF token. The lab banner updated to <strong>Solved</strong>, confirming the attack succeeded.</p>
+<blockquote>  <figure><img src="images/lab-5-csrf-where-token-is-tied-to-non-session-cookie/386b75237172807f8780d0a066c5ddaf.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<h2 id="impact">🎯 Impact</h2>
+<p>An attacker who discovers a header injection vulnerability elsewhere on the same domain can use it to overwrite a non-session cookie that a CSRF token is tied to. By pairing a known, attacker-chosen cookie value with a matching CSRF token, the attacker can force a victim’s browser into accepting a forged request as valid — even though the application appears to implement CSRF token protection. This allows silent state-changing actions such as email takeover, which can be chained with a password reset to achieve full account takeover.</p>
+<hr>
+<h2 id="references">📚 References</h2>
+<ul>
+  <li><a href="https://portswigger.net/web-security/csrf/bypassing-token-validation" target="_blank" rel="noopener">PortSwigger Web Security Academy — Bypassing CSRF token validation</a></li>
+  <li><a href="https://cwe.mitre.org/data/definitions/352.html" target="_blank" rel="noopener">CWE-352: Cross-Site Request Forgery</a></li>
+  <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html" target="_blank" rel="noopener">OWASP CSRF Prevention Cheat Sheet</a></li>
+</ul>
+<hr>
+<blockquote>🤖 Documented with Claude pentest-findings skill</blockquote>
+
+</div>
+
+<footer>Built by Waseef · <a href="../../../index.html">Back to Portfolio</a></footer>
+</body>
+</html>

@@ -108,22 +108,23 @@
     <h2>CTF Machines</h2>
     <div class="cards">
 <!-- AUTO:MACHINES:START -->
-      <a href="writeups/pickle-rick.html" class="card" style="text-decoration:none;">
+      <a href="writeups/machines/pickle-rick.html" class="card" style="text-decoration:none;">
         <div class="card-header"><span class="card-title">Pickle Rick</span><span class="badge badge-easy">Easy</span></div>
         <div class="card-meta">TryHackMe</div>
-        <p style="font-size:13px;color:var(--muted);">Web app exploitation, command injection, and Linux privilege escalation to find Rick's secret ingredients.</p>
+        <p style="font-size:13px;color:var(--muted);">The Pickle Rick machine was fully compromised through a chain of information disclosure and command injection vulnerabilities. Cleartext credentials were…</p>
       </a>
-      <a href="writeups/kioptrix-level-1.html" class="card" style="text-decoration:none;">
+      <a href="writeups/machines/kioptrix-level-1.html" class="card" style="text-decoration:none;">
         <div class="card-header"><span class="card-title">Kioptrix Level 1</span><span class="badge badge-beginner">Beginner</span></div>
         <div class="card-meta">VulnHub</div>
-        <p style="font-size:13px;color:var(--muted);">Classic boot-to-root machine exploiting outdated Samba service via Metasploit for root access.</p>
+        <p style="font-size:13px;color:var(--muted);">Kioptrix Level 1 was fully compromised via a remote buffer overflow in Apache mod_ssl (CVE-2002-0082). The OpenFuck exploit (EDB-47080) was used to gain an…</p>
       </a>
-      <a href="writeups/kioptrix-level-2.html" class="card" style="text-decoration:none;">
+      <a href="writeups/machines/kioptrix-level-2.html" class="card" style="text-decoration:none;">
         <div class="card-header"><span class="card-title">Kioptrix Level 2</span><span class="badge badge-easy">Easy</span></div>
         <div class="card-meta">VulnHub</div>
-        <p style="font-size:13px;color:var(--muted);">SQL injection on the login form to bypass auth, then OS command injection to get a reverse shell.</p>
+        <p style="font-size:13px;color:var(--muted);">Kioptrix Level 2 was compromised through a two-stage web attack chain. A SQL injection vulnerability on the login page provided unauthenticated access to an…</p>
       </a>
-<!-- AUTO:MACHINES:END -->
+
+      <!-- AUTO:MACHINES:END -->
     </div>
   </section>
   <section id="labs">
@@ -132,12 +133,13 @@
     <p style="color:var(--muted);font-size:14px;margin-bottom:1.5rem;">Completed web security labs from the PortSwigger Web Security Academy, covering core vulnerability classes. Click a category to see every lab.</p>
     <div class="labs-grid">
 <!-- AUTO:LABS:START -->
-      <a href="writeups/labs/sql-injection/index.html" class="lab-card" style="text-decoration:none;color:inherit;"><div class="lab-icon">💉</div><div class="lab-info"><div class="lab-name">SQL Injection</div><div class="lab-count">Labs completed</div></div></a>
-      <a href="writeups/labs/xss/index.html" class="lab-card" style="text-decoration:none;color:inherit;"><div class="lab-icon">🔀</div><div class="lab-info"><div class="lab-name">XSS</div><div class="lab-count">Labs completed</div></div></a>
-      <a href="writeups/labs/csrf/index.html" class="lab-card" style="text-decoration:none;color:inherit;"><div class="lab-icon">🔀</div><div class="lab-info"><div class="lab-name">CSRF</div><div class="lab-count">Labs completed</div></div></a>
-      <a href="writeups/labs/ssrf/index.html" class="lab-card" style="text-decoration:none;color:inherit;"><div class="lab-icon">🌐</div><div class="lab-info"><div class="lab-name">SSRF</div><div class="lab-count">Labs completed</div></div></a>
-      <a href="writeups/labs/file-upload-vulnerabilities/index.html" class="lab-card" style="text-decoration:none;color:inherit;"><div class="lab-icon">📁</div><div class="lab-info"><div class="lab-name">File Upload</div><div class="lab-count">Labs completed</div></div></a>
-<!-- AUTO:LABS:END -->
+      <a href="writeups/labs/csrf/index.html" class="lab-card" style="text-decoration:none;color:inherit;"><div class="lab-icon">🔀</div><div class="lab-info"><div class="lab-name">CSRF</div><div class="lab-count">10 labs completed</div></div></a>
+      <a href="writeups/labs/file-upload-vulnerabilities/index.html" class="lab-card" style="text-decoration:none;color:inherit;"><div class="lab-icon">📁</div><div class="lab-info"><div class="lab-name">File Upload Vulnerabilities</div><div class="lab-count">2 labs completed</div></div></a>
+      <a href="writeups/labs/sql-injection/index.html" class="lab-card" style="text-decoration:none;color:inherit;"><div class="lab-icon">💉</div><div class="lab-info"><div class="lab-name">SQL Injection</div><div class="lab-count">18 labs completed</div></div></a>
+      <a href="writeups/labs/ssrf/index.html" class="lab-card" style="text-decoration:none;color:inherit;"><div class="lab-icon">🌐</div><div class="lab-info"><div class="lab-name">SSRF</div><div class="lab-count">5 labs completed</div></div></a>
+      <a href="writeups/labs/xss/index.html" class="lab-card" style="text-decoration:none;color:inherit;"><div class="lab-icon">🔀</div><div class="lab-info"><div class="lab-name">XSS</div><div class="lab-count">5 labs completed</div></div></a>
+
+      <!-- AUTO:LABS:END -->
     </div>
   </section>
   <section id="wargames">
@@ -146,8 +148,9 @@
     <p style="color:var(--muted);font-size:14px;margin-bottom:1.5rem;">Progressive Linux, crypto, and web fundamentals challenges from OverTheWire, documented level by level.</p>
     <div class="labs-grid">
 <!-- AUTO:WARGAMES:START -->
-      <a href="writeups/wargames/krypton/index.html" class="lab-card" style="text-decoration:none;color:inherit;"><div class="lab-icon">🔐</div><div class="lab-info"><div class="lab-name">Krypton</div><div class="lab-count">Levels completed</div></div></a>
-<!-- AUTO:WARGAMES:END -->
+      <p style="color:var(--muted);">No wargames synced yet.</p>
+
+      <!-- AUTO:WARGAMES:END -->
     </div>
   </section>
   <section id="contact">

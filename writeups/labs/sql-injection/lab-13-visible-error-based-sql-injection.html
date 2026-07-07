@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 13 — Visible error-based SQL injection — Waseef's Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --bg2: #161b22; --bg3: #21262d;
+      --border: #30363d; --text: #e6edf3; --muted: #8b949e;
+      --accent: #58a6ff; --accent2: #3fb950; --red: #f85149;
+      --orange: #d29922; --radius: 8px;
+      --c-red: #f85149; --c-blue: #58a6ff; --c-green: #3fb950;
+      --c-yellow: #d29922; --c-purple: #bc8cff; --c-pink: #ff7b72;
+      --c-gray: #8b949e;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.7; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    nav { position: sticky; top: 0; z-index: 100; background: rgba(13,17,23,.9); backdrop-filter: blur(12px);
+          border-bottom: 1px solid var(--border); padding: .75rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { font-weight: 600; font-size: 1rem; color: var(--text); }
+    .nav-back { font-size: .85rem; color: var(--muted); display: flex; align-items: center; gap: .4rem; }
+    .nav-back:hover { color: var(--accent); text-decoration: none; }
+    .hero { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 3rem 2rem 2.5rem; }
+    .hero-inner { max-width: 860px; margin: 0 auto; }
+    .breadcrumb { font-size: .8rem; color: var(--muted); margin-bottom: 1rem; }
+    .breadcrumb a { color: var(--muted); }
+    .breadcrumb a:hover { color: var(--accent); }
+    .hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
+    .hero p.desc { color: var(--muted); max-width: 640px; margin-top: .5rem; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+    .badge { display: inline-flex; align-items: center; gap: .3rem; padding: .25rem .7rem;
+             border-radius: 20px; font-size: .75rem; font-weight: 500; }
+    .badge-platform { background: #1f3a5f; color: #58a6ff; border: 1px solid #1f4080; }
+    .badge-easy { background: #1a3a2a; color: #3fb950; border: 1px solid #2ea043; }
+    .badge-medium { background: #3a2a1a; color: #d29922; border: 1px solid #9e6a03; }
+    .badge-hard { background: #3a1a1a; color: #f85149; border: 1px solid #da3633; }
+    .badge-beginner { background: #1a3a2a; color: #56d364; border: 1px solid #2ea043; }
+    .badge-os { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .badge-date { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .content { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+    h1, h2, h3 { color: var(--text); font-weight: 600; margin: 2rem 0 .75rem; }
+    h2 { font-size: 1.35rem; padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 1.1rem; color: var(--accent); }
+    p { margin: .6rem 0; color: #c9d1d9; }
+    ul, ol { margin: .5rem 0 .5rem 1.5rem; }
+    li { margin: .3rem 0; color: #c9d1d9; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    blockquote { border-left: 3px solid var(--accent); padding: .5rem 1rem; margin: .75rem 0;
+                 background: var(--bg2); border-radius: 0 var(--radius) var(--radius) 0; color: var(--muted); }
+    pre { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+          padding: 1rem 1.25rem; overflow-x: auto; margin: .75rem 0; }
+    code { font-family: 'Fira Code', monospace; font-size: .85rem; color: #e6edf3; }
+    p code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; color: var(--accent); font-size: .82rem; }
+    strong code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; }
+    figure { margin: 1.25rem 0; }
+    img { max-width: 100%; border-radius: var(--radius); border: 1px solid var(--border);
+          display: block; margin: 0 auto; }
+    figcaption { text-align: center; font-size: .8rem; color: var(--muted); margin-top: .4rem; }
+    .callout { display: flex; gap: .75rem; align-items: flex-start; background: var(--bg2);
+               border: 1px solid var(--border); border-radius: var(--radius); padding: .9rem 1rem; margin: .75rem 0; }
+    .callout-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: .1rem; }
+    details { border: 1px solid var(--border); border-radius: var(--radius); margin: .5rem 0; }
+    summary { padding: .6rem 1rem; cursor: pointer; font-weight: 500; background: var(--bg2); border-radius: var(--radius); }
+    details[open] summary { border-radius: var(--radius) var(--radius) 0 0; border-bottom: 1px solid var(--border); }
+    details > *:not(summary) { padding: .75rem 1rem; }
+    .table-wrap { overflow-x: auto; margin: .75rem 0; }
+    table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+    th, td { padding: .6rem .9rem; border: 1px solid var(--border); text-align: left; }
+    th { background: var(--bg3); font-weight: 600; }
+    tr:nth-child(even) { background: rgba(33,38,45,.5); }
+    .columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin: .75rem 0; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem;
+            transition: border-color .15s, transform .15s; display: block; }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); text-decoration: none; }
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: .6rem; gap: .5rem; }
+    .card-title { font-size: 14px; font-weight: 600; color: var(--text); }
+    .card-meta { font-size: 12px; color: var(--muted); margin-bottom: .4rem; }
+    .card-desc { font-size: 13px; color: var(--muted); }
+    footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--muted); font-size: .85rem; }
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-logo">Waseef</span>
+  <a href="../../../index.html" class="nav-back">← Back to Portfolio</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#labs">Labs</a> / <a href="index.html">SQL Injection</a> / Lab 13 — Visible error-based SQL injection</div>
+    <h1>Lab 13 — Visible error-based SQL injection</h1>
+    <div class="meta-row">
+      <span class="badge badge-os">⚪ 🟡 Medium</span>
+      <span class="badge badge-date">📅 2026-05-19</span>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+<h2 id="finding-summary">📋 Finding Summary</h2>
+<div class='table-wrap'><table>
+  <tr><th>Field</th><th>Value</th></tr>
+  <tr><td><strong>Type</strong></td><td>Web App</td></tr>
+  <tr><td><strong>Severity</strong></td><td>🟡 Medium</td></tr>
+  <tr><td><strong>CVE / CWE</strong></td><td>CWE-89</td></tr>
+  <tr><td><strong>Date</strong></td><td>2026-05-19</td></tr>
+</table></div>
+<hr>
+<h2 id="description">🔍 Description</h2>
+<p>Visible error-based SQL injection occurs when a web application includes raw database error messages in HTTP responses. An attacker can craft payloads that cause the database to raise errors containing the output of arbitrary SQL expressions — effectively turning error messages into a data exfiltration channel. In this lab, the <code>TrackingId</code> cookie value is embedded unsanitized into a SQL query, and PostgreSQL error messages are reflected directly in the HTTP response, allowing the attacker to extract sensitive data one value at a time using <code>CAST</code>-based payloads.</p>
+<hr>
+<h2 id="end-goals">🎯 End Goals</h2>
+<ul>
+  <li>Confirm the <code>TrackingId</code> cookie is vulnerable to SQL injection via visible error messages</li>
+  <li>Identify the database type and version through error-based data leakage</li>
+  <li>Extract the <code>administrator</code> username and password from the <code>users</code> table</li>
+  <li>Log in as <code>administrator</code> to solve the lab</li>
+</ul>
+<hr>
+<h2 id="steps-to-reproduce">🪜 Steps to Reproduce</h2>
+<ol>
+  <li>Browse the lab and observe that the server assigns a <code>TrackingId</code> cookie to the browser</li>
+  <li>Navigate to the login page and confirm the browser sends the <code>TrackingId</code> cookie on subsequent requests</li>
+  <li>In Burp Repeater, inject a single quote into the <code>TrackingId</code> value and observe a 500 error with a visible SQL error message</li>
+  <li>Add a SQL comment (<code>-</code>) after the quote to confirm the injection point produces a clean 200 response</li>
+  <li>Use <code>CAST</code>based payloads to probe boolean expression behavior, refining syntax until the server returns 200</li>
+  <li>Inject <code>CAST((SELECT version()) AS int)</code> to leak the PostgreSQL version string through the error message</li>
+  <li>Confirm the <code>users</code> table exists by injecting <code>CAST((SELECT 'a' from users) AS int)</code> without the TrackingId value to keep the query short</li>
+  <li>Add <code>LIMIT 1</code> and switch to <code>username</code> to extract the first username via the error message</li>
+  <li>Repeat with <code>password</code> to extract the administrator’s password</li>
+  <li>Log in using the extracted credentials to solve the lab</li>
+</ol>
+<hr>
+<h2 id="analysis">🧠 Analysis</h2>
+<p><strong>Step 1 — Observe initial server behavior</strong></p>
+<p>Browsing the lab homepage in Burp showed that the server issues a <code>TrackingId</code> cookie (e.g. <code>R9odV6qtSBZRwe8U</code>) on the initial GET <code>/</code> request, returning 200 OK. Navigating to <code>/login</code> confirmed that the browser automatically sends this <code>TrackingId</code> on subsequent requests, meaning the cookie value is processed server-side on every page load — making it a candidate injection point.</p>
+<blockquote>  <figure><img src="images/lab-13-visible-error-based-sql-injection/365b7523717280e0b111fde4cf20ca3e.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-13-visible-error-based-sql-injection/365b7523717280f98215c1f6a1f3ad75.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-13-visible-error-based-sql-injection/365b752371728037af67c4579c833a93.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-13-visible-error-based-sql-injection/365b7523717280269431e39a1be41771.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 2 — Inject a single quote to trigger an error</strong></p>
+<p>A single quote was appended to the <code>TrackingId</code> value: <code>TrackingId=R9odV6qtSBZRwe8U'</code>. The server responded with HTTP 500 and reflected the full PostgreSQL error: <em>Unterminated string literal started at position 52 in SQL SELECT * FROM tracking WHERE id = ‘R9odV6qtSBZRwe8U’. Expected char</em>. This confirmed that the cookie value is embedded directly into a SQL query with no sanitization, and that database errors are visible in the response.</p>
+<blockquote>  <figure><img src="images/lab-13-visible-error-based-sql-injection/365b7523717280dfbe20cf2709352e3f.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-13-visible-error-based-sql-injection/365b752371728098b57ef5373bc56cfe.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 3 — Comment out the trailing quote to confirm injection</strong></p>
+<p>Adding a SQL comment after the injected quote — <code>TrackingId=R9odV6qtSBZRwe8U'--</code> — neutralized the syntax error by commenting out the application’s closing quote. The server returned 200 OK and the homepage loaded normally, confirming that the injection point is controllable and that payloads appended after the value are executed by the database.</p>
+<blockquote>  <figure><img src="images/lab-13-visible-error-based-sql-injection/365b7523717280168097ced9673d9bcb.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-13-visible-error-based-sql-injection/365b7523717280789fa8e9bc32c69b9d.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 4 — Probe with CAST to establish a valid boolean expression</strong></p>
+<p>To use <code>CAST</code> for error-based extraction, the payload needs to form a valid boolean expression in the <code>AND</code> clause. Initial attempts showed two errors requiring correction:</p>
+<p>First, <code>' AND CAST((SELECT(1)) as int)--</code> returned HTTP 500 with <em>ERROR: syntax error at or near “SELECT” Position: 62</em> — <code>SELECT(1)</code> with parentheses directly around the literal value is invalid SQL syntax.</p>
+<p>Correcting to <code>' AND CAST((SELECT 1) AS int)--</code> (without <code>=1</code>) still returned 500 with <em>ERROR: argument of AND must be type boolean, not type integer</em> — the <code>CAST</code> result needs to be compared to something to form a boolean.</p>
+<p>Adding the comparison — <code>' AND CAST((SELECT 1) AS int)=1--</code> — returned 200 OK, confirming the full <code>CAST(...) = value</code> pattern works as a valid boolean expression in the <code>AND</code> clause and is ready for data extraction.</p>
+<blockquote>  <figure><img src="images/lab-13-visible-error-based-sql-injection/365b7523717280dbbbc4c4724f1a569e.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-13-visible-error-based-sql-injection/365b75237172809eab5dcfe94b7515de.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-13-visible-error-based-sql-injection/365b75237172801196a7cfd203445891.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-13-visible-error-based-sql-injection/365b75237172809584a0efd86190582f.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-13-visible-error-based-sql-injection/365b752371728036986ef751bf539cb9.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-13-visible-error-based-sql-injection/365b75237172804fb579cdebed84ffcd.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 5 — Leak the database version</strong></p>
+<p>With the <code>CAST</code> pattern confirmed, <code>version()</code> was substituted: <code>' AND CAST((SELECT version()) AS int)=1--</code>. The server returned 500 with the error: <em>ERROR: invalid input syntax for type integer: “PostgreSQL 12.22 (Ubuntu 12.22-0ubuntu0.20.04.4) on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 9.4.0-1ubuntu1~20.04.2) 9.4.0, 64-bit”</em>. The database version string was fully leaked through the error message, confirming PostgreSQL as the backend.</p>
+<blockquote>  <figure><img src="images/lab-13-visible-error-based-sql-injection/365b75237172806d8236c46fc5263368.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-13-visible-error-based-sql-injection/365b7523717280e18e30ddd90dadf843.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 6 — Confirm the users table exists and extract the username</strong></p>
+<p>To keep the query short enough for the database to process cleanly, the <code>TrackingId</code> value was dropped, sending only <code>'AND CAST((SELECT 'a' from users) AS int)=1--</code>. The server returned 500 with <em>ERROR: more than one row returned by a subquery used as an expression</em>, confirming the <code>users</code> table exists and contains multiple rows.</p>
+<p>Adding <code>LIMIT 1</code> and switching to the <code>username</code> column — <code>'AND CAST((SELECT username from users LIMIT 1) AS int)=1--</code> — returned the error: <em>ERROR: invalid input syntax for type integer: “administrator”</em>, leaking the first username through the error message.</p>
+<blockquote>  <figure><img src="images/lab-13-visible-error-based-sql-injection/365b752371728078a9acd0136cc9ab15.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-13-visible-error-based-sql-injection/365b75237172803cba73e86c1888853a.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-13-visible-error-based-sql-injection/365b7523717280a8b31cfb726ab7a29a.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-13-visible-error-based-sql-injection/365b75237172807ab20fd01c83b554c3.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-13-visible-error-based-sql-injection/365b75237172804f8f60e525f68ec090.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-13-visible-error-based-sql-injection/365b75237172809dbb30fb9cfc4af324.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 7 — Extract the password and log in</strong></p>
+<p>Substituting <code>password</code> for <code>username</code> — <code>'AND CAST((SELECT password from users LIMIT 1) AS int)=1--</code> — returned the error: <em>ERROR: invalid input syntax for type integer: “qbdahza2n0r6yjsfzikf”</em>, leaking the administrator’s password: <strong><code>qbdahza2n0r6yjsfzikf</code></strong>.</p>
+<p>Logging in at <code>/login</code> with username <code>administrator</code> and the extracted password <strong><code>qbdahza2n0r6yjsfzikf</code></strong> returned the “Congratulations, you solved the lab!” banner.</p>
+<blockquote>  <figure><img src="images/lab-13-visible-error-based-sql-injection/365b7523717280d7ab52d04092e3dd3f.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-13-visible-error-based-sql-injection/365b7523717280abbcc5c2e40016ca50.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-13-visible-error-based-sql-injection/365b752371728072aec7e4b46429676d.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<h2 id="impact">🎯 Impact</h2>
+<p>An attacker with access to the <code>TrackingId</code> cookie can extract arbitrary data from the database one value at a time using <code>CAST</code>-based payloads. In this case, full account credentials were recovered from the <code>users</code> table, enabling complete account takeover. On a production system this technique could be used to exfiltrate usernames, password hashes, session tokens, or any other sensitive data accessible to the database user.</p>
+<hr>
+<h2 id="references">📚 References</h2>
+<ul>
+  <li><a href="https://portswigger.net/web-security/sql-injection/blind/lab-sql-injection-visible-error-based" target="_blank" rel="noopener">PortSwigger: Visible error-based SQL injection</a></li>
+  <li><a href="https://portswigger.net/web-security/sql-injection/cheat-sheet" target="_blank" rel="noopener">PortSwigger: SQL injection cheat sheet</a></li>
+  <li><a href="https://cwe.mitre.org/data/definitions/89.html" target="_blank" rel="noopener">CWE-89: Improper Neutralization of Special Elements used in an SQL Command</a></li>
+</ul>
+<hr>
+<blockquote>🤖 Documented with Claude pentest-findings skill</blockquote>
+
+</div>
+
+<footer>Built by Waseef · <a href="../../../index.html">Back to Portfolio</a></footer>
+</body>
+</html>

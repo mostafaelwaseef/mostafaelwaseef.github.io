@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 5 — SSRF with filter bypass via open redirection — Waseef's Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --bg2: #161b22; --bg3: #21262d;
+      --border: #30363d; --text: #e6edf3; --muted: #8b949e;
+      --accent: #58a6ff; --accent2: #3fb950; --red: #f85149;
+      --orange: #d29922; --radius: 8px;
+      --c-red: #f85149; --c-blue: #58a6ff; --c-green: #3fb950;
+      --c-yellow: #d29922; --c-purple: #bc8cff; --c-pink: #ff7b72;
+      --c-gray: #8b949e;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.7; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    nav { position: sticky; top: 0; z-index: 100; background: rgba(13,17,23,.9); backdrop-filter: blur(12px);
+          border-bottom: 1px solid var(--border); padding: .75rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { font-weight: 600; font-size: 1rem; color: var(--text); }
+    .nav-back { font-size: .85rem; color: var(--muted); display: flex; align-items: center; gap: .4rem; }
+    .nav-back:hover { color: var(--accent); text-decoration: none; }
+    .hero { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 3rem 2rem 2.5rem; }
+    .hero-inner { max-width: 860px; margin: 0 auto; }
+    .breadcrumb { font-size: .8rem; color: var(--muted); margin-bottom: 1rem; }
+    .breadcrumb a { color: var(--muted); }
+    .breadcrumb a:hover { color: var(--accent); }
+    .hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
+    .hero p.desc { color: var(--muted); max-width: 640px; margin-top: .5rem; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+    .badge { display: inline-flex; align-items: center; gap: .3rem; padding: .25rem .7rem;
+             border-radius: 20px; font-size: .75rem; font-weight: 500; }
+    .badge-platform { background: #1f3a5f; color: #58a6ff; border: 1px solid #1f4080; }
+    .badge-easy { background: #1a3a2a; color: #3fb950; border: 1px solid #2ea043; }
+    .badge-medium { background: #3a2a1a; color: #d29922; border: 1px solid #9e6a03; }
+    .badge-hard { background: #3a1a1a; color: #f85149; border: 1px solid #da3633; }
+    .badge-beginner { background: #1a3a2a; color: #56d364; border: 1px solid #2ea043; }
+    .badge-os { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .badge-date { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .content { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+    h1, h2, h3 { color: var(--text); font-weight: 600; margin: 2rem 0 .75rem; }
+    h2 { font-size: 1.35rem; padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 1.1rem; color: var(--accent); }
+    p { margin: .6rem 0; color: #c9d1d9; }
+    ul, ol { margin: .5rem 0 .5rem 1.5rem; }
+    li { margin: .3rem 0; color: #c9d1d9; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    blockquote { border-left: 3px solid var(--accent); padding: .5rem 1rem; margin: .75rem 0;
+                 background: var(--bg2); border-radius: 0 var(--radius) var(--radius) 0; color: var(--muted); }
+    pre { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+          padding: 1rem 1.25rem; overflow-x: auto; margin: .75rem 0; }
+    code { font-family: 'Fira Code', monospace; font-size: .85rem; color: #e6edf3; }
+    p code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; color: var(--accent); font-size: .82rem; }
+    strong code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; }
+    figure { margin: 1.25rem 0; }
+    img { max-width: 100%; border-radius: var(--radius); border: 1px solid var(--border);
+          display: block; margin: 0 auto; }
+    figcaption { text-align: center; font-size: .8rem; color: var(--muted); margin-top: .4rem; }
+    .callout { display: flex; gap: .75rem; align-items: flex-start; background: var(--bg2);
+               border: 1px solid var(--border); border-radius: var(--radius); padding: .9rem 1rem; margin: .75rem 0; }
+    .callout-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: .1rem; }
+    details { border: 1px solid var(--border); border-radius: var(--radius); margin: .5rem 0; }
+    summary { padding: .6rem 1rem; cursor: pointer; font-weight: 500; background: var(--bg2); border-radius: var(--radius); }
+    details[open] summary { border-radius: var(--radius) var(--radius) 0 0; border-bottom: 1px solid var(--border); }
+    details > *:not(summary) { padding: .75rem 1rem; }
+    .table-wrap { overflow-x: auto; margin: .75rem 0; }
+    table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+    th, td { padding: .6rem .9rem; border: 1px solid var(--border); text-align: left; }
+    th { background: var(--bg3); font-weight: 600; }
+    tr:nth-child(even) { background: rgba(33,38,45,.5); }
+    .columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin: .75rem 0; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem;
+            transition: border-color .15s, transform .15s; display: block; }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); text-decoration: none; }
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: .6rem; gap: .5rem; }
+    .card-title { font-size: 14px; font-weight: 600; color: var(--text); }
+    .card-meta { font-size: 12px; color: var(--muted); margin-bottom: .4rem; }
+    .card-desc { font-size: 13px; color: var(--muted); }
+    footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--muted); font-size: .85rem; }
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-logo">Waseef</span>
+  <a href="../../../index.html" class="nav-back">← Back to Portfolio</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#labs">Labs</a> / <a href="index.html">SSRF</a> / Lab 5 — SSRF with filter bypass via open redirection</div>
+    <h1>Lab 5 — SSRF with filter bypass via open redirection</h1>
+    <div class="meta-row">
+      <span class="badge badge-os">⚪ 🟠 High</span>
+      <span class="badge badge-date">📅 2026-07-03</span>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+<h2 id="finding-summary">📋 Finding Summary</h2>
+<div class='table-wrap'><table>
+  <tr><th>Field</th><th>Value</th></tr>
+  <tr><td><strong>Type</strong></td><td>Web App</td></tr>
+  <tr><td><strong>Severity</strong></td><td>🟠 High</td></tr>
+  <tr><td><strong>CVE / CWE</strong></td><td>CWE-918</td></tr>
+  <tr><td><strong>Date</strong></td><td>2026-07-03</td></tr>
+</table></div>
+<hr>
+<h2 id="description">🔍 Description</h2>
+<p>Server-Side Request Forgery (SSRF) is a vulnerability that allows an attacker to induce a server-side application to make HTTP requests to an arbitrary destination of the attacker’s choosing. In this variant, the application’s stock-check feature accepts a <code>stockApi</code> parameter that is restricted to a relative path on the local application only — supplying a full external URL is rejected outright. However, the application’s “Next product” feature exposes an open redirect: a <code>path</code> query parameter on <code>/product/nextProduct</code> is used verbatim as a <code>Location</code> header with no validation. By URL-encoding a call to this open-redirect endpoint and supplying it as the value of <code>stockApi</code>, an attacker satisfies the local-path restriction while causing the server’s own outbound request to follow the subsequent redirect to any internal address of the attacker’s choosing — reaching a second, internal-only back-end system that was never meant to be reachable directly.</p>
+<hr>
+<h2 id="end-goals">🎯 End Goals</h2>
+<ul>
+  <li>Identify the stock-check feature and confirm <code>stockApi</code> is restricted to local relative paths</li>
+  <li>Discover an unchecked open redirect on the “Next product” feature’s <code>path</code> parameter</li>
+  <li>Chain the open redirect through <code>stockApi</code> to reach an internal admin interface</li>
+  <li>Delete the user <code>carlos</code> via the admin interface to solve the lab</li>
+</ul>
+<hr>
+<h2 id="steps-to-reproduce">🪜 Steps to Reproduce</h2>
+<ol>
+  <li>Open the lab and browse the shop homepage.</li>
+  <li>Navigate to a product page, use Burp Suite to intercept the stock-check request, and note the “Next product” link.</li>
+  <li>Capture the “Next product” request and confirm it performs a normal internal redirect.</li>
+  <li>Attempt to set <code>stockApi</code> directly to an external URL and observe it is rejected.</li>
+  <li>Test the “Next product” <code>path</code> parameter with an external URL to confirm it is an unchecked open redirect, and confirm the browser follows it off-site.</li>
+  <li>Chain the open redirect through <code>stockApi</code> to reach the internal admin panel, enumerate the admin panel’s users, inspect the delete link’s structure, and route the delete request through the chained bypass.</li>
+  <li>Confirm the lab is solved and the target user has been deleted.</li>
+</ol>
+<hr>
+<h2 id="analysis">🧠 Analysis</h2>
+<p><strong>Step 1 — Access the lab</strong></p>
+<p>The lab was launched and the shop homepage loaded successfully.</p>
+<blockquote><em>(Drag 01.png here)</em>  <figure><img src="images/lab-5-ssrf-with-filter-bypass-via-open-redirection/392b7523717280f6a06ef794ec77a3e8.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 2 — Locate the stock-check feature, capture the baseline request, then head toward the “Next product” link</strong></p>
+<p>Navigating to a product page revealed a stock-check feature. With Burp Suite intercepting traffic, submitting the stock check captured a request containing a <code>stockApi</code> parameter whose URL-decoded value was <code>/product/stock/check?productId=1&amp;storeId=1</code> — notably a relative path rather than a full URL with a hostname, unlike the earlier SSRF labs. The response returned <code>HTTP/2 200</code> with a plain-text body of <code>367</code>. Returning to the product page, the “Next product” link at the bottom was identified as a further avenue to investigate.</p>
+<blockquote>  <figure><img src="images/lab-5-ssrf-with-filter-bypass-via-open-redirection/392b75237172806bbc7dc8daeac60034.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-5-ssrf-with-filter-bypass-via-open-redirection/392b7523717280c680c2fa9f42a08cc6.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-5-ssrf-with-filter-bypass-via-open-redirection/392b7523717280d9a7aaea4ed750f7f5.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 3 — Capture the “Next product” feature’s request and confirm the redirect works normally</strong></p>
+<p>Clicking “Next product” was captured in Burp as <code>GET /product/nextProduct?currentProductId=1&amp;path=/product?productId=2</code>, which returned <code>HTTP/2 302 Found</code> with <code>Location: /product?productId=2</code> — revealing that the feature is implemented as a redirect driven entirely by the <code>path</code> query parameter. Following the redirect in the browser landed normally on the second product page, “Eggtastic, Fun, Food Eggcessories.”</p>
+<blockquote>  <figure><img src="images/lab-5-ssrf-with-filter-bypass-via-open-redirection/392b75237172802b908bf1d2f5378c1f.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-5-ssrf-with-filter-bypass-via-open-redirection/392b7523717280879780c55e797b7f24.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 4 — Attempt to set </strong><strong><code>stockApi</code></strong><strong> directly to an external URL</strong></p>
+<p>Setting <code>stockApi</code> to <code>http://localhost&amp;storeId=1</code> returned <code>HTTP/2 400 Bad Request</code> with the body <code>"Invalid external stock check url 'Invalid URL'"</code>. Unlike the blacklist and whitelist labs, this confirmed the parameter is not filtered by hostname at all — it strictly requires a local relative path, rejecting any value that parses as an absolute URL.</p>
+<blockquote>  <figure><img src="images/lab-5-ssrf-with-filter-bypass-via-open-redirection/392b7523717280e9b6e1f9c0bee02315.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 5 — Discover the </strong><strong><code>path</code></strong><strong> parameter is an unchecked open redirect</strong></p>
+<p>Testing the “Next product” endpoint with an external destination, <code>GET /product/nextProduct?currentProductId=1&amp;path=https://www.google.com</code>, returned <code>HTTP/2 302 Found</code> with <code>Location: https://www.google.com</code>. This confirmed the <code>path</code> parameter performs a redirect to literally any value supplied, with no restriction to internal or same-site destinations — a classic open redirect. Navigating to the crafted link in the browser left the lab’s domain entirely and landed on the real Google homepage, visually confirming the open redirect has no destination restriction whatsoever.</p>
+<blockquote>  <figure><img src="images/lab-5-ssrf-with-filter-bypass-via-open-redirection/392b7523717280a2aaa8ef2163a7cb3d.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-5-ssrf-with-filter-bypass-via-open-redirection/392b7523717280f795bac1331b64400a.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 6 — Chain the open redirect through </strong><strong><code>stockApi</code></strong><strong> to reach the internal admin panel, enumerate users, and exploit via chained SSRF to delete carlos</strong></p>
+<p>Setting <code>stockApi</code> to the URL-encoded local path <code>/product/nextProduct%3fcurrentProductId%3d1%26path%3dhttp%3a//192.168.0.12%3a8080/admin</code> satisfied the local-path restriction while the server itself followed the resulting 302 redirect to <code>http://192.168.0.12:8080/admin</code>, returning <code>HTTP/2 200 OK</code> with the internal admin panel’s HTML. The panel’s Users page listed <code>wiener</code> and <code>carlos</code>, each with a “Delete” link; DevTools showed the link’s <code>href</code> was <code>/http://192.168.0.12:8080/admin/delete?username=carlos</code>, blocked from direct use by the same leading-slash parsing quirk seen in Lab 2. Repeating the chained bypass against that delete endpoint — <code>stockApi=/product/nextProduct%3fcurrentProductId%3d1%26path%3dhttp%3a//192.168.0.12%3a8080/admin/delete%3fusername%3dcarlos</code> — returned <code>HTTP/2 200 OK</code>, confirming the deletion succeeded server-side.</p>
+<blockquote>  <figure><img src="images/lab-5-ssrf-with-filter-bypass-via-open-redirection/392b75237172808a93d3efffb9f10406.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-5-ssrf-with-filter-bypass-via-open-redirection/392b7523717280abb66eceeea1dd817d.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-5-ssrf-with-filter-bypass-via-open-redirection/392b75237172802984a7e5a426202375.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-5-ssrf-with-filter-bypass-via-open-redirection/392b752371728057ba8df9bba91243a2.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 7 — Verify and solve</strong></p>
+<p>The lab banner updated to display “Congratulations, you solved the lab!” with status <strong>Solved</strong>. A final refresh of the product page showed “User deleted successfully!” with the Users list now containing only <code>wiener</code>, confirming <code>carlos</code> had been removed via the chained SSRF exploit.</p>
+<blockquote>  <figure><img src="images/lab-5-ssrf-with-filter-bypass-via-open-redirection/392b7523717280f7b955e5adcb259194.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<h2 id="impact">🎯 Impact</h2>
+<p>Restricting a server-side request parameter to “local paths only” is not sufficient protection if the application itself contains an open redirect, since the vulnerable endpoint’s own server-side HTTP client will transparently follow any redirect it receives — including one crafted to point at an internal, non-public address. In this lab, that chain allowed an unauthenticated attacker to fully bypass a same-origin restriction, reach a second internal back-end system’s admin interface, and perform a destructive action (deleting a user account) that was never intended to be reachable from outside the internal network. In a real deployment, any open redirect anywhere in an application becomes a potential SSRF pivot point for any feature that trusts “local path” input.</p>
+<hr>
+<h2 id="references">📚 References</h2>
+<ul>
+  <li><a href="https://portswigger.net/web-security/ssrf" target="_blank" rel="noopener">PortSwigger Web Security Academy — SSRF</a></li>
+  <li><a href="https://portswigger.net/web-security/ssrf/lab-ssrf-filter-bypass-via-open-redirection" target="_blank" rel="noopener">PortSwigger Lab — SSRF with filter bypass via open redirection vulnerability</a></li>
+  <li><a href="https://portswigger.net/web-security/ssrf/url-validation-bypass-cheat-sheet" target="_blank" rel="noopener">PortSwigger — URL validation bypass cheat sheet</a></li>
+  <li><a href="https://cwe.mitre.org/data/definitions/918.html" target="_blank" rel="noopener">CWE-918: Server-Side Request Forgery (SSRF)</a></li>
+</ul>
+<hr>
+<blockquote>🤖 Documented with Claude pentest-findings skill</blockquote>
+
+</div>
+
+<footer>Built by Waseef · <a href="../../../index.html">Back to Portfolio</a></footer>
+</body>
+</html>

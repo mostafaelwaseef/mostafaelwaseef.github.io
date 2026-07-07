@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 12 — Blind SQL injection with conditional errors — Waseef's Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --bg2: #161b22; --bg3: #21262d;
+      --border: #30363d; --text: #e6edf3; --muted: #8b949e;
+      --accent: #58a6ff; --accent2: #3fb950; --red: #f85149;
+      --orange: #d29922; --radius: 8px;
+      --c-red: #f85149; --c-blue: #58a6ff; --c-green: #3fb950;
+      --c-yellow: #d29922; --c-purple: #bc8cff; --c-pink: #ff7b72;
+      --c-gray: #8b949e;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.7; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    nav { position: sticky; top: 0; z-index: 100; background: rgba(13,17,23,.9); backdrop-filter: blur(12px);
+          border-bottom: 1px solid var(--border); padding: .75rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { font-weight: 600; font-size: 1rem; color: var(--text); }
+    .nav-back { font-size: .85rem; color: var(--muted); display: flex; align-items: center; gap: .4rem; }
+    .nav-back:hover { color: var(--accent); text-decoration: none; }
+    .hero { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 3rem 2rem 2.5rem; }
+    .hero-inner { max-width: 860px; margin: 0 auto; }
+    .breadcrumb { font-size: .8rem; color: var(--muted); margin-bottom: 1rem; }
+    .breadcrumb a { color: var(--muted); }
+    .breadcrumb a:hover { color: var(--accent); }
+    .hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
+    .hero p.desc { color: var(--muted); max-width: 640px; margin-top: .5rem; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+    .badge { display: inline-flex; align-items: center; gap: .3rem; padding: .25rem .7rem;
+             border-radius: 20px; font-size: .75rem; font-weight: 500; }
+    .badge-platform { background: #1f3a5f; color: #58a6ff; border: 1px solid #1f4080; }
+    .badge-easy { background: #1a3a2a; color: #3fb950; border: 1px solid #2ea043; }
+    .badge-medium { background: #3a2a1a; color: #d29922; border: 1px solid #9e6a03; }
+    .badge-hard { background: #3a1a1a; color: #f85149; border: 1px solid #da3633; }
+    .badge-beginner { background: #1a3a2a; color: #56d364; border: 1px solid #2ea043; }
+    .badge-os { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .badge-date { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .content { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+    h1, h2, h3 { color: var(--text); font-weight: 600; margin: 2rem 0 .75rem; }
+    h2 { font-size: 1.35rem; padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 1.1rem; color: var(--accent); }
+    p { margin: .6rem 0; color: #c9d1d9; }
+    ul, ol { margin: .5rem 0 .5rem 1.5rem; }
+    li { margin: .3rem 0; color: #c9d1d9; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    blockquote { border-left: 3px solid var(--accent); padding: .5rem 1rem; margin: .75rem 0;
+                 background: var(--bg2); border-radius: 0 var(--radius) var(--radius) 0; color: var(--muted); }
+    pre { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+          padding: 1rem 1.25rem; overflow-x: auto; margin: .75rem 0; }
+    code { font-family: 'Fira Code', monospace; font-size: .85rem; color: #e6edf3; }
+    p code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; color: var(--accent); font-size: .82rem; }
+    strong code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; }
+    figure { margin: 1.25rem 0; }
+    img { max-width: 100%; border-radius: var(--radius); border: 1px solid var(--border);
+          display: block; margin: 0 auto; }
+    figcaption { text-align: center; font-size: .8rem; color: var(--muted); margin-top: .4rem; }
+    .callout { display: flex; gap: .75rem; align-items: flex-start; background: var(--bg2);
+               border: 1px solid var(--border); border-radius: var(--radius); padding: .9rem 1rem; margin: .75rem 0; }
+    .callout-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: .1rem; }
+    details { border: 1px solid var(--border); border-radius: var(--radius); margin: .5rem 0; }
+    summary { padding: .6rem 1rem; cursor: pointer; font-weight: 500; background: var(--bg2); border-radius: var(--radius); }
+    details[open] summary { border-radius: var(--radius) var(--radius) 0 0; border-bottom: 1px solid var(--border); }
+    details > *:not(summary) { padding: .75rem 1rem; }
+    .table-wrap { overflow-x: auto; margin: .75rem 0; }
+    table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+    th, td { padding: .6rem .9rem; border: 1px solid var(--border); text-align: left; }
+    th { background: var(--bg3); font-weight: 600; }
+    tr:nth-child(even) { background: rgba(33,38,45,.5); }
+    .columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin: .75rem 0; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem;
+            transition: border-color .15s, transform .15s; display: block; }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); text-decoration: none; }
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: .6rem; gap: .5rem; }
+    .card-title { font-size: 14px; font-weight: 600; color: var(--text); }
+    .card-meta { font-size: 12px; color: var(--muted); margin-bottom: .4rem; }
+    .card-desc { font-size: 13px; color: var(--muted); }
+    footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--muted); font-size: .85rem; }
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-logo">Waseef</span>
+  <a href="../../../index.html" class="nav-back">← Back to Portfolio</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#labs">Labs</a> / <a href="index.html">SQL Injection</a> / Lab 12 — Blind SQL injection with conditional errors</div>
+    <h1>Lab 12 — Blind SQL injection with conditional errors</h1>
+    <div class="meta-row">
+      <span class="badge badge-os">⚪ 🔴 High</span>
+      <span class="badge badge-date">📅 2026-05-18</span>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+<h2 id="finding-summary">📋 Finding Summary</h2>
+<div class='table-wrap'><table>
+  <tr><th>Field</th><th>Value</th></tr>
+  <tr><td><strong>Type</strong></td><td>Web App</td></tr>
+  <tr><td><strong>Severity</strong></td><td>🔴 High</td></tr>
+  <tr><td><strong>CVE / CWE</strong></td><td>CWE-89</td></tr>
+  <tr><td><strong>Date</strong></td><td>2026-05-18</td></tr>
+</table></div>
+<hr>
+<h2 id="description">🔍 Description</h2>
+<p>This lab contains a blind SQL injection vulnerability in the <code>TrackingId</code> cookie. Unlike conditional response labs, the application does not render any visible difference in output based on query results — instead, it returns a 500 Internal Server Error when an injected SQL expression causes a database error. By crafting conditional division-by-zero payloads, an attacker can use the presence or absence of a server error as a true/false signal to enumerate the database one character at a time.</p>
+<hr>
+<h2 id="end-goals">🎯 End Goals</h2>
+<ul>
+  <li>Confirm blind SQL injection in the <code>TrackingId</code> cookie via conditional server errors</li>
+  <li>Identify the database type using Oracle-specific syntax</li>
+  <li>Verify the <code>users</code> table contains an <code>administrator</code> account</li>
+  <li>Determine the exact length of the administrator password</li>
+  <li>Extract the full password character by character using SUBSTR-based conditional errors</li>
+  <li>Log in as <code>administrator</code> to solve the lab</li>
+</ul>
+<hr>
+<h2 id="steps-to-reproduce">🪜 Steps to Reproduce</h2>
+<ol>
+  <li>Browse to the lab and capture a request in Burp Suite. Confirm the <code>TrackingId</code> cookie is present.</li>
+  <li>Append a single quote to the TrackingId value and observe a 500 error, confirming SQL injection.</li>
+  <li>Test <code>OR 1=1 -- -</code> and <code>OR 1=2 -- -</code> — both return 200, confirming no conditional output signal exists.</li>
+  <li>Test <code>||</code> concatenation syntax to confirm the database supports it.</li>
+  <li>Query <code>v$version</code> to confirm the database is Oracle.</li>
+  <li>Probe the <code>users</code> table and use <code>ROWNUM=1</code> to confirm it exists.</li>
+  <li>Attempt to detect the <code>administrator</code> account via concatenation — both real and fake usernames return 200, confirming a conditional error technique is needed.</li>
+  <li>Use a <code>CASE WHEN ... THEN TO_CHAR(1/0)</code> payload to trigger a 500 only when the administrator account exists.</li>
+  <li>Use <code>LENGTH(password)</code> with the conditional error to determine the password length.</li>
+  <li>Run Burp Intruder Sniper iterating 1–30 to pinpoint the exact password length.</li>
+  <li>Manually verify the SUBSTR approach before automating.</li>
+  <li>Configure Burp Intruder Cluster Bomb with character index 1–20 and candidate characters a–z and 0–9.</li>
+  <li>Run the attack, filter by 5xx responses, and assemble the full password.</li>
+  <li>Log in as <code>administrator</code> using the recovered password.</li>
+</ol>
+<hr>
+<h2 id="analysis">🧠 Analysis</h2>
+<p><strong>Step 1 — Cookie Observed Being Set</strong></p>
+<p>Browsed to the lab home page with Burp Suite intercepting. Observed the server setting the <code>TrackingId</code> cookie in the response, establishing that this cookie is assigned by the application on first visit.</p>
+<blockquote>  <figure><img src="images/lab-12-blind-sql-injection-with-conditional-errors/364b7523717280edba33e2b42e30b3bd.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-12-blind-sql-injection-with-conditional-errors/364b7523717280c28435d6029faed93e.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 2 — Cookie Sent in Request</strong></p>
+<p>Refreshed the page. The browser sent the <code>TrackingId</code> cookie back in the request, confirming the application receives and processes the cookie value on every request.</p>
+<blockquote>  <figure><img src="images/lab-12-blind-sql-injection-with-conditional-errors/364b75237172807d8ac7f800ca7d2037.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 3 — Single Quote Triggers 500</strong></p>
+<p>Appended a single quote after the TrackingId value with payload <code>'</code>. The server returned a 500 Internal Server Error, hinting the cookie value is embedded directly in a SQL query without sanitization.</p>
+<blockquote>  <figure><img src="images/lab-12-blind-sql-injection-with-conditional-errors/364b75237172808ab35cd477d0a1719d.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-12-blind-sql-injection-with-conditional-errors/364b75237172805a842ef5d2bb9576c3.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 4 — OR 1=1 Returns 200</strong></p>
+<p>Injected payload <code>' OR 1=1 -- -</code>. The server returned 200 OK, showing the query executed without error when given a true condition.</p>
+<blockquote>  <figure><img src="images/lab-12-blind-sql-injection-with-conditional-errors/364b7523717280e4b2b0d636eadcd61b.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-12-blind-sql-injection-with-conditional-errors/364b7523717280d3b0a1e7bcebde974d.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 5 — OR 1=2 Also Returns 200</strong></p>
+<p>Injected payload <code>' OR 1=2 -- -</code>. The server also returned 200 OK — both true and false conditions produce the same response, confirming no conditional output signal exists in this lab. Only server errors can be used as a true/false signal.</p>
+<blockquote>  <figure><img src="images/lab-12-blind-sql-injection-with-conditional-errors/364b752371728068b0dbd64ab31bb526.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-12-blind-sql-injection-with-conditional-errors/364b752371728053adc0f653e0be7aad.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 6 — String Concatenation Syntax Works</strong></p>
+<p>Injected payload <code>'||'</code>. The server returned 200 OK, confirming the database supports <code>||</code> string concatenation syntax.</p>
+<blockquote>  <figure><img src="images/lab-12-blind-sql-injection-with-conditional-errors/364b7523717280cf9bb9e6e6e4e08bf8.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-12-blind-sql-injection-with-conditional-errors/364b75237172802b882ee9a1edda6f37.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 7 — Oracle Confirmed via v$version</strong></p>
+<p>Queried the Oracle-specific <code>v$version</code> view with payload <code>'||(SELECT banner FROM v$version)||'</code>. The server returned 200 OK, confirming the backend database is Oracle.</p>
+<blockquote>  <figure><img src="images/lab-12-blind-sql-injection-with-conditional-errors/364b7523717280c8890ed4d907464687.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-12-blind-sql-injection-with-conditional-errors/364b75237172808ba0cfc5680de56865.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 8 — Users Table Probed</strong></p>
+<p>Injected payload <code>'||(SELECT 'a' FROM users)||'</code>. The server returned 500 — the subquery returned multiple rows, causing the concatenation to fail. This hinted the <code>users</code> table may exist but the query was returning more than one row, signaling the need to limit the result to a single entry before any conclusion could be drawn.</p>
+<blockquote>  <figure><img src="images/lab-12-blind-sql-injection-with-conditional-errors/364b752371728086ab7ad7953cd5ee27.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-12-blind-sql-injection-with-conditional-errors/364b75237172801f853dc8fa81dc4a43.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 9 — Single Row Confirmed, Users Table Exists</strong></p>
+<p>Added <code>WHERE ROWNUM=1</code> to limit the result to one row; full payload: <code>'||(SELECT 'a' FROM users WHERE ROWNUM=1)||'</code>. The server returned 200 OK, confirming the <code>users</code> table exists and the query structure is correct.</p>
+<blockquote>  <figure><img src="images/lab-12-blind-sql-injection-with-conditional-errors/364b7523717280b18b06c09544ad302a.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 10 — Concatenation Cannot Signal Account Existence</strong></p>
+<p>Added <code>WHERE username = 'administrator'</code>; full payload: <code>'||(SELECT 'a' FROM users WHERE username = 'administrator')||'</code> → 200 OK. Then tested a fake username with payload <code>'||(SELECT 'a' FROM users WHERE username = 'administratorhuhuhu')||'</code> → also 200 OK. Both real and fake usernames return the same response, confirming the concatenation approach cannot detect account existence. A conditional error technique is needed instead.</p>
+<blockquote>  <figure><img src="images/lab-12-blind-sql-injection-with-conditional-errors/364b75237172805b8581c25e5cace971.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-12-blind-sql-injection-with-conditional-errors/364b7523717280f9b741dea6d4861b1c.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-12-blind-sql-injection-with-conditional-errors/364b75237172809cb793c786541afe6a.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-12-blind-sql-injection-with-conditional-errors/364b7523717280bda97cfd4976fce916.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 11 — Conditional Error Confirms Administrator Exists</strong></p>
+<p>Replaced the concatenation with a CASE expression that triggers a division-by-zero error on a true condition. Full payload with real username: <code>'||(SELECT CASE WHEN 1=1 THEN TO_CHAR(1/0) ELSE 'a' END FROM users WHERE username = 'administrator')||'</code> → 500 Internal Server Error. Same payload with fake username <code>'administratorjhjhj'</code> → 200 OK. The error fires only when the account exists, establishing a reliable true/false signal based on the 500 error.</p>
+<blockquote>  <figure><img src="images/lab-12-blind-sql-injection-with-conditional-errors/364b752371728002a89ddd59c331a043.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-12-blind-sql-injection-with-conditional-errors/364b7523717280aca412d4d6f6f03eed.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-12-blind-sql-injection-with-conditional-errors/364b752371728082a637d4416bdce76b.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-12-blind-sql-injection-with-conditional-errors/364b7523717280d4873bebff1709855b.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 12 — Password Length &gt;1</strong></p>
+<p>Added <code>AND LENGTH(password)&gt;1</code> to the CASE condition; full payload: <code>'||(SELECT CASE WHEN 1=1 THEN TO_CHAR(1/0) ELSE 'a' END FROM users WHERE username = 'administrator' AND LENGTH(password)&gt;1)||'</code> → 500, confirming the password is longer than 1 character.</p>
+<blockquote>  <figure><img src="images/lab-12-blind-sql-injection-with-conditional-errors/364b75237172804b904ac0370017d0a8.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-12-blind-sql-injection-with-conditional-errors/364b752371728015b1caeff2c9e866c1.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 13 — Password Length &gt;30</strong></p>
+<p>Same payload with <code>LENGTH(password)&gt;30</code> → 200 OK, confirming the password is not longer than 30 characters. This narrowed the password length to somewhere between 1 and 30 characters.</p>
+<blockquote>  <figure><img src="images/lab-12-blind-sql-injection-with-conditional-errors/364b752371728014a8feef30214ab1d3.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-12-blind-sql-injection-with-conditional-errors/364b7523717280469d9de7ac8617c648.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 14 — Exact Length via Sniper Attack</strong></p>
+<p>Configured Burp Intruder Sniper mode with the LENGTH threshold as the payload position, iterating numbers 1–30, filtering for 5xx responses. Payload 19 triggered a 500 error (true — password length is greater than 19), while payload 20 returned 200 OK (false — password length is not greater than 20), confirming the password is exactly 20 characters long.</p>
+<blockquote>  <figure><img src="images/lab-12-blind-sql-injection-with-conditional-errors/364b75237172802890fdc209be7e03e0.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-12-blind-sql-injection-with-conditional-errors/364b75237172803595edf221fa151407.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-12-blind-sql-injection-with-conditional-errors/364b7523717280e6acf1ead39a50af5d.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 15 — SUBSTR Manual Test</strong></p>
+<p>Replaced the LENGTH condition with a SUBSTR check to test individual characters; full payload: <code>'||(SELECT CASE WHEN SUBSTR(password,1,1)='a' THEN TO_CHAR(1/0) ELSE 'a' END FROM users WHERE username = 'administrator')||'</code> → 200 OK, confirming the first character is not ‘a’ and validating the SUBSTR approach before automating.</p>
+<blockquote>  <figure><img src="images/lab-12-blind-sql-injection-with-conditional-errors/364b75237172808e914fe90d982f9cb6.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-12-blind-sql-injection-with-conditional-errors/364b75237172800cbee2d39c253950a6.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 16 — Cluster Bomb Setup</strong></p>
+<p>Configured Burp Intruder Cluster Bomb mode. Payload set 1 (character index): numbers 1–20. Payload set 2 (candidate character): brute forcer covering a–z and 0–9, totalling 36 characters and 720 requests. The payload template used <code>SUBSTR(password,§1§,1)='§a§'</code> inside the CASE condition.</p>
+<blockquote>  <figure><img src="images/lab-12-blind-sql-injection-with-conditional-errors/364b75237172802b988bd1de40f1af3b.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<figure><img src="images/lab-12-blind-sql-injection-with-conditional-errors/364b752371728072b0e6c38aae13746a.png" alt="screenshot" loading="lazy"></figure>
+<hr>
+<p><strong>Step 17 — Cluster Bomb Results</strong></p>
+<p>Ran the Cluster Bomb attack across all 20 positions and 36 candidate characters. Filtered results by 5xx responses — the 20 requests that triggered a server error revealed the matching character for each position. Reading the matching character per position assembled the full administrator password: <strong><code>p1bwrolictbuo9jmv2kb</code></strong></p>
+<blockquote>  <figure><img src="images/lab-12-blind-sql-injection-with-conditional-errors/364b752371728099bc3af62363ba68be.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-12-blind-sql-injection-with-conditional-errors/364b7523717280c7badbd23a787dcfb6.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 18 — Lab Solved</strong></p>
+<p>Navigated to the login page and authenticated as <code>administrator</code> with the extracted password <strong><code>p1bwrolictbuo9jmv2kb</code></strong>. The application confirmed the credentials and displayed “Congratulations, you solved the lab!”</p>
+<blockquote>  <figure><img src="images/lab-12-blind-sql-injection-with-conditional-errors/364b7523717280a0812fd81375d1412d.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<h2 id="impact">🎯 Impact</h2>
+<p>Blind error-based SQL injection allows an attacker to exfiltrate arbitrary data from the database using only the presence or absence of a server error as a signal. In this lab, the full administrator password was recovered character by character without any visible output, enabling complete account takeover. In a real application this technique could be used to dump all user credentials, session tokens, or any sensitive data accessible to the database user, compromising the entire application and its users.</p>
+<hr>
+<h2 id="references">📚 References</h2>
+<ul>
+  <li><a href="https://portswigger.net/web-security/sql-injection/blind/lab-conditional-errors" target="_blank" rel="noopener">PortSwigger: Blind SQL injection with conditional errors</a></li>
+  <li><a href="https://portswigger.net/web-security/sql-injection/cheat-sheet" target="_blank" rel="noopener">PortSwigger: SQL injection cheat sheet</a></li>
+  <li><a href="https://cwe.mitre.org/data/definitions/89.html" target="_blank" rel="noopener">CWE-89: Improper Neutralization of Special Elements used in an SQL Command</a></li>
+  <li><a href="https://owasp.org/www-community/attacks/SQL_Injection" target="_blank" rel="noopener">OWASP: SQL Injection</a></li>
+</ul>
+<hr>
+<blockquote>🤖 Documented with Claude pentest-findings skill</blockquote>
+
+</div>
+
+<footer>Built by Waseef · <a href="../../../index.html">Back to Portfolio</a></footer>
+</body>
+</html>

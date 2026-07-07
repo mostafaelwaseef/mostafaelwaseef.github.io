@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 8 — CSRF with SameSite Strict bypass via client-side redirect — Waseef's Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --bg2: #161b22; --bg3: #21262d;
+      --border: #30363d; --text: #e6edf3; --muted: #8b949e;
+      --accent: #58a6ff; --accent2: #3fb950; --red: #f85149;
+      --orange: #d29922; --radius: 8px;
+      --c-red: #f85149; --c-blue: #58a6ff; --c-green: #3fb950;
+      --c-yellow: #d29922; --c-purple: #bc8cff; --c-pink: #ff7b72;
+      --c-gray: #8b949e;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.7; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    nav { position: sticky; top: 0; z-index: 100; background: rgba(13,17,23,.9); backdrop-filter: blur(12px);
+          border-bottom: 1px solid var(--border); padding: .75rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { font-weight: 600; font-size: 1rem; color: var(--text); }
+    .nav-back { font-size: .85rem; color: var(--muted); display: flex; align-items: center; gap: .4rem; }
+    .nav-back:hover { color: var(--accent); text-decoration: none; }
+    .hero { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 3rem 2rem 2.5rem; }
+    .hero-inner { max-width: 860px; margin: 0 auto; }
+    .breadcrumb { font-size: .8rem; color: var(--muted); margin-bottom: 1rem; }
+    .breadcrumb a { color: var(--muted); }
+    .breadcrumb a:hover { color: var(--accent); }
+    .hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
+    .hero p.desc { color: var(--muted); max-width: 640px; margin-top: .5rem; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+    .badge { display: inline-flex; align-items: center; gap: .3rem; padding: .25rem .7rem;
+             border-radius: 20px; font-size: .75rem; font-weight: 500; }
+    .badge-platform { background: #1f3a5f; color: #58a6ff; border: 1px solid #1f4080; }
+    .badge-easy { background: #1a3a2a; color: #3fb950; border: 1px solid #2ea043; }
+    .badge-medium { background: #3a2a1a; color: #d29922; border: 1px solid #9e6a03; }
+    .badge-hard { background: #3a1a1a; color: #f85149; border: 1px solid #da3633; }
+    .badge-beginner { background: #1a3a2a; color: #56d364; border: 1px solid #2ea043; }
+    .badge-os { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .badge-date { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .content { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+    h1, h2, h3 { color: var(--text); font-weight: 600; margin: 2rem 0 .75rem; }
+    h2 { font-size: 1.35rem; padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 1.1rem; color: var(--accent); }
+    p { margin: .6rem 0; color: #c9d1d9; }
+    ul, ol { margin: .5rem 0 .5rem 1.5rem; }
+    li { margin: .3rem 0; color: #c9d1d9; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    blockquote { border-left: 3px solid var(--accent); padding: .5rem 1rem; margin: .75rem 0;
+                 background: var(--bg2); border-radius: 0 var(--radius) var(--radius) 0; color: var(--muted); }
+    pre { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+          padding: 1rem 1.25rem; overflow-x: auto; margin: .75rem 0; }
+    code { font-family: 'Fira Code', monospace; font-size: .85rem; color: #e6edf3; }
+    p code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; color: var(--accent); font-size: .82rem; }
+    strong code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; }
+    figure { margin: 1.25rem 0; }
+    img { max-width: 100%; border-radius: var(--radius); border: 1px solid var(--border);
+          display: block; margin: 0 auto; }
+    figcaption { text-align: center; font-size: .8rem; color: var(--muted); margin-top: .4rem; }
+    .callout { display: flex; gap: .75rem; align-items: flex-start; background: var(--bg2);
+               border: 1px solid var(--border); border-radius: var(--radius); padding: .9rem 1rem; margin: .75rem 0; }
+    .callout-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: .1rem; }
+    details { border: 1px solid var(--border); border-radius: var(--radius); margin: .5rem 0; }
+    summary { padding: .6rem 1rem; cursor: pointer; font-weight: 500; background: var(--bg2); border-radius: var(--radius); }
+    details[open] summary { border-radius: var(--radius) var(--radius) 0 0; border-bottom: 1px solid var(--border); }
+    details > *:not(summary) { padding: .75rem 1rem; }
+    .table-wrap { overflow-x: auto; margin: .75rem 0; }
+    table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+    th, td { padding: .6rem .9rem; border: 1px solid var(--border); text-align: left; }
+    th { background: var(--bg3); font-weight: 600; }
+    tr:nth-child(even) { background: rgba(33,38,45,.5); }
+    .columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin: .75rem 0; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem;
+            transition: border-color .15s, transform .15s; display: block; }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); text-decoration: none; }
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: .6rem; gap: .5rem; }
+    .card-title { font-size: 14px; font-weight: 600; color: var(--text); }
+    .card-meta { font-size: 12px; color: var(--muted); margin-bottom: .4rem; }
+    .card-desc { font-size: 13px; color: var(--muted); }
+    footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--muted); font-size: .85rem; }
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-logo">Waseef</span>
+  <a href="../../../index.html" class="nav-back">← Back to Portfolio</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#labs">Labs</a> / <a href="index.html">CSRF</a> / Lab 8 — CSRF with SameSite Strict bypass via client-side redirect</div>
+    <h1>Lab 8 — CSRF with SameSite Strict bypass via client-side redirect</h1>
+    <div class="meta-row">
+      <span class="badge badge-os">⚪ 🟡 Medium</span>
+      <span class="badge badge-date">📅 2026-06-25</span>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+<h2 id="finding-summary">📋 Finding Summary</h2>
+<div class='table-wrap'><table>
+  <tr><th>Field</th><th>Value</th></tr>
+  <tr><td><strong>Type</strong></td><td>Web App</td></tr>
+  <tr><td><strong>Severity</strong></td><td>🟡 Medium</td></tr>
+  <tr><td><strong>CVE / CWE</strong></td><td>CWE-352</td></tr>
+  <tr><td><strong>Date</strong></td><td>2026-06-25</td></tr>
+</table></div>
+<hr>
+<h2 id="description">🔍 Description</h2>
+<p>SameSite=Strict prevents cross-site requests from carrying session cookies entirely — even top-level navigations. However, if the application performs a client-side redirect using attacker-controllable input that stays within the same origin, the browser treats the resulting navigation as same-site and includes the SameSite=Strict cookie. In this lab, the blog comment confirmation page reads a <code>postId</code> query parameter and uses it directly in a JavaScript <code>window.location</code> redirect: <code>window.location = blogPath + '/' + postId</code>. By supplying a path-traversal <code>postId</code> value (e.g. <code>/../my-account/change-email?email=...&amp;submit=1</code>), the redirect can be pointed at any same-origin endpoint. When a victim visits the exploit page, the same-site redirect carries their session cookie, turning a client-side gadget into a full CSRF bypass.</p>
+<hr>
+<h2 id="end-goals">🎯 End Goals</h2>
+<ul>
+  <li>Identify that the session cookie uses SameSite=Strict, blocking conventional cross-site CSRF</li>
+  <li>Discover the comment confirmation page performs a client-side redirect using a controllable <code>postId</code> parameter</li>
+  <li>Demonstrate that a path-traversal <code>postId</code> value can redirect to the email change endpoint with the session cookie attached</li>
+  <li>Craft an exploit that triggers the redirect via <code>document.location</code> and deliver it to change the victim’s email</li>
+</ul>
+<hr>
+<h2 id="steps-to-reproduce">🪜 Steps to Reproduce</h2>
+<ol>
+  <li>Log in as <code>wiener</code> — note the session cookie has <code>SameSite=Strict</code>.</li>
+  <li>Submit a comment on a blog post and observe the confirmation page redirects via JavaScript using the <code>postId</code> URL parameter.</li>
+  <li>Inspect the redirect script — confirm <code>postId</code> is used unsanitised in <code>window.location</code>.</li>
+  <li>Test a crafted <code>postId</code> path-traversal value that points to <code>/my-account/change-email?email=...&amp;submit=1</code>.</li>
+  <li>Confirm the GET-based email change endpoint accepts the request when triggered by same-site redirect.</li>
+  <li>Build an exploit page using <code>document.location</code> pointing to the crafted confirmation URL and deliver it via the exploit server.</li>
+</ol>
+<hr>
+<h2 id="analysis">🧠 Analysis</h2>
+<p><strong>Step 1 — Access the lab</strong></p>
+<p>The lab was launched and the homepage loaded. The lab is Practitioner level and targets a SameSite=Strict bypass via a client-side redirect gadget.</p>
+<blockquote>  <figure><img src="images/lab-8-csrf-with-samesite-strict-bypass-via-client-side-redirect/38ab7523717280779861d4f66765270c.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 2 — Log in and confirm SameSite=Strict cookie</strong></p>
+<p>Authenticated as <code>wiener:peter</code>. Burp captured the <code>POST /login</code> response, which set <code>Cookie: session=...; Secure; HttpOnly; SameSite=Strict</code> — confirming the application enforces the strictest SameSite policy. After login, the My Account page showed the current email <code>wiener@normal-user.net</code>.</p>
+<blockquote>  <figure><img src="images/lab-8-csrf-with-samesite-strict-bypass-via-client-side-redirect/38ab75237172800c8715e186e175a74d.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-8-csrf-with-samesite-strict-bypass-via-client-side-redirect/38ab752371728011956fd2da6fa05143.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-8-csrf-with-samesite-strict-bypass-via-client-side-redirect/38ab7523717280ccb245c2d0e24d7931.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 3 — Discover the comment confirmation redirect</strong></p>
+<p>Submitted a test comment on a blog post (comment: <code>test</code>, name: <code>test</code>, email: <code>test@test.com</code>). The server redirected to <code>/post/comment/confirmation?postId=1</code>, which displayed “Thank you for your comment! You will be redirected momentarily.” After a brief delay, the page navigated back to <code>/post/1</code>, confirming the presence of a JavaScript-driven redirect that uses the <code>postId</code> query parameter.</p>
+<blockquote>  <figure><img src="images/lab-8-csrf-with-samesite-strict-bypass-via-client-side-redirect/38ab75237172806c91a3f11050a823e1.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-8-csrf-with-samesite-strict-bypass-via-client-side-redirect/38ab752371728089ac78ef211b5eea60.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-8-csrf-with-samesite-strict-bypass-via-client-side-redirect/38ab7523717280fb8574d019c4b6530b.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 4 — Inspect the redirect script and confirm </strong><strong><code>postId</code></strong><strong> injection</strong></p>
+<p>Captured the <code>POST /post/comment</code> in Burp Repeater and followed the chain through to the confirmation page. Inspected the confirmation page source — the <code>redirectOnConfirmation</code> JavaScript function reads <code>postId</code> directly from <code>URLSearchParams</code> and constructs the redirect target as <code>window.location = blogPath + '/' + postId</code> after a 3-second timeout. No sanitisation is applied to <code>postId</code>, meaning a value like <code>/../my-account/change-email%3Femail%3D...%26submit%3D1</code> will resolve to a same-origin email change URL. Because the redirect stays on the same origin, the browser treats the navigation as same-site and includes the SameSite=Strict session cookie.</p>
+<blockquote>  <figure><img src="images/lab-8-csrf-with-samesite-strict-bypass-via-client-side-redirect/38ab7523717280e88766d0deb3458772.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-8-csrf-with-samesite-strict-bypass-via-client-side-redirect/38ab752371728007863fc620f89c4e38.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-8-csrf-with-samesite-strict-bypass-via-client-side-redirect/38ab7523717280219cebe0745312840f.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 5 — Test the redirect payload and confirm same-site navigation</strong></p>
+<p>Navigated directly to the confirmation page with a crafted <code>postId</code> value pointing to <code>/../my-account/change-email%3Femail%3Dtest%40test.com%26submit%3D1</code>. The confirmation page loaded, the URL bar showed the redirect in progress, and the page navigated to My Account. The redirect was confirmed to be same-site — the browser included the SameSite=Strict session cookie throughout the chain.</p>
+<blockquote>  <figure><img src="images/lab-8-csrf-with-samesite-strict-bypass-via-client-side-redirect/38ab7523717280108c0dc68c35f505ac.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-8-csrf-with-samesite-strict-bypass-via-client-side-redirect/38ab7523717280c49748ce6c2ce5e273.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-8-csrf-with-samesite-strict-bypass-via-client-side-redirect/38ab7523717280d69d8bfdcf95211f9b.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-8-csrf-with-samesite-strict-bypass-via-client-side-redirect/38ab752371728043b9bff7acdb60d038.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-8-csrf-with-samesite-strict-bypass-via-client-side-redirect/38ab752371728052b890c791e1cadd72.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-8-csrf-with-samesite-strict-bypass-via-client-side-redirect/38ab7523717280f2b292c3a204e9dc10.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 6 — Capture email change POST and convert to GET</strong></p>
+<p>Submitted the email change form with <code>test1@test.com</code> to capture the POST to <code>/my-account/change-email</code>. In Burp Repeater, right-clicked → Change request method to convert to GET — the parameters moved into the query string as <code>email=test1%40test.com&amp;submit=1</code>. This GET form of the request is what the redirect will trigger.</p>
+<blockquote>  <figure><img src="images/lab-8-csrf-with-samesite-strict-bypass-via-client-side-redirect/38ab7523717280d79253e644d6c707fe.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-8-csrf-with-samesite-strict-bypass-via-client-side-redirect/38ab752371728006ac5bc2065fb296e9.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-8-csrf-with-samesite-strict-bypass-via-client-side-redirect/38ab75237172806aafc8cf40ff74a28e.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-8-csrf-with-samesite-strict-bypass-via-client-side-redirect/38ab7523717280af9a11e5b8cdd782e2.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 7 — Confirm the full redirect chain changes the email</strong></p>
+<p>Navigated to the crafted confirmation URL with <code>postId=/../my-account/change-email?email=test2@test.com&amp;submit=1</code>. The “Thank you” confirmation page appeared, the redirect fired after 3 seconds, and the My Account page confirmed the email had been updated to <code>test2@test.com</code> — proving the entire chain works: same-site redirect → GET email change → SameSite=Strict cookie included.</p>
+<blockquote>  <figure><img src="images/lab-8-csrf-with-samesite-strict-bypass-via-client-side-redirect/38ab7523717280e0b4c4eaa96476fd16.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-8-csrf-with-samesite-strict-bypass-via-client-side-redirect/38ab75237172800491c8ed56defd2a2d.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-8-csrf-with-samesite-strict-bypass-via-client-side-redirect/38ab75237172802d90abd055c8ae0320.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 8 — Build exploit and deliver to victim</strong></p>
+<p>Pasted the following payload into the exploit server body:</p>
+<pre><code class="language-html">&lt;script&gt;
+document.location = "https://LAB-ID.web-security-academy.net/post/comment/confirmation?postId=/../my-account/change-email?email=test3%40test.com%26submit=1";
+&lt;/script&gt;</code></pre>
+<p>Clicked “Deliver exploit to victim”. The victim’s browser navigated to the exploit page, which immediately redirected to the confirmation URL. The same-site redirect carried their SameSite=Strict session cookie to the email change endpoint. The lab banner updated to <strong>Solved</strong>, and the My Account page confirmed the email was changed to <code>test3@test.com</code>.</p>
+<blockquote>  <figure><img src="images/lab-8-csrf-with-samesite-strict-bypass-via-client-side-redirect/38ab75237172806896dcf6af3752c7f9.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-8-csrf-with-samesite-strict-bypass-via-client-side-redirect/38ab752371728052ae3fea60db733c75.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-8-csrf-with-samesite-strict-bypass-via-client-side-redirect/38ab7523717280d0aca5c80c2193dd75.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<h2 id="impact">🎯 Impact</h2>
+<p>An attacker who can lure an authenticated victim to visit a malicious page can silently change their email address even when SameSite=Strict is enforced — by chaining through a client-side redirect gadget that stays within the same origin. Because the redirect is same-site, the browser attaches the session cookie throughout the chain, completely bypassing the SameSite=Strict protection. This attack requires no CSRF token and no cookie manipulation, making it difficult to detect. The resulting email takeover can be chained with a password reset for full account takeover.</p>
+<hr>
+<h2 id="references">📚 References</h2>
+<ul>
+  <li><a href="https://portswigger.net/web-security/csrf/bypassing-samesite-restrictions#bypassing-samesite-strict-restrictions-via-client-side-redirects" target="_blank" rel="noopener">PortSwigger Web Security Academy — Bypassing SameSite Strict restrictions via client-side redirects</a></li>
+  <li><a href="https://cwe.mitre.org/data/definitions/352.html" target="_blank" rel="noopener">CWE-352: Cross-Site Request Forgery</a></li>
+  <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html" target="_blank" rel="noopener">OWASP CSRF Prevention Cheat Sheet</a></li>
+</ul>
+<hr>
+<blockquote>🤖 Documented with Claude pentest-findings skill</blockquote>
+
+</div>
+
+<footer>Built by Waseef · <a href="../../../index.html">Back to Portfolio</a></footer>
+</body>
+</html>

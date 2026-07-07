@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 2 — CSRF where token validation depends on request method — Waseef's Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --bg2: #161b22; --bg3: #21262d;
+      --border: #30363d; --text: #e6edf3; --muted: #8b949e;
+      --accent: #58a6ff; --accent2: #3fb950; --red: #f85149;
+      --orange: #d29922; --radius: 8px;
+      --c-red: #f85149; --c-blue: #58a6ff; --c-green: #3fb950;
+      --c-yellow: #d29922; --c-purple: #bc8cff; --c-pink: #ff7b72;
+      --c-gray: #8b949e;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.7; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    nav { position: sticky; top: 0; z-index: 100; background: rgba(13,17,23,.9); backdrop-filter: blur(12px);
+          border-bottom: 1px solid var(--border); padding: .75rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { font-weight: 600; font-size: 1rem; color: var(--text); }
+    .nav-back { font-size: .85rem; color: var(--muted); display: flex; align-items: center; gap: .4rem; }
+    .nav-back:hover { color: var(--accent); text-decoration: none; }
+    .hero { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 3rem 2rem 2.5rem; }
+    .hero-inner { max-width: 860px; margin: 0 auto; }
+    .breadcrumb { font-size: .8rem; color: var(--muted); margin-bottom: 1rem; }
+    .breadcrumb a { color: var(--muted); }
+    .breadcrumb a:hover { color: var(--accent); }
+    .hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
+    .hero p.desc { color: var(--muted); max-width: 640px; margin-top: .5rem; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+    .badge { display: inline-flex; align-items: center; gap: .3rem; padding: .25rem .7rem;
+             border-radius: 20px; font-size: .75rem; font-weight: 500; }
+    .badge-platform { background: #1f3a5f; color: #58a6ff; border: 1px solid #1f4080; }
+    .badge-easy { background: #1a3a2a; color: #3fb950; border: 1px solid #2ea043; }
+    .badge-medium { background: #3a2a1a; color: #d29922; border: 1px solid #9e6a03; }
+    .badge-hard { background: #3a1a1a; color: #f85149; border: 1px solid #da3633; }
+    .badge-beginner { background: #1a3a2a; color: #56d364; border: 1px solid #2ea043; }
+    .badge-os { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .badge-date { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .content { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+    h1, h2, h3 { color: var(--text); font-weight: 600; margin: 2rem 0 .75rem; }
+    h2 { font-size: 1.35rem; padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 1.1rem; color: var(--accent); }
+    p { margin: .6rem 0; color: #c9d1d9; }
+    ul, ol { margin: .5rem 0 .5rem 1.5rem; }
+    li { margin: .3rem 0; color: #c9d1d9; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    blockquote { border-left: 3px solid var(--accent); padding: .5rem 1rem; margin: .75rem 0;
+                 background: var(--bg2); border-radius: 0 var(--radius) var(--radius) 0; color: var(--muted); }
+    pre { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+          padding: 1rem 1.25rem; overflow-x: auto; margin: .75rem 0; }
+    code { font-family: 'Fira Code', monospace; font-size: .85rem; color: #e6edf3; }
+    p code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; color: var(--accent); font-size: .82rem; }
+    strong code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; }
+    figure { margin: 1.25rem 0; }
+    img { max-width: 100%; border-radius: var(--radius); border: 1px solid var(--border);
+          display: block; margin: 0 auto; }
+    figcaption { text-align: center; font-size: .8rem; color: var(--muted); margin-top: .4rem; }
+    .callout { display: flex; gap: .75rem; align-items: flex-start; background: var(--bg2);
+               border: 1px solid var(--border); border-radius: var(--radius); padding: .9rem 1rem; margin: .75rem 0; }
+    .callout-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: .1rem; }
+    details { border: 1px solid var(--border); border-radius: var(--radius); margin: .5rem 0; }
+    summary { padding: .6rem 1rem; cursor: pointer; font-weight: 500; background: var(--bg2); border-radius: var(--radius); }
+    details[open] summary { border-radius: var(--radius) var(--radius) 0 0; border-bottom: 1px solid var(--border); }
+    details > *:not(summary) { padding: .75rem 1rem; }
+    .table-wrap { overflow-x: auto; margin: .75rem 0; }
+    table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+    th, td { padding: .6rem .9rem; border: 1px solid var(--border); text-align: left; }
+    th { background: var(--bg3); font-weight: 600; }
+    tr:nth-child(even) { background: rgba(33,38,45,.5); }
+    .columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin: .75rem 0; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem;
+            transition: border-color .15s, transform .15s; display: block; }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); text-decoration: none; }
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: .6rem; gap: .5rem; }
+    .card-title { font-size: 14px; font-weight: 600; color: var(--text); }
+    .card-meta { font-size: 12px; color: var(--muted); margin-bottom: .4rem; }
+    .card-desc { font-size: 13px; color: var(--muted); }
+    footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--muted); font-size: .85rem; }
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-logo">Waseef</span>
+  <a href="../../../index.html" class="nav-back">← Back to Portfolio</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#labs">Labs</a> / <a href="index.html">CSRF</a> / Lab 2 — CSRF where token validation depends on request method</div>
+    <h1>Lab 2 — CSRF where token validation depends on request method</h1>
+    <div class="meta-row">
+      <span class="badge badge-os">⚪ 🟡 Medium</span>
+      <span class="badge badge-date">📅 2026-06-19</span>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+<h2 id="finding-summary">📋 Finding Summary</h2>
+<div class='table-wrap'><table>
+  <tr><th>Field</th><th>Value</th></tr>
+  <tr><td><strong>Type</strong></td><td>Web App</td></tr>
+  <tr><td><strong>Severity</strong></td><td>🟡 Medium</td></tr>
+  <tr><td><strong>CVE / CWE</strong></td><td>CWE-352</td></tr>
+  <tr><td><strong>Date</strong></td><td>2026-06-19</td></tr>
+</table></div>
+<hr>
+<h2 id="description">🔍 Description</h2>
+<p>Cross-Site Request Forgery (CSRF) token validation that depends on the request method is a flawed defense pattern where the server only checks the CSRF token on POST requests but not on GET requests. By using Burp Suite’s “Change request method” feature, an attacker can convert a POST-based state-changing request into a GET request, which carries the parameters in the URL query string. Because the server skips token validation for GET requests, the CSRF token can be omitted entirely — and because the victim’s session cookie is still sent automatically by the browser, the forged request is accepted as legitimate.</p>
+<hr>
+<h2 id="end-goals">🎯 End Goals</h2>
+<ul>
+  <li>Identify that the email change endpoint validates the CSRF token only on POST requests</li>
+  <li>Demonstrate that switching to a GET request bypasses token validation entirely</li>
+  <li>Craft a CSRF PoC that changes the victim’s email via a GET-based request and deliver it through the exploit server</li>
+</ul>
+<hr>
+<h2 id="steps-to-reproduce">🪜 Steps to Reproduce</h2>
+<ol>
+  <li>Log in as <code>wiener</code> and navigate to the My Account page.</li>
+  <li>Submit an email change and capture the POST request in Burp Repeater.</li>
+  <li>Use “Change request method” to convert the POST to a GET request.</li>
+  <li>Send the GET request and confirm it succeeds (HTTP 302).</li>
+  <li>Remove the <code>csrf</code> parameter from the GET request and confirm it still succeeds.</li>
+  <li>Right-click the GET request → Engagement tools → Generate CSRF PoC.</li>
+  <li>Paste the PoC into the exploit server and deliver it to the victim.</li>
+</ol>
+<hr>
+<h2 id="analysis">🧠 Analysis</h2>
+<p><strong>Step 1 — Access the lab</strong></p>
+<p>The lab was launched and the homepage loaded. The lab is flagged as Practitioner level and concerns a CSRF defense that only applies to certain request types.</p>
+<blockquote>  <figure><img src="images/lab-2-csrf-where-token-validation-depends-on-request-method/384b7523717280eab277ceede5f0451b.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 2 — Log in and view account page</strong></p>
+<p>Authenticated as <code>wiener:peter</code> and navigated to the My Account page. The current email was <code>wiener@normal-user.net</code> and an email update form was present.</p>
+<blockquote>  <figure><img src="images/lab-2-csrf-where-token-validation-depends-on-request-method/384b7523717280418cf6f89dbac1c9e5.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 3 — Submit email change and capture request</strong></p>
+<p>Entered <code>test@test.com</code> into the email field and submitted. Burp captured the POST request in Repeater: <code>POST /my-account/change-email</code> with body <code>email=test%40test.com&amp;csrf=mYxcx1KB...</code>. The CSRF token was present in the POST body.</p>
+<blockquote>  <figure><img src="images/lab-2-csrf-where-token-validation-depends-on-request-method/384b7523717280e58121e6b54a0c39f3.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-2-csrf-where-token-validation-depends-on-request-method/384b7523717280b8937dc6d6c1f73b2a.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 4 — Probe CSRF token validation — change method to GET</strong></p>
+<p>Right-clicked the POST request in Repeater and selected Change request method. Burp converted the request to <code>GET /my-account/change-email?email=test%40test.com&amp;csrf=...</code>, moving all parameters into the query string.</p>
+<blockquote>  <figure><img src="images/lab-2-csrf-where-token-validation-depends-on-request-method/384b7523717280c1ba4fe2aa4b5f8aea.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-2-csrf-where-token-validation-depends-on-request-method/384b7523717280f591f1ee53fe7b268b.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 5 — Confirm GET request succeeds without token validation</strong></p>
+<p>Sent the converted GET request. The server returned HTTP 302 and redirected to <code>/my-account?id=wiener</code>, and the account page then showed the updated email <code>test1@test.com</code>. This confirmed that the server accepts the email change via GET and does not enforce CSRF token validation on GET requests.</p>
+<blockquote>  <figure><img src="images/lab-2-csrf-where-token-validation-depends-on-request-method/384b752371728008a6f9ebede41ffd10.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-2-csrf-where-token-validation-depends-on-request-method/384b7523717280c8aa74fe2bfb7a8b5a.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 6 — Test GET request without CSRF token</strong></p>
+<p>Removed the <code>csrf</code> parameter entirely from the query string, leaving only <code>GET /my-account/change-email?email=test-2@test.com</code>. Sent the request — the server again returned HTTP 302 and the email was updated to <code>test-2@test.com</code>. This confirmed that no CSRF token is required at all when using a GET request.</p>
+<blockquote>  <figure><img src="images/lab-2-csrf-where-token-validation-depends-on-request-method/384b7523717280ada831ed3c634ab8f5.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-2-csrf-where-token-validation-depends-on-request-method/384b7523717280289d9aed15de1b3cf7.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 7 — Generate CSRF PoC and deliver exploit</strong></p>
+<p>Right-clicked the GET request in Repeater → Engagement tools → Generate CSRF PoC. Burp generated a form-based PoC with <code>email=test-3@test.com</code> that auto-submits on page load. The HTML was pasted into the exploit server body and “Deliver exploit to victim” was clicked. The lab banner updated to <strong>Solved</strong> and the victim’s email was changed to <code>test-3@test.com</code>, confirming the attack succeeded.</p>
+<blockquote>  <figure><img src="images/lab-2-csrf-where-token-validation-depends-on-request-method/384b752371728081a14dd9dec9d99f0a.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-2-csrf-where-token-validation-depends-on-request-method/384b75237172801784b8f91f0db2b484.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-2-csrf-where-token-validation-depends-on-request-method/384b7523717280a08333d379c38f85a2.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<h2 id="impact">🎯 Impact</h2>
+<p>An attacker who can lure an authenticated user to visit a malicious page can silently change the victim’s email address without possessing or bypassing a valid CSRF token. Since the application only validates the CSRF token on POST requests, converting the request to a GET entirely sidesteps the defense. This can be chained with a password reset to achieve full account takeover.</p>
+<hr>
+<h2 id="references">📚 References</h2>
+<ul>
+  <li><a href="https://portswigger.net/web-security/csrf/bypassing-token-validation" target="_blank" rel="noopener">PortSwigger Web Security Academy — Bypassing CSRF token validation</a></li>
+  <li><a href="https://cwe.mitre.org/data/definitions/352.html" target="_blank" rel="noopener">CWE-352: Cross-Site Request Forgery</a></li>
+  <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html" target="_blank" rel="noopener">OWASP CSRF Prevention Cheat Sheet</a></li>
+</ul>
+<hr>
+<blockquote>🤖 Documented with Claude pentest-findings skill</blockquote>
+
+</div>
+
+<footer>Built by Waseef · <a href="../../../index.html">Back to Portfolio</a></footer>
+</body>
+</html>

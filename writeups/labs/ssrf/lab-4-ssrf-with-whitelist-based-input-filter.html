@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 4 — SSRF with whitelist-based input filter — Waseef's Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --bg2: #161b22; --bg3: #21262d;
+      --border: #30363d; --text: #e6edf3; --muted: #8b949e;
+      --accent: #58a6ff; --accent2: #3fb950; --red: #f85149;
+      --orange: #d29922; --radius: 8px;
+      --c-red: #f85149; --c-blue: #58a6ff; --c-green: #3fb950;
+      --c-yellow: #d29922; --c-purple: #bc8cff; --c-pink: #ff7b72;
+      --c-gray: #8b949e;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.7; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    nav { position: sticky; top: 0; z-index: 100; background: rgba(13,17,23,.9); backdrop-filter: blur(12px);
+          border-bottom: 1px solid var(--border); padding: .75rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { font-weight: 600; font-size: 1rem; color: var(--text); }
+    .nav-back { font-size: .85rem; color: var(--muted); display: flex; align-items: center; gap: .4rem; }
+    .nav-back:hover { color: var(--accent); text-decoration: none; }
+    .hero { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 3rem 2rem 2.5rem; }
+    .hero-inner { max-width: 860px; margin: 0 auto; }
+    .breadcrumb { font-size: .8rem; color: var(--muted); margin-bottom: 1rem; }
+    .breadcrumb a { color: var(--muted); }
+    .breadcrumb a:hover { color: var(--accent); }
+    .hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
+    .hero p.desc { color: var(--muted); max-width: 640px; margin-top: .5rem; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+    .badge { display: inline-flex; align-items: center; gap: .3rem; padding: .25rem .7rem;
+             border-radius: 20px; font-size: .75rem; font-weight: 500; }
+    .badge-platform { background: #1f3a5f; color: #58a6ff; border: 1px solid #1f4080; }
+    .badge-easy { background: #1a3a2a; color: #3fb950; border: 1px solid #2ea043; }
+    .badge-medium { background: #3a2a1a; color: #d29922; border: 1px solid #9e6a03; }
+    .badge-hard { background: #3a1a1a; color: #f85149; border: 1px solid #da3633; }
+    .badge-beginner { background: #1a3a2a; color: #56d364; border: 1px solid #2ea043; }
+    .badge-os { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .badge-date { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .content { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+    h1, h2, h3 { color: var(--text); font-weight: 600; margin: 2rem 0 .75rem; }
+    h2 { font-size: 1.35rem; padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 1.1rem; color: var(--accent); }
+    p { margin: .6rem 0; color: #c9d1d9; }
+    ul, ol { margin: .5rem 0 .5rem 1.5rem; }
+    li { margin: .3rem 0; color: #c9d1d9; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    blockquote { border-left: 3px solid var(--accent); padding: .5rem 1rem; margin: .75rem 0;
+                 background: var(--bg2); border-radius: 0 var(--radius) var(--radius) 0; color: var(--muted); }
+    pre { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+          padding: 1rem 1.25rem; overflow-x: auto; margin: .75rem 0; }
+    code { font-family: 'Fira Code', monospace; font-size: .85rem; color: #e6edf3; }
+    p code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; color: var(--accent); font-size: .82rem; }
+    strong code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; }
+    figure { margin: 1.25rem 0; }
+    img { max-width: 100%; border-radius: var(--radius); border: 1px solid var(--border);
+          display: block; margin: 0 auto; }
+    figcaption { text-align: center; font-size: .8rem; color: var(--muted); margin-top: .4rem; }
+    .callout { display: flex; gap: .75rem; align-items: flex-start; background: var(--bg2);
+               border: 1px solid var(--border); border-radius: var(--radius); padding: .9rem 1rem; margin: .75rem 0; }
+    .callout-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: .1rem; }
+    details { border: 1px solid var(--border); border-radius: var(--radius); margin: .5rem 0; }
+    summary { padding: .6rem 1rem; cursor: pointer; font-weight: 500; background: var(--bg2); border-radius: var(--radius); }
+    details[open] summary { border-radius: var(--radius) var(--radius) 0 0; border-bottom: 1px solid var(--border); }
+    details > *:not(summary) { padding: .75rem 1rem; }
+    .table-wrap { overflow-x: auto; margin: .75rem 0; }
+    table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+    th, td { padding: .6rem .9rem; border: 1px solid var(--border); text-align: left; }
+    th { background: var(--bg3); font-weight: 600; }
+    tr:nth-child(even) { background: rgba(33,38,45,.5); }
+    .columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin: .75rem 0; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem;
+            transition: border-color .15s, transform .15s; display: block; }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); text-decoration: none; }
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: .6rem; gap: .5rem; }
+    .card-title { font-size: 14px; font-weight: 600; color: var(--text); }
+    .card-meta { font-size: 12px; color: var(--muted); margin-bottom: .4rem; }
+    .card-desc { font-size: 13px; color: var(--muted); }
+    footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--muted); font-size: .85rem; }
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-logo">Waseef</span>
+  <a href="../../../index.html" class="nav-back">← Back to Portfolio</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#labs">Labs</a> / <a href="index.html">SSRF</a> / Lab 4 — SSRF with whitelist-based input filter</div>
+    <h1>Lab 4 — SSRF with whitelist-based input filter</h1>
+    <div class="meta-row">
+      <span class="badge badge-os">⚪ 🟠 High</span>
+      <span class="badge badge-date">📅 2026-07-03</span>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+<h2 id="finding-summary">📋 Finding Summary</h2>
+<div class='table-wrap'><table>
+  <tr><th>Field</th><th>Value</th></tr>
+  <tr><td><strong>Type</strong></td><td>Web App</td></tr>
+  <tr><td><strong>Severity</strong></td><td>🟠 High</td></tr>
+  <tr><td><strong>CVE / CWE</strong></td><td>CWE-918</td></tr>
+  <tr><td><strong>Date</strong></td><td>2026-07-03</td></tr>
+</table></div>
+<hr>
+<h2 id="description">🔍 Description</h2>
+<p>Server-Side Request Forgery (SSRF) is a vulnerability that allows an attacker to induce a server-side application to make HTTP requests to an arbitrary destination of the attacker’s choosing. The application’s stock-check feature accepts a <code>stockApi</code> parameter containing the full URL the back-end server should fetch to retrieve stock data. In this variant, the developer has deployed a whitelist that requires the URL’s hostname to exactly match <code>stock.weliketoshop.net</code>. However, the validating code and the code that actually issues the request parse the URL differently: embedding credentials (<code>user@host</code> syntax) reveals that the real connection attempt targets whatever precedes the <code>@</code>, and double URL-encoding the <code>#</code> fragment character lets an attacker smuggle a second hostname past the whitelist check entirely, since the validator only sees a single decode pass while the underlying HTTP client decodes it twice.</p>
+<hr>
+<h2 id="end-goals">🎯 End Goals</h2>
+<ul>
+  <li>Identify the stock-check feature and confirm the <code>stockApi</code> parameter is server-side fetched</li>
+  <li>Discover the parser discrepancy exposed by embedded URL credentials</li>
+  <li>Bypass the hostname whitelist using double URL-encoding of the <code>#</code> fragment character</li>
+  <li>Delete the user <code>carlos</code> via the admin interface to solve the lab</li>
+</ul>
+<hr>
+<h2 id="steps-to-reproduce">🪜 Steps to Reproduce</h2>
+<ol>
+  <li>Open the lab and browse the shop homepage.</li>
+  <li>Navigate to a product page and use Burp Suite to intercept the stock-check request.</li>
+  <li>Identify the <code>stockApi</code> parameter and confirm it is fetched server-side.</li>
+  <li>Attempt an obvious loopback reference and observe that the whitelist blocks it.</li>
+  <li>Embed credentials in the URL (<code>user@host</code>) and observe the whitelist passes it, but the connection fails.</li>
+  <li>Single URL-encode the <code>#</code> character and observe the whitelist still blocks it.</li>
+  <li>Double URL-encode the <code>#</code> character to bypass the whitelist.</li>
+  <li>Substitute <code>localhost</code> for the placeholder credential to reach the local server.</li>
+  <li>Enumerate the admin panel’s users and inspect the delete link’s structure.</li>
+  <li>Route the delete request through the <code>stockApi</code> parameter using the bypass.</li>
+  <li>Confirm the lab is solved and the target user has been deleted.</li>
+</ol>
+<hr>
+<h2 id="analysis">🧠 Analysis</h2>
+<p><strong>Step 1 — Access the lab</strong></p>
+<p>The lab was launched and the shop homepage loaded successfully.</p>
+<blockquote>  <figure><img src="images/lab-4-ssrf-with-whitelist-based-input-filter/392b75237172805bb200e36e6d9d331a.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 2 — Locate the stock-check feature and capture the baseline request</strong></p>
+<p>Navigating to a product page revealed a stock-check feature. With Burp Suite intercepting traffic, submitting the stock check captured a request containing a <code>stockApi</code> parameter with the URL-encoded value <code>http://stock.weliketoshop.net:8080/product/stock/check?productId=1&amp;storeId=1</code>. The response returned <code>HTTP/2 200</code> with a plain-text body of <code>387</code>.</p>
+<blockquote>  <figure><img src="images/lab-4-ssrf-with-whitelist-based-input-filter/392b752371728009856dd71a93858717.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-4-ssrf-with-whitelist-based-input-filter/392b752371728074ac58d82d1ed88cf7.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 3 — Inconclusive probe</strong></p>
+<p>The <code>stockApi</code> value was truncated, with no path or query string. The response was <code>HTTP/2 400 Bad Request</code> with the body <code>"Missing parameter"</code>.</p>
+<blockquote>  <figure><img src="images/lab-4-ssrf-with-whitelist-based-input-filter/392b752371728009b2bfdb93a622987f.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 4 — Obvious loopback reference is blocked by the whitelist</strong></p>
+<p>Setting <code>stockApi</code> to <code>http://localhost/</code> returned <code>HTTP/2 400 Bad Request</code> with the body <code>"External stock check host must be stock.weliketoshop.net"</code>, confirming the whitelist validates the hostname exactly rather than using a blacklist of forbidden values.</p>
+<blockquote>  <figure><img src="images/lab-4-ssrf-with-whitelist-based-input-filter/392b7523717280148208d79e983f4d03.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 5 — Discover the embedded-credentials parser discrepancy</strong></p>
+<p>Setting <code>stockApi</code> to <code>http://username@stock.weliketoshop.net/</code> passed the whitelist check, since the hostname portion the validator reads is still <code>stock.weliketoshop.net</code>. However, the response returned <code>HTTP/2 500</code> with the body <code>"Could not connect to external stock check service"</code>, indicating the code that actually issues the request instead tried to connect to <code>username</code> — revealing that the validating logic and the requesting logic parse the URL’s host differently.</p>
+<blockquote>  <figure><img src="images/lab-4-ssrf-with-whitelist-based-input-filter/392b75237172802a8a3efc40b5650071.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-4-ssrf-with-whitelist-based-input-filter/392b75237172807abfb1cc9bab8403c2.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 6 — Confirm single-encoding the </strong><strong><code>#</code></strong><strong> is still filtered</strong></p>
+<p>Attempting <code>http://username%23@stock.weliketoshop.net</code> — single URL-encoding the <code>#</code> character — still returned <code>HTTP/2 400 Bad Request</code> with the whitelist’s blocking message, since the value is decoded once before the hostname check runs.</p>
+<blockquote>  <figure><img src="images/lab-4-ssrf-with-whitelist-based-input-filter/392b75237172802dbe52f72b4fab1392.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-4-ssrf-with-whitelist-based-input-filter/392b7523717280baa903f51daae417ea.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 7 — Bypass the whitelist via double URL-encoding</strong></p>
+<p>Double-encoding the <code>#</code> character as <code>%2523</code> — <code>http://username%2523@stock.weliketoshop.net</code> — passed the whitelist check, since the validator only decodes it once and still sees <code>stock.weliketoshop.net</code> as the host. The response returned <code>HTTP/2 500</code> with the same <code>"Could not connect to external stock check service"</code> message as Step 5, confirming the requesting code fully decodes the value twice, treats everything after the real <code>#</code> as a URL fragment, and attempts to connect to <code>username</code> instead — now unblocked by the whitelist entirely.</p>
+<blockquote>  <figure><img src="images/lab-4-ssrf-with-whitelist-based-input-filter/392b752371728035bec9ed5e9eaa4611.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-4-ssrf-with-whitelist-based-input-filter/392b75237172805ab5abe0d17bd85a9a.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 8 — Prove SSRF against the local server</strong></p>
+<p>Substituting <code>localhost</code> for the placeholder credential — <code>http://localhost%2523@stock.weliketoshop.net</code> — returned <code>HTTP/2 200 OK</code> with the application’s own homepage HTML, confirming the request actually reached the local server. The browser’s navigation bar subsequently showed a new “Admin panel” link.</p>
+<blockquote>  <figure><img src="images/lab-4-ssrf-with-whitelist-based-input-filter/392b752371728095b882ce2889feb219.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-4-ssrf-with-whitelist-based-input-filter/392b752371728087811dc492a3c7a467.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 9 — Enumerate users and inspect the delete link</strong></p>
+<p>Following the admin panel link via the same bypass (<code>.../admin</code>) returned <code>HTTP/2 200 OK</code> with the admin panel’s HTML. The Users page listed two accounts, <code>wiener</code> and <code>carlos</code>, each with a “Delete” link. Inspecting the element in DevTools showed the underlying <code>href</code> was <code>/admin/delete?username=carlos</code>.</p>
+<blockquote>  <figure><img src="images/lab-4-ssrf-with-whitelist-based-input-filter/392b7523717280039c8adb0a9dd7f6ff.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-4-ssrf-with-whitelist-based-input-filter/392b7523717280a5857bf294afa5b163.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-4-ssrf-with-whitelist-based-input-filter/392b75237172802c83d1e4d907105416.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 10 — Exploit via SSRF to delete carlos</strong></p>
+<p>The <code>stockApi</code> parameter was set to <code>http://localhost%2523@stock.weliketoshop.net/admin/delete?username=carlos</code> and sent through Repeater. The response was <code>HTTP/2 302 Found</code> with a <code>Location: /admin</code> redirect, indicating the deletion request succeeded when routed server-side through the <code>stockApi</code> parameter.</p>
+<blockquote>  <figure><img src="images/lab-4-ssrf-with-whitelist-based-input-filter/392b7523717280bfb90ff5d87178a31f.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 11 — Verify and solve</strong></p>
+<p>Navigating directly to <code>/admin</code> in the browser still returned the whitelist/loopback-style access restriction, confirming the block remained in place for ordinary requests even after the lab was solved. The admin panel was re-confirmed reachable via the double-encoding bypass, and a final refresh of the product page showed “User deleted successfully!” with the Users list now containing only <code>wiener</code>, confirming <code>carlos</code> had been removed via the SSRF exploit.</p>
+<blockquote>  <figure><img src="images/lab-4-ssrf-with-whitelist-based-input-filter/392b752371728073a65bc766b0822317.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-4-ssrf-with-whitelist-based-input-filter/392b75237172801385dce1368f1ea7ad.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-4-ssrf-with-whitelist-based-input-filter/392b7523717280658e68ea34954cf746.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<h2 id="impact">🎯 Impact</h2>
+<p>Whitelist-based SSRF defenses are only as strong as the consistency between the code that validates a URL and the code that ultimately requests it. In this lab, that inconsistency allowed an unauthenticated attacker to pass a strict hostname whitelist by embedding a second hostname as URL credentials, and to fully defeat the filter using double URL-encoding of the <code>#</code> fragment character — ultimately performing a destructive action (deleting a user account) against an admin interface that was never meant to be reachable externally. In a real deployment, the same class of parser discrepancy could expose any internal service behind a whitelist that assumes a single, uniform URL-parsing behavior across its own components.</p>
+<hr>
+<h2 id="references">📚 References</h2>
+<ul>
+  <li><a href="https://portswigger.net/web-security/ssrf" target="_blank" rel="noopener">PortSwigger Web Security Academy — SSRF</a></li>
+  <li><a href="https://portswigger.net/web-security/ssrf/lab-ssrf-with-whitelist-filter" target="_blank" rel="noopener">PortSwigger Lab — SSRF with whitelist-based input filter</a></li>
+  <li><a href="https://portswigger.net/web-security/ssrf/url-validation-bypass-cheat-sheet" target="_blank" rel="noopener">PortSwigger — URL validation bypass cheat sheet</a></li>
+  <li><a href="https://cwe.mitre.org/data/definitions/918.html" target="_blank" rel="noopener">CWE-918: Server-Side Request Forgery (SSRF)</a></li>
+</ul>
+<hr>
+<blockquote>🤖 Documented with Claude pentest-findings skill</blockquote>
+
+</div>
+
+<footer>Built by Waseef · <a href="../../../index.html">Back to Portfolio</a></footer>
+</body>
+</html>

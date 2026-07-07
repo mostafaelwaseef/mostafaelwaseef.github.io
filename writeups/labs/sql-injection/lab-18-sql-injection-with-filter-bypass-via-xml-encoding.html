@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 18 — SQL injection with filter bypass via XML encoding — Waseef's Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --bg2: #161b22; --bg3: #21262d;
+      --border: #30363d; --text: #e6edf3; --muted: #8b949e;
+      --accent: #58a6ff; --accent2: #3fb950; --red: #f85149;
+      --orange: #d29922; --radius: 8px;
+      --c-red: #f85149; --c-blue: #58a6ff; --c-green: #3fb950;
+      --c-yellow: #d29922; --c-purple: #bc8cff; --c-pink: #ff7b72;
+      --c-gray: #8b949e;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.7; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    nav { position: sticky; top: 0; z-index: 100; background: rgba(13,17,23,.9); backdrop-filter: blur(12px);
+          border-bottom: 1px solid var(--border); padding: .75rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { font-weight: 600; font-size: 1rem; color: var(--text); }
+    .nav-back { font-size: .85rem; color: var(--muted); display: flex; align-items: center; gap: .4rem; }
+    .nav-back:hover { color: var(--accent); text-decoration: none; }
+    .hero { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 3rem 2rem 2.5rem; }
+    .hero-inner { max-width: 860px; margin: 0 auto; }
+    .breadcrumb { font-size: .8rem; color: var(--muted); margin-bottom: 1rem; }
+    .breadcrumb a { color: var(--muted); }
+    .breadcrumb a:hover { color: var(--accent); }
+    .hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
+    .hero p.desc { color: var(--muted); max-width: 640px; margin-top: .5rem; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+    .badge { display: inline-flex; align-items: center; gap: .3rem; padding: .25rem .7rem;
+             border-radius: 20px; font-size: .75rem; font-weight: 500; }
+    .badge-platform { background: #1f3a5f; color: #58a6ff; border: 1px solid #1f4080; }
+    .badge-easy { background: #1a3a2a; color: #3fb950; border: 1px solid #2ea043; }
+    .badge-medium { background: #3a2a1a; color: #d29922; border: 1px solid #9e6a03; }
+    .badge-hard { background: #3a1a1a; color: #f85149; border: 1px solid #da3633; }
+    .badge-beginner { background: #1a3a2a; color: #56d364; border: 1px solid #2ea043; }
+    .badge-os { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .badge-date { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .content { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+    h1, h2, h3 { color: var(--text); font-weight: 600; margin: 2rem 0 .75rem; }
+    h2 { font-size: 1.35rem; padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 1.1rem; color: var(--accent); }
+    p { margin: .6rem 0; color: #c9d1d9; }
+    ul, ol { margin: .5rem 0 .5rem 1.5rem; }
+    li { margin: .3rem 0; color: #c9d1d9; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    blockquote { border-left: 3px solid var(--accent); padding: .5rem 1rem; margin: .75rem 0;
+                 background: var(--bg2); border-radius: 0 var(--radius) var(--radius) 0; color: var(--muted); }
+    pre { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+          padding: 1rem 1.25rem; overflow-x: auto; margin: .75rem 0; }
+    code { font-family: 'Fira Code', monospace; font-size: .85rem; color: #e6edf3; }
+    p code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; color: var(--accent); font-size: .82rem; }
+    strong code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; }
+    figure { margin: 1.25rem 0; }
+    img { max-width: 100%; border-radius: var(--radius); border: 1px solid var(--border);
+          display: block; margin: 0 auto; }
+    figcaption { text-align: center; font-size: .8rem; color: var(--muted); margin-top: .4rem; }
+    .callout { display: flex; gap: .75rem; align-items: flex-start; background: var(--bg2);
+               border: 1px solid var(--border); border-radius: var(--radius); padding: .9rem 1rem; margin: .75rem 0; }
+    .callout-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: .1rem; }
+    details { border: 1px solid var(--border); border-radius: var(--radius); margin: .5rem 0; }
+    summary { padding: .6rem 1rem; cursor: pointer; font-weight: 500; background: var(--bg2); border-radius: var(--radius); }
+    details[open] summary { border-radius: var(--radius) var(--radius) 0 0; border-bottom: 1px solid var(--border); }
+    details > *:not(summary) { padding: .75rem 1rem; }
+    .table-wrap { overflow-x: auto; margin: .75rem 0; }
+    table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+    th, td { padding: .6rem .9rem; border: 1px solid var(--border); text-align: left; }
+    th { background: var(--bg3); font-weight: 600; }
+    tr:nth-child(even) { background: rgba(33,38,45,.5); }
+    .columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin: .75rem 0; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem;
+            transition: border-color .15s, transform .15s; display: block; }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); text-decoration: none; }
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: .6rem; gap: .5rem; }
+    .card-title { font-size: 14px; font-weight: 600; color: var(--text); }
+    .card-meta { font-size: 12px; color: var(--muted); margin-bottom: .4rem; }
+    .card-desc { font-size: 13px; color: var(--muted); }
+    footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--muted); font-size: .85rem; }
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-logo">Waseef</span>
+  <a href="../../../index.html" class="nav-back">← Back to Portfolio</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#labs">Labs</a> / <a href="index.html">SQL Injection</a> / Lab 18 — SQL injection with filter bypass via XML encoding</div>
+    <h1>Lab 18 — SQL injection with filter bypass via XML encoding</h1>
+    <div class="meta-row">
+      <span class="badge badge-os">⚪ 🔴 High</span>
+      <span class="badge badge-date">📅 2026-05-19</span>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+<h2 id="finding-summary">📋 Finding Summary</h2>
+<div class='table-wrap'><table>
+  <tr><th>Field</th><th>Value</th></tr>
+  <tr><td><strong>Type</strong></td><td>Web App</td></tr>
+  <tr><td><strong>Severity</strong></td><td>🔴 High</td></tr>
+  <tr><td><strong>CVE / CWE</strong></td><td>CWE-89</td></tr>
+  <tr><td><strong>Date</strong></td><td>2026-05-19</td></tr>
+</table></div>
+<hr>
+<h2 id="description">🔍 Description</h2>
+<p>SQL injection with filter bypass via XML encoding occurs when a web application passes user-supplied data embedded in an XML body to a SQL query, and a WAF or input filter is in place to block common SQL injection keywords such as <code>UNION</code> and <code>SELECT</code>. An attacker can evade the filter by obfuscating the payload using XML entity encoding — for example, representing each character as its hex entity equivalent (<code>&amp;#x55;&amp;#x4e;&amp;#x49;&amp;#x4f;&amp;#x4e;...</code>). The database’s XML parser decodes the entities before the query is executed, so the SQL runs normally while the WAF never sees the plaintext keywords. In this lab, the stock check feature sends a POST request with an XML body containing <code>productId</code> and <code>storeId</code> values. The <code>storeId</code> field is vulnerable to SQL injection, and the Hackvertor Burp extension is used to apply hex entity encoding to the payload, bypassing the WAF and enabling a UNION-based attack to extract credentials from the <code>users</code> table.</p>
+<hr>
+<h2 id="end-goals">🎯 End Goals</h2>
+<ul>
+  <li>Identify the XML-based stock check feature as a SQL injection point</li>
+  <li>Confirm that a WAF blocks direct UNION injection attempts</li>
+  <li>Bypass the WAF by encoding the payload using Hackvertor hex entity encoding</li>
+  <li>Use a UNION attack to extract usernames and passwords from the <code>users</code> table</li>
+  <li>Log in as <code>administrator</code> to solve the lab</li>
+</ul>
+<hr>
+<h2 id="steps-to-reproduce">🪜 Steps to Reproduce</h2>
+<ol>
+  <li>Browse the lab and observe the server assigns a <code>TrackingId</code> cookie on initial page load; confirm the browser sends it on subsequent requests</li>
+  <li>Navigate to a product page and click “Check stock” — observe the application returns a stock count</li>
+  <li>In Burp HTTP History, locate the POST <code>/product/stock</code> request and observe it sends an XML body with <code>productId</code> and <code>storeId</code> fields</li>
+  <li>Send the request to Burp Repeater</li>
+  <li>Inject <code>1 UNION SELECT NULL</code> into the <code>storeId</code> field and observe a 500 error — confirming a WAF is blocking the payload</li>
+  <li>Using the Hackvertor extension, select the UNION payload, right-click → Extensions → Hackvertor → Encode → base64; observe the response still fails</li>
+  <li>Switch to hex entity encoding: select the payload, right-click → Extensions → Hackvertor → Encode → hex_entities; observe 200 OK — the WAF is bypassed</li>
+  <li>Confirm the number of columns by trying <code>UNION SELECT NULL,NULL</code> — a 200 response with “0 units” confirms only 1 column is returned</li>
+  <li>Inject <code>UNION SELECT username||'~'||password FROM users</code> (hex-entity encoded) to concatenate and retrieve all credentials in a single column</li>
+  <li>Extract the <code>administrator</code> password from the response and log in to solve the lab</li>
+</ol>
+<hr>
+<h2 id="analysis">🧠 Analysis</h2>
+<p><strong>Step 1 — Observe the lab and identify the TrackingId cookie</strong></p>
+<p>Browsing the lab homepage showed it is marked “Not solved”. In Burp HTTP History, the server issued a <code>TrackingId</code> cookie on the initial GET <code>/</code> request. Navigating to a product page confirmed the browser automatically sends this cookie on subsequent requests, meaning it is processed server-side on every page load.</p>
+<blockquote>  <figure><img src="images/lab-18-sql-injection-with-filter-bypass-via-xml-encoding/365b75237172806bb564e77dce1bcc8c.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-18-sql-injection-with-filter-bypass-via-xml-encoding/365b752371728085a039d0c67d06a1e0.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-18-sql-injection-with-filter-bypass-via-xml-encoding/365b7523717280cead67ef10b4289c49.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-18-sql-injection-with-filter-bypass-via-xml-encoding/365b75237172800f853cf803c38256a2.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 2 — Identify the stock check feature and capture the request</strong></p>
+<p>Clicking “Check stock” on a product page returned “258 units”. In Burp HTTP History, the corresponding POST <code>/product/stock</code> request was visible — it sends an XML body with <code>productId</code> and <code>storeId</code> values to a backend stock query. This XML structure is a non-standard injection surface that may not be covered by standard WAF rules. The request was sent to Burp Repeater for testing.</p>
+<blockquote>  <figure><img src="images/lab-18-sql-injection-with-filter-bypass-via-xml-encoding/365b7523717280798577fc54a35fd89b.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-18-sql-injection-with-filter-bypass-via-xml-encoding/365b752371728073b7c0e35de386d3a9.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-18-sql-injection-with-filter-bypass-via-xml-encoding/365b7523717280498494cb1fda95bb75.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 3 — Confirm WAF blocks direct UNION injection</strong></p>
+<p>With the request in Burp Repeater, <code>1 UNION SELECT NULL</code> was injected directly into the <code>&lt;storeId&gt;</code> field:</p>
+<pre><code class="language-xml">&lt;storeId&gt;1 UNION SELECT NULL&lt;/storeId&gt;</code></pre>
+<p>The server responded with HTTP 500 Internal Server Error — confirming a WAF detected and blocked the plaintext SQL keywords.</p>
+<blockquote>  <figure><img src="images/lab-18-sql-injection-with-filter-bypass-via-xml-encoding/365b752371728051935ce895dc65a49a.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 4 — Try base64 encoding (blocked), then switch to hex_entities (succeeds)</strong></p>
+<p>To bypass the WAF, the Hackvertor Burp extension was used to obfuscate the payload. The <code>1 UNION SELECT NULL</code> value was first wrapped in a base64 Hackvertor tag:</p>
+<pre><code class="language-xml">&lt;storeId&gt;&lt;@base64&gt;1 UNION SELECT NULL&lt;/@base64&gt;&lt;/storeId&gt;</code></pre>
+<p>This did not work — the WAF still blocked it or the database did not decode the base64. Hex entity encoding was then tried instead, wrapping the payload in <code>&lt;@hex_entities&gt;</code> tags:</p>
+<pre><code class="language-xml">&lt;storeId&gt;&lt;@hex_entities&gt;1 UNION SELECT NULL&lt;/@hex_entities&gt;&lt;/storeId&gt;</code></pre>
+<p>The server returned 200 OK with <code>null</code> in the response body — confirming the WAF was bypassed. The XML parser decoded the hex entities before executing the query, so the database saw valid SQL while the WAF saw only encoded text.</p>
+<blockquote>  <figure><img src="images/lab-18-sql-injection-with-filter-bypass-via-xml-encoding/365b7523717280438c42e15103a89ce5.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-18-sql-injection-with-filter-bypass-via-xml-encoding/365b7523717280ab9598ffd06dd882b3.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-18-sql-injection-with-filter-bypass-via-xml-encoding/365b75237172802ab711e6b5595c1fd3.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-18-sql-injection-with-filter-bypass-via-xml-encoding/365b75237172803d83e4ce935a2f4870.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 5 — Confirm single column</strong></p>
+<p>To determine the number of columns returned, <code>UNION SELECT NULL,NULL</code> was tested:</p>
+<pre><code class="language-xml">&lt;storeId&gt;&lt;@hex_entities&gt;1 UNION SELECT NULL,NULL&lt;/@hex_entities&gt;&lt;/storeId&gt;</code></pre>
+<p>The server returned 200 OK with “0 units” — confirming the query returns only 1 column, meaning the full credential string must be concatenated into a single value.</p>
+<blockquote>  <figure><img src="images/lab-18-sql-injection-with-filter-bypass-via-xml-encoding/365b75237172801fbb81d3dbbcb24f68.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 6 — Exfiltrate credentials with username/password concatenation</strong></p>
+<p>With 1 column confirmed, usernames and passwords were concatenated using <code>||'~'||</code> as a separator and extracted in a single UNION query:</p>
+<pre><code class="language-xml">&lt;storeId&gt;&lt;@hex_entities&gt;1 UNION SELECT username||'~'||password FROM users&lt;/@hex_entities&gt;&lt;/storeId&gt;</code></pre>
+<p>The response returned all user credentials from the <code>users</code> table. The administrator’s credentials were clearly visible: <strong><code>t0vc3kip9bisx2bc6d5n</code></strong></p>
+<blockquote>  <figure><img src="images/lab-18-sql-injection-with-filter-bypass-via-xml-encoding/365b752371728054b8abf6dc9fab5d4f.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 7 — Log in as administrator and solve the lab</strong></p>
+<p>Logging in at <code>/login</code> with username <code>administrator</code> and the extracted password <strong><code>t0vc3kip9bisx2bc6d5n</code></strong> returned the “My Account” page showing “Your username is: administrator” and the “Congratulations, you solved the lab!” banner.</p>
+<blockquote>  <figure><img src="images/lab-18-sql-injection-with-filter-bypass-via-xml-encoding/365b752371728003b090e32741e01ed7.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<h2 id="impact">🎯 Impact</h2>
+<p>An attacker who can reach the stock check endpoint can extract arbitrary data from the database by bypassing the WAF using XML entity encoding — a technique that requires only the Hackvertor Burp extension and is trivial to apply. In this case, all user credentials were recovered from the <code>users</code> table in a single request, enabling complete account takeover. On a production system this technique could be used to exfiltrate any data accessible to the database user — including session tokens, API keys, PII, or any other sensitive records — while evading WAF detection entirely.</p>
+<hr>
+<h2 id="references">📚 References</h2>
+<ul>
+  <li><a href="https://portswigger.net/web-security/sql-injection/lab-sql-injection-with-filter-bypass-via-xml-encoding" target="_blank" rel="noopener">PortSwigger: SQL injection with filter bypass via XML encoding</a></li>
+  <li><a href="https://portswigger.net/web-security/sql-injection/cheat-sheet" target="_blank" rel="noopener">PortSwigger: SQL injection cheat sheet</a></li>
+  <li><a href="https://portswigger.net/bappstore/65033cbd2c344fbabe57ac060b5dd100" target="_blank" rel="noopener">Hackvertor Burp Extension</a></li>
+  <li><a href="https://cwe.mitre.org/data/definitions/89.html" target="_blank" rel="noopener">CWE-89: Improper Neutralization of Special Elements used in an SQL Command</a></li>
+</ul>
+<hr>
+<blockquote>🤖 Documented with Claude pentest-findings skill</blockquote>
+
+</div>
+
+<footer>Built by Waseef · <a href="../../../index.html">Back to Portfolio</a></footer>
+</body>
+</html>

