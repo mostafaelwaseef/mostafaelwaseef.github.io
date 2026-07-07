@@ -8,11 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --bg: #0d1117; --bg2: #161b22; --bg3: #21262d; --border: #30363d;
-      --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff; --accent2: #3fb950;
-      --red: #f85149; --orange: #d29922; --radius: 8px;
-    }
+    :root { --bg: #0d1117; --bg2: #161b22; --bg3: #21262d; --border: #30363d; --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff; --accent2: #3fb950; --red: #f85149; --orange: #d29922; --radius: 8px; }
     html { scroll-behavior: smooth; }
     body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.6; }
     a { color: var(--accent); text-decoration: none; }
@@ -43,7 +39,7 @@
     .skills-list { display: flex; flex-wrap: wrap; gap: 0.5rem; }
     .skill-tag { background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; padding: 0.2rem 0.65rem; font-family: 'Fira Code', monospace; font-size: 12px; color: var(--muted); }
     .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
-    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; transition: border-color 0.15s, transform 0.15s; }
+    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; transition: border-color 0.15s, transform 0.15s; cursor: pointer; }
     .card:hover { border-color: var(--accent); transform: translateY(-2px); }
     .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 0.6rem; }
     .card-title { font-size: 14px; font-weight: 600; color: var(--text); }
@@ -60,14 +56,6 @@
     .lab-info { min-width: 0; }
     .lab-name { font-size: 13px; font-weight: 600; }
     .lab-count { font-size: 11px; color: var(--muted); }
-    .cert-list { display: flex; flex-direction: column; gap: 0.75rem; }
-    .cert-item { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; display: flex; align-items: center; gap: 1rem; }
-    .cert-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-    .cert-dot-done { background: var(--accent2); }
-    .cert-dot-progress { background: var(--orange); }
-    .cert-dot-planned { background: var(--border); }
-    .cert-name { font-size: 14px; font-weight: 600; flex: 1; }
-    .cert-status { font-size: 12px; color: var(--muted); }
     .contact-links { display: flex; flex-wrap: wrap; gap: 0.75rem; }
     .contact-link { display: inline-flex; align-items: center; gap: 0.5rem; background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.65rem 1.1rem; font-size: 14px; font-weight: 500; color: var(--text); transition: border-color 0.15s; }
     .contact-link:hover { border-color: var(--accent); text-decoration: none; }
@@ -82,7 +70,6 @@
       <li><a href="#about">About</a></li>
       <li><a href="#machines">Machines</a></li>
       <li><a href="#labs">Labs</a></li>
-      <li><a href="#certs">Certs</a></li>
       <li><a href="#contact">Contact</a></li>
     </ul>
   </nav>
@@ -115,30 +102,30 @@
     <div class="section-label">// 02. write-ups</div>
     <h2>CTF Machines</h2>
     <div class="cards">
-      <div class="card">
+      <a href="https://app.notion.com/p/394b75237172809d804fc94eea64b1de" class="card" target="_blank" rel="noopener" style="text-decoration:none;">
         <div class="card-header"><span class="card-title">Pickle Rick</span><span class="badge badge-easy">Easy</span></div>
         <div class="card-meta">TryHackMe</div>
         <p style="font-size:13px;color:var(--muted);">Web app exploitation, command injection, and Linux privilege escalation to find Rick's secret ingredients.</p>
         <div class="card-tags"><span class="tag">command-injection</span><span class="tag">web</span><span class="tag">linux</span></div>
-      </div>
-      <div class="card">
+      </a>
+      <a href="https://app.notion.com/p/395b7523717280f3a2d5c67e92cd0af5" class="card" target="_blank" rel="noopener" style="text-decoration:none;">
         <div class="card-header"><span class="card-title">Kioptrix Level 1</span><span class="badge badge-beginner">Beginner</span></div>
         <div class="card-meta">VulnHub</div>
         <p style="font-size:13px;color:var(--muted);">Classic boot-to-root machine exploiting outdated Samba service via Metasploit for root access.</p>
         <div class="card-tags"><span class="tag">samba</span><span class="tag">metasploit</span><span class="tag">network</span></div>
-      </div>
-      <div class="card">
+      </a>
+      <a href="https://app.notion.com/p/396b75237172804fa8acef1531530fda" class="card" target="_blank" rel="noopener" style="text-decoration:none;">
         <div class="card-header"><span class="card-title">Kioptrix Level 2</span><span class="badge badge-easy">Easy</span></div>
         <div class="card-meta">VulnHub</div>
         <p style="font-size:13px;color:var(--muted);">SQL injection on the login form to bypass auth, then OS command injection to get a reverse shell.</p>
         <div class="card-tags"><span class="tag">sqli</span><span class="tag">cmd-injection</span><span class="tag">privesc</span></div>
-      </div>
+      </a>
     </div>
   </section>
   <section id="labs">
     <div class="section-label">// 03. labs</div>
     <h2>PortSwigger Web Security Labs</h2>
-    <p style="color:var(--muted);font-size:14px;margin-bottom:1.5rem;">Completed web security labs from the PortSwigger Web Security Academy.</p>
+    <p style="color:var(--muted);font-size:14px;margin-bottom:1.5rem;">Completed web security labs from the PortSwigger Web Security Academy, covering core vulnerability classes.</p>
     <div class="labs-grid">
       <div class="lab-card"><div class="lab-icon">💉</div><div class="lab-info"><div class="lab-name">SQL Injection</div><div class="lab-count">Labs completed</div></div></div>
       <div class="lab-card"><div class="lab-icon">🔀</div><div class="lab-info"><div class="lab-name">XSS</div><div class="lab-count">Labs completed</div></div></div>
@@ -147,17 +134,8 @@
       <div class="lab-card"><div class="lab-icon">📁</div><div class="lab-info"><div class="lab-name">File Upload</div><div class="lab-count">Labs completed</div></div></div>
     </div>
   </section>
-  <section id="certs">
-    <div class="section-label">// 04. certifications</div>
-    <h2>Certifications</h2>
-    <div class="cert-list">
-      <div class="cert-item"><div class="cert-dot cert-dot-progress"></div><span class="cert-name">eJPT — eLearnSecurity Junior Penetration Tester</span><span class="cert-status">In progress</span></div>
-      <div class="cert-item"><div class="cert-dot cert-dot-planned"></div><span class="cert-name">CompTIA Security+</span><span class="cert-status">Planned</span></div>
-      <div class="cert-item"><div class="cert-dot cert-dot-planned"></div><span class="cert-name">OSCP — Offensive Security Certified Professional</span><span class="cert-status">Goal</span></div>
-    </div>
-  </section>
   <section id="contact">
-    <div class="section-label">// 05. contact</div>
+    <div class="section-label">// 04. contact</div>
     <h2>Get in Touch</h2>
     <p style="color:var(--muted);margin-bottom:1.5rem;">Open to internships, junior security roles, and bug bounty collaborations.</p>
     <div class="contact-links">
