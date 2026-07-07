@@ -446,6 +446,13 @@ STYLE_BLOCK = """
     .card-meta { font-size: 12px; color: var(--muted); margin-bottom: .4rem; }
     .card-desc { font-size: 13px; color: var(--muted); }
     footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 620px) {
+      nav { padding: .65rem 1.25rem; }
+      .hero { padding: 2rem 1.25rem 1.75rem; }
+      .hero h1 { font-size: 1.5rem; }
+      .content { padding: 2rem 1.25rem 3rem; }
+      .cards { grid-template-columns: 1fr; }
+    }
 """
 
 LEAF_TEMPLATE = """<!DOCTYPE html>

@@ -65,12 +65,33 @@
     .contact-link:hover { border-color: var(--accent); text-decoration: none; }
     footer { text-align: center; padding: 2.5rem; font-size: 13px; color: var(--muted); border-top: 1px solid var(--border); }
     footer span { color: var(--accent2); }
+    .nav-toggle { display: none; background: none; border: none; color: var(--text); font-size: 1.5rem; line-height: 1; cursor: pointer; padding: 0.25rem 0.4rem; }
+    @media (max-width: 768px) {
+      .nav-toggle { display: inline-flex; align-items: center; }
+      .nav-links { position: fixed; top: 56px; left: 0; right: 0; z-index: 99; background: var(--bg2); border-bottom: 1px solid var(--border);
+                   flex-direction: column; gap: 0; max-height: 0; overflow: hidden; transition: max-height 0.25s ease; }
+      .nav-links.open { max-height: 320px; }
+      .nav-links li { width: 100%; }
+      .nav-links a { display: block; padding: 0.9rem 2rem; font-size: 14px; }
+      .nav-links a:hover { background: var(--bg3); }
+    }
+    @media (max-width: 620px) {
+      nav { padding: 0 1.25rem; }
+      .hero { padding: 4rem 1.25rem 3rem; }
+      section { padding: 3rem 1.25rem; }
+    }
+    @media (max-width: 420px) {
+      .hero-btns { flex-direction: column; align-items: stretch; }
+      .contact-links { flex-direction: column; align-items: stretch; }
+      .contact-link { justify-content: center; }
+    }
   </style>
 </head>
 <body>
   <nav>
     <div class="nav-logo">~/waseef $</div>
-    <ul class="nav-links">
+    <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="nav-links">☰</button>
+    <ul class="nav-links" id="nav-links">
       <li><a href="#about">About</a></li>
       <li><a href="#machines">Machines</a></li>
       <li><a href="#labs">Labs</a></li>
@@ -164,6 +185,22 @@
   </section>
   <footer>Built with <span>♥</span> by Waseef &nbsp;·&nbsp; Cybersecurity Portfolio</footer>
   <script>
+    (function () {
+      var toggle = document.getElementById('nav-toggle');
+      var navLinks = document.getElementById('nav-links');
+      if (toggle && navLinks) {
+        toggle.addEventListener('click', function () {
+          var isOpen = navLinks.classList.toggle('open');
+          toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        });
+        navLinks.querySelectorAll('a').forEach(function (link) {
+          link.addEventListener('click', function () {
+            navLinks.classList.remove('open');
+            toggle.setAttribute('aria-expanded', 'false');
+          });
+        });
+      }
+    })();
     (function () {
       var sections = document.querySelectorAll('section[id]');
       if (!('IntersectionObserver' in window) || !sections.length) return;
