@@ -58,19 +58,31 @@ def get_blocks(block_id):
 # ── Image download ──────────────────────────────────────────────────────────
 
 def download_image(url, slug, block_id):
+    """Download image to repo and return relative path. Returns None on failure."""
     img_dir = IMAGES_DIR / slug
     img_dir.mkdir(parents=True, exist_ok=True)
     ext = "png"
-    m = re.search(r"/([^/?]+\.(?:png|jpg|jpeg|gif|webp|svg))", url, re.I)
+    m = re.search(r"\.(?:png|jpg|jpeg|gif|webp|svg)(?=[?&#]|$)", url, re.I)
     if m:
-        ext = m.group(1).rsplit(".", 1)[-1].lower()
-    fname = f"{block_id[:8]}.{ext}"
+        ext = m.group().lstrip(".").lower()
+    # Use full block id (no dashes) for unique filenames
+    fname = f"{block_id.replace('-', '')}.{ext}"
     dest  = img_dir / fname
     if not dest.exists():
         print(f"  Downloading {fname} …")
-        r = requests.get(url, timeout=30)
-        r.raise_for_status()
-        dest.write_bytes(r.content)
+        try:
+            r = requests.get(url, timeout=60, allow_redirects=True)
+            r.raise_for_status()
+            # Validate it's actually image data
+            ct = r.headers.get("content-type", "")
+            if "text/html" in ct:
+                print(f"  WARNING: got HTML instead of image (URL may be expired): {fname}")
+                return None
+            dest.write_bytes(r.content)
+            print(f"  Saved {len(r.content):,} bytes → {fname}")
+        except Exception as e:
+            print(f"  WARNING: download failed for {fname}: {e}")
+            return None
     return f"images/{slug}/{fname}"
 
 # ── Rich-text renderer ──────────────────────────────────────────────────────
@@ -168,7 +180,8 @@ def render_blocks(blocks, slug, depth=0):
             caption = rt(data.get("caption", []))
             if url:
                 local = download_image(url, slug, bid)
-                html += f'{indent}<figure><img src="{local}" alt="{caption or "screenshot"}" loading="lazy">'
+                img_src = local if local else url  # fall back to S3 URL if download failed
+                html += f'{indent}<figure><img src="{img_src}" alt="{caption or "screenshot"}" loading="lazy">'
                 if caption:
                     html += f"<figcaption>{caption}</figcaption>"
                 html += "</figure>\n"
