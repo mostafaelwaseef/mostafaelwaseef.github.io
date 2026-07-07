@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Level 2 → Level 3 — Caesar Cipher — Waseef's Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --bg2: #161b22; --bg3: #21262d;
+      --border: #30363d; --text: #e6edf3; --muted: #8b949e;
+      --accent: #58a6ff; --accent2: #3fb950; --red: #f85149;
+      --orange: #d29922; --radius: 8px;
+      --c-red: #f85149; --c-blue: #58a6ff; --c-green: #3fb950;
+      --c-yellow: #d29922; --c-purple: #bc8cff; --c-pink: #ff7b72;
+      --c-gray: #8b949e;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.7; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    nav { position: sticky; top: 0; z-index: 100; background: rgba(13,17,23,.9); backdrop-filter: blur(12px);
+          border-bottom: 1px solid var(--border); padding: .75rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { font-weight: 600; font-size: 1rem; color: var(--text); }
+    .nav-back { font-size: .85rem; color: var(--muted); display: flex; align-items: center; gap: .4rem; }
+    .nav-back:hover { color: var(--accent); text-decoration: none; }
+    .hero { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 3rem 2rem 2.5rem; }
+    .hero-inner { max-width: 860px; margin: 0 auto; }
+    .breadcrumb { font-size: .8rem; color: var(--muted); margin-bottom: 1rem; }
+    .breadcrumb a { color: var(--muted); }
+    .breadcrumb a:hover { color: var(--accent); }
+    .hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
+    .hero p.desc { color: var(--muted); max-width: 640px; margin-top: .5rem; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+    .badge { display: inline-flex; align-items: center; gap: .3rem; padding: .25rem .7rem;
+             border-radius: 20px; font-size: .75rem; font-weight: 500; }
+    .badge-platform { background: #1f3a5f; color: #58a6ff; border: 1px solid #1f4080; }
+    .badge-easy { background: #1a3a2a; color: #3fb950; border: 1px solid #2ea043; }
+    .badge-medium { background: #3a2a1a; color: #d29922; border: 1px solid #9e6a03; }
+    .badge-hard { background: #3a1a1a; color: #f85149; border: 1px solid #da3633; }
+    .badge-beginner { background: #1a3a2a; color: #56d364; border: 1px solid #2ea043; }
+    .badge-os { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .badge-date { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .content { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+    h1, h2, h3 { color: var(--text); font-weight: 600; margin: 2rem 0 .75rem; }
+    h2 { font-size: 1.35rem; padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 1.1rem; color: var(--accent); }
+    p { margin: .6rem 0; color: #c9d1d9; }
+    ul, ol { margin: .5rem 0 .5rem 1.5rem; }
+    li { margin: .3rem 0; color: #c9d1d9; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    blockquote { border-left: 3px solid var(--accent); padding: .5rem 1rem; margin: .75rem 0;
+                 background: var(--bg2); border-radius: 0 var(--radius) var(--radius) 0; color: var(--muted); }
+    pre { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+          padding: 1rem 1.25rem; overflow-x: auto; margin: .75rem 0; }
+    code { font-family: 'Fira Code', monospace; font-size: .85rem; color: #e6edf3; }
+    p code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; color: var(--accent); font-size: .82rem; }
+    strong code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; }
+    figure { margin: 1.25rem 0; }
+    img { max-width: 100%; border-radius: var(--radius); border: 1px solid var(--border);
+          display: block; margin: 0 auto; }
+    figcaption { text-align: center; font-size: .8rem; color: var(--muted); margin-top: .4rem; }
+    .callout { display: flex; gap: .75rem; align-items: flex-start; background: var(--bg2);
+               border: 1px solid var(--border); border-radius: var(--radius); padding: .9rem 1rem; margin: .75rem 0; }
+    .callout-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: .1rem; }
+    details { border: 1px solid var(--border); border-radius: var(--radius); margin: .5rem 0; }
+    summary { padding: .6rem 1rem; cursor: pointer; font-weight: 500; background: var(--bg2); border-radius: var(--radius); }
+    details[open] summary { border-radius: var(--radius) var(--radius) 0 0; border-bottom: 1px solid var(--border); }
+    details > *:not(summary) { padding: .75rem 1rem; }
+    .table-wrap { overflow-x: auto; margin: .75rem 0; }
+    table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+    th, td { padding: .6rem .9rem; border: 1px solid var(--border); text-align: left; }
+    th { background: var(--bg3); font-weight: 600; }
+    tr:nth-child(even) { background: rgba(33,38,45,.5); }
+    .columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin: .75rem 0; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem;
+            transition: border-color .15s, transform .15s; display: block; }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); text-decoration: none; }
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: .6rem; gap: .5rem; }
+    .card-title { font-size: 14px; font-weight: 600; color: var(--text); }
+    .card-meta { font-size: 12px; color: var(--muted); margin-bottom: .4rem; }
+    .card-desc { font-size: 13px; color: var(--muted); }
+    footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--muted); font-size: .85rem; }
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-logo">Waseef</span>
+  <a href="../../../index.html" class="nav-back">← Back to Portfolio</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#wargames">Wargames</a> / <a href="index.html">Krypton</a> / Level 2 → Level 3 — Caesar Cipher</div>
+    <h1>Level 2 → Level 3 — Caesar Cipher</h1>
+    <div class="meta-row">
+      <span class="badge badge-os">⚪ 🔵 Easy</span>
+      <span class="badge badge-date">📅 2026-06-14</span>
+      <span class="badge badge-os">🧩 Caesar Cipher</span>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+<h2 id="level-summary">📋 Level Summary</h2>
+<div class='table-wrap'><table>
+  <tr><th>Field</th><th>Value</th></tr>
+  <tr><td><strong>Type</strong></td><td>Krypton</td></tr>
+  <tr><td><strong>Cipher / Technique</strong></td><td>Caesar Cipher</td></tr>
+  <tr><td><strong>Difficulty</strong></td><td>🔵 Easy</td></tr>
+  <tr><td><strong>Date</strong></td><td>2026-06-14</td></tr>
+</table></div>
+<hr>
+<h2 id="description">🔍 Description</h2>
+<p>The Caesar cipher is one of the oldest known encryption techniques. It works by shifting every letter in the plaintext by a fixed number of positions in the alphabet. With only 25 possible shifts, it is trivially broken by brute force or frequency analysis. This level introduces the concept of a keyed shift cipher and demonstrates how to determine the shift value experimentally using a known-plaintext attack — encrypting a known input and comparing the output to derive the key.</p>
+<hr>
+<h2 id="end-goals">🎯 End Goals</h2>
+<ul>
+  <li>Identify that the encryption binary uses a Caesar cipher with a fixed key</li>
+  <li>Determine the shift value by encrypting a known plaintext and comparing the result</li>
+  <li>Decode the ciphertext <code>OMQEMDUEQMEK</code> to recover the password for krypton3</li>
+  <li>SSH into krypton3 using the decoded password</li>
+</ul>
+<hr>
+<h2 id="steps-to-reproduce">🪜 Steps to Reproduce</h2>
+<ol>
+  <li>SSH into krypton2 and navigate to <code>/krypton/krypton2/</code> to read the README and inspect available files</li>
+  <li>Set up a working directory in <code>/tmp</code>, symlink the keyfile, and set permissions</li>
+  <li>Run the <code>encrypt</code> binary on a known input to determine the cipher shift</li>
+  <li>Use the derived shift to decode the <code>krypton3</code> password file using an online Caesar cipher tool</li>
+  <li>SSH into krypton3 using the decoded password</li>
+</ol>
+<hr>
+<h2 id="analysis">🧠 Analysis</h2>
+<p><strong>Step 1 — Read the level instructions</strong>
+Logged in as krypton2 and ran <code>cd /krypton/</code> then <code>ls</code> to confirm available level directories. Inside <code>/krypton/krypton2/</code>, ran <code>cat README</code> which explained that the level uses a Caesar cipher with a fixed rotation, the key is stored in <code>keyfile.dat</code>, and a working directory in <code>/tmp</code> is required to use the <code>encrypt</code> binary.</p>
+<blockquote>  <figure><img src="images/level-2-level-3-caesar-cipher/37fb752371728076b308c09e5e1a48bd.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-2-level-3-caesar-cipher/37fb75237172809ab52bf91e7cfb83c4.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 2 — Explore the level directory and inspect the encrypt binary</strong>
+Ran <code>cd /krypton/krypton2</code> and <code>ls</code>, then <code>ls -la</code> to inspect permissions. The <code>encrypt</code> binary has the setuid bit set (<code>-rwsr-x---</code>), meaning it runs as krypton2 and can read <code>keyfile.dat</code> even without direct access. Also present: <code>keyfile.dat</code> and <code>krypton3</code> (the encrypted password file).</p>
+<blockquote>  <figure><img src="images/level-2-level-3-caesar-cipher/37fb75237172800983aaf9977edfb54b.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 3 — Set up a working directory in /tmp</strong>
+Created a temporary working directory with <code>mkdir /tmp/&lt;dir&gt;</code>, changed into it, and created a symlink to the keyfile with <code>ln -s /krypton/krypton2/keyfile.dat</code>. Ran <code>ls</code> to confirm the symlink was in place.</p>
+<blockquote>  <figure><img src="images/level-2-level-3-caesar-cipher/37fb7523717280eeb12fc872e7294b54.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 4 — Test the encrypt binary to determine the cipher shift</strong>
+Ran <code>echo "a" &gt; test.txt</code> to create a known-plaintext input, then <code>chmod 777 .</code> to allow the setuid binary to write output to the current directory. Confirmed permissions with <code>ls -la</code>. Ran <code>/krypton/krypton2/encrypt test.txt</code> — the binary produced a <code>ciphertext</code> file. Opened it with <code>nano ciphertext</code> which showed <code>M</code>, meaning <code>a</code> (position 0) encrypts to <code>M</code> (position 12), confirming a shift of 12. The full password ciphertext <code>OMQEMDUEQMEK</code> is in <code>/krypton/krypton2/krypton3</code>.</p>
+<blockquote>  <figure><img src="images/level-2-level-3-caesar-cipher/37fb75237172807a9f67f75cc28df316.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-2-level-3-caesar-cipher/37fb7523717280e79448c91256c40e16.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-2-level-3-caesar-cipher/37fb75237172801db361c8f905353959.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-2-level-3-caesar-cipher/37fb7523717280c58247fdbca9a0c597.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 5 — Decode the krypton3 password using cryptii</strong>
+Entered the ciphertext <code>OMQEMDUEQMEK</code> into cryptii.com’s Caesar cipher decoder. Using a shift of 14 (equivalent to reversing a shift of 12 in a 26-letter alphabet), the decoded plaintext was <strong><code>CAESARISEASY</code></strong>.</p>
+<blockquote>  <figure><img src="images/level-2-level-3-caesar-cipher/37fb7523717280f5bd1efa9ecbbe793b.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 6 — SSH into krypton3 with the decoded password</strong>
+Ran <code>ssh krypton3@krypton.labs.overthewire.org -p 2231</code> and authenticated with password <strong><code>CAESARISEASY</code></strong>. The OTW welcome banner confirmed a successful login to the krypton3 shell.</p>
+<blockquote>  <figure><img src="images/level-2-level-3-caesar-cipher/37fb7523717280729e63d116ca6c99f2.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-2-level-3-caesar-cipher/37fb752371728013a010e7e753225109.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<h2 id="key-concepts-learned">🔑 Key Concepts Learned</h2>
+<ul>
+  <li>The Caesar cipher shifts each letter by a fixed amount — with only 25 possible keys, it offers no real security</li>
+  <li>A <strong>known-plaintext attack</strong> lets you derive the shift by comparing a known input to its encrypted output — here, encrypting <code>a</code> and seeing <code>M</code> revealed the shift</li>
+  <li>The <code>encrypt</code> binary uses a <strong>setuid</strong> bit, allowing it to read a protected keyfile without exposing it directly — a common privilege-escalation pattern in CTFs</li>
+  <li>Symlinks inside <code>/tmp</code> are a clean way to give a setuid binary access to files it needs without copying sensitive data</li>
+  <li>Online tools like cryptii.com make brute-forcing a Caesar shift trivial once the ciphertext is known</li>
+</ul>
+<hr>
+<h2 id="references">📚 References</h2>
+<ul>
+  <li><a href="https://overthewire.org/wargames/krypton/krypton2.html" target="_blank" rel="noopener">OverTheWire: Krypton Level 2</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/Caesar_cipher" target="_blank" rel="noopener">Caesar cipher — Wikipedia</a></li>
+  <li><a href="https://cryptii.com/pipes/caesar-cipher" target="_blank" rel="noopener">cryptii.com — Caesar cipher decoder</a></li>
+</ul>
+<hr>
+<blockquote>🤖 Documented with Claude otw-wargames skill</blockquote>
+
+</div>
+
+<footer>Built by Waseef · <a href="../../../index.html">Back to Portfolio</a></footer>
+</body>
+</html>

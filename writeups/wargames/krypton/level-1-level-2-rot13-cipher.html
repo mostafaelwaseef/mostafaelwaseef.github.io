@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Level 1 → Level 2 — ROT13 Cipher — Waseef's Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --bg2: #161b22; --bg3: #21262d;
+      --border: #30363d; --text: #e6edf3; --muted: #8b949e;
+      --accent: #58a6ff; --accent2: #3fb950; --red: #f85149;
+      --orange: #d29922; --radius: 8px;
+      --c-red: #f85149; --c-blue: #58a6ff; --c-green: #3fb950;
+      --c-yellow: #d29922; --c-purple: #bc8cff; --c-pink: #ff7b72;
+      --c-gray: #8b949e;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.7; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    nav { position: sticky; top: 0; z-index: 100; background: rgba(13,17,23,.9); backdrop-filter: blur(12px);
+          border-bottom: 1px solid var(--border); padding: .75rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { font-weight: 600; font-size: 1rem; color: var(--text); }
+    .nav-back { font-size: .85rem; color: var(--muted); display: flex; align-items: center; gap: .4rem; }
+    .nav-back:hover { color: var(--accent); text-decoration: none; }
+    .hero { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 3rem 2rem 2.5rem; }
+    .hero-inner { max-width: 860px; margin: 0 auto; }
+    .breadcrumb { font-size: .8rem; color: var(--muted); margin-bottom: 1rem; }
+    .breadcrumb a { color: var(--muted); }
+    .breadcrumb a:hover { color: var(--accent); }
+    .hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
+    .hero p.desc { color: var(--muted); max-width: 640px; margin-top: .5rem; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+    .badge { display: inline-flex; align-items: center; gap: .3rem; padding: .25rem .7rem;
+             border-radius: 20px; font-size: .75rem; font-weight: 500; }
+    .badge-platform { background: #1f3a5f; color: #58a6ff; border: 1px solid #1f4080; }
+    .badge-easy { background: #1a3a2a; color: #3fb950; border: 1px solid #2ea043; }
+    .badge-medium { background: #3a2a1a; color: #d29922; border: 1px solid #9e6a03; }
+    .badge-hard { background: #3a1a1a; color: #f85149; border: 1px solid #da3633; }
+    .badge-beginner { background: #1a3a2a; color: #56d364; border: 1px solid #2ea043; }
+    .badge-os { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .badge-date { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .content { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+    h1, h2, h3 { color: var(--text); font-weight: 600; margin: 2rem 0 .75rem; }
+    h2 { font-size: 1.35rem; padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 1.1rem; color: var(--accent); }
+    p { margin: .6rem 0; color: #c9d1d9; }
+    ul, ol { margin: .5rem 0 .5rem 1.5rem; }
+    li { margin: .3rem 0; color: #c9d1d9; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    blockquote { border-left: 3px solid var(--accent); padding: .5rem 1rem; margin: .75rem 0;
+                 background: var(--bg2); border-radius: 0 var(--radius) var(--radius) 0; color: var(--muted); }
+    pre { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+          padding: 1rem 1.25rem; overflow-x: auto; margin: .75rem 0; }
+    code { font-family: 'Fira Code', monospace; font-size: .85rem; color: #e6edf3; }
+    p code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; color: var(--accent); font-size: .82rem; }
+    strong code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; }
+    figure { margin: 1.25rem 0; }
+    img { max-width: 100%; border-radius: var(--radius); border: 1px solid var(--border);
+          display: block; margin: 0 auto; }
+    figcaption { text-align: center; font-size: .8rem; color: var(--muted); margin-top: .4rem; }
+    .callout { display: flex; gap: .75rem; align-items: flex-start; background: var(--bg2);
+               border: 1px solid var(--border); border-radius: var(--radius); padding: .9rem 1rem; margin: .75rem 0; }
+    .callout-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: .1rem; }
+    details { border: 1px solid var(--border); border-radius: var(--radius); margin: .5rem 0; }
+    summary { padding: .6rem 1rem; cursor: pointer; font-weight: 500; background: var(--bg2); border-radius: var(--radius); }
+    details[open] summary { border-radius: var(--radius) var(--radius) 0 0; border-bottom: 1px solid var(--border); }
+    details > *:not(summary) { padding: .75rem 1rem; }
+    .table-wrap { overflow-x: auto; margin: .75rem 0; }
+    table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+    th, td { padding: .6rem .9rem; border: 1px solid var(--border); text-align: left; }
+    th { background: var(--bg3); font-weight: 600; }
+    tr:nth-child(even) { background: rgba(33,38,45,.5); }
+    .columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin: .75rem 0; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem;
+            transition: border-color .15s, transform .15s; display: block; }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); text-decoration: none; }
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: .6rem; gap: .5rem; }
+    .card-title { font-size: 14px; font-weight: 600; color: var(--text); }
+    .card-meta { font-size: 12px; color: var(--muted); margin-bottom: .4rem; }
+    .card-desc { font-size: 13px; color: var(--muted); }
+    footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--muted); font-size: .85rem; }
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-logo">Waseef</span>
+  <a href="../../../index.html" class="nav-back">← Back to Portfolio</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#wargames">Wargames</a> / <a href="index.html">Krypton</a> / Level 1 → Level 2 — ROT13 Cipher</div>
+    <h1>Level 1 → Level 2 — ROT13 Cipher</h1>
+    <div class="meta-row">
+      <span class="badge badge-os">⚪ 🔵 Easy</span>
+      <span class="badge badge-date">📅 2026-06-14</span>
+      <span class="badge badge-os">🧩 ROT13</span>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+<h2 id="level-summary">📋 Level Summary</h2>
+<div class='table-wrap'><table>
+  <tr><th>Field</th><th>Value</th></tr>
+  <tr><td><strong>Type</strong></td><td>Krypton</td></tr>
+  <tr><td><strong>Cipher / Technique</strong></td><td>ROT13</td></tr>
+  <tr><td><strong>Difficulty</strong></td><td>🔵 Easy</td></tr>
+  <tr><td><strong>Date</strong></td><td>2026-06-14</td></tr>
+</table></div>
+<hr>
+<h2 id="description">🔍 Description</h2>
+<p>ROT13 is a simple substitution cipher that rotates each letter 13 positions forward in the alphabet. Because the alphabet has 26 letters, applying ROT13 twice returns the original text — making it its own inverse. It provides no real security and is trivially reversible without a key. Krypton uses a non-standard ciphertext format where word boundaries are preserved rather than grouped into 5-letter clusters.</p>
+<hr>
+<h2 id="end-goals">🎯 End Goals</h2>
+<ul>
+  <li>Find the encrypted password file <code>krypton2</code> inside <code>/krypton/krypton1/</code></li>
+  <li>Decode the ROT13 ciphertext to obtain the plaintext password</li>
+  <li>Use the decoded password to SSH into krypton2</li>
+</ul>
+<hr>
+<h2 id="steps-to-reproduce">🪜 Steps to Reproduce</h2>
+<ol>
+  <li>SSH into krypton1 and navigate to <code>/krypton/</code></li>
+  <li>Read the README file inside <code>/krypton/krypton1/</code> for level instructions</li>
+  <li>List files in <code>/krypton/krypton1/</code>, identify the file type of <code>krypton2</code>, and read its contents</li>
+  <li>Decode the ciphertext using ROT13</li>
+  <li>SSH into krypton2 using the decoded password</li>
+</ol>
+<hr>
+<h2 id="analysis">🧠 Analysis</h2>
+<p><strong>Step 1 — Navigate to the krypton directory</strong>
+After logging in as krypton1, ran <code>cd /krypton</code> to navigate to the wargame directory, then <code>ls</code> to list available level directories: <code>krypton1</code> through <code>krypton7</code>.</p>
+<blockquote>  <figure><img src="images/level-1-level-2-rot13-cipher/37fb7523717280afaf6ed24cf004daa1.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-1-level-2-rot13-cipher/37fb7523717280b6bf1df6af50ef0a65.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 2 — Read the level instructions (README)</strong>
+Inside <code>/krypton/krypton1/</code>, ran <code>cat README</code> which confirmed the password for Level 2 is in the file <code>krypton2</code>, encrypted with a simple rotation cipher called ROT13. The file preserves plain text word boundaries in the ciphertext.</p>
+<blockquote>  <figure><img src="images/level-1-level-2-rot13-cipher/37fb7523717280298e8aeb49993be0c0.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 3 — List files and identify krypton2 file type</strong>
+Ran <code>ls</code> inside <code>/krypton/krypton1/</code> revealing two files: <code>krypton2</code> and <code>README</code>. Ran <code>file krypton2</code> which confirmed it is <code>ASCII text</code>, then <code>cat krypton2</code> to read the ciphertext: <code>YRIRY GJB CNFFJBEQ EBGGRA</code>.</p>
+<blockquote>  <figure><img src="images/level-1-level-2-rot13-cipher/37fb7523717280d69f92d00105da72f5.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-1-level-2-rot13-cipher/37fb75237172808fbde1e89bb76e617d.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 4 — Decode ROT13 using CyberChef</strong>
+Entered the ciphertext <code>YRIRY GJB CNFFJBEQ EBGGRA</code> into CyberChef with the ROT13 recipe (rotating upper and lower case chars by 13). The decoded output was <code>LEVEL TWO PASSWORD ROTTEN</code>, revealing the password <strong><code>ROTTEN</code></strong>.</p>
+<blockquote>  <figure><img src="images/level-1-level-2-rot13-cipher/37fb752371728030aa9ef59075b7abd9.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 5 — SSH into krypton2 with decoded password</strong>
+Ran <code>ssh krypton2@krypton.labs.overthewire.org -p 2231</code> and authenticated with password <strong><code>ROTTEN</code></strong>. The OTW welcome banner confirmed a successful login to the krypton2 shell.</p>
+<blockquote>  <figure><img src="images/level-1-level-2-rot13-cipher/37fb7523717280aea9dddb47964ad3f5.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-1-level-2-rot13-cipher/37fb7523717280148faee29d5d04cff7.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<h2 id="key-concepts-learned">🔑 Key Concepts Learned</h2>
+<ul>
+  <li>ROT13 is a Caesar cipher with a fixed shift of 13 — it is not encryption and provides zero security</li>
+  <li>Because the English alphabet has 26 letters, ROT13 is self-inverse: applying it twice restores the original text</li>
+  <li>Standard ciphertext groups letters into 5-character clusters to hide word boundaries; Krypton Level 1 deliberately skips this to ease the introduction</li>
+  <li>CyberChef is a powerful browser-based tool for quickly applying and chaining encoding/decoding/cipher operations</li>
+  <li>Recognizing ROT13 visually: common giveaways are <code>YRIRY</code> (LEVEL), <code>CNFFJBEQ</code> (PASSWORD), or the <code>=</code> → <code>=</code> symmetry in Base64-adjacent contexts</li>
+</ul>
+<hr>
+<h2 id="references">📚 References</h2>
+<ul>
+  <li><a href="https://overthewire.org/wargames/krypton/krypton1.html" target="_blank" rel="noopener">OverTheWire: Krypton Level 1</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/ROT13" target="_blank" rel="noopener">ROT13 — Wikipedia</a></li>
+  <li><a href="https://gchq.github.io/CyberChef/" target="_blank" rel="noopener">CyberChef</a></li>
+</ul>
+<hr>
+<blockquote>🤖 Documented with Claude otw-wargames skill</blockquote>
+
+</div>
+
+<footer>Built by Waseef · <a href="../../../index.html">Back to Portfolio</a></footer>
+</body>
+</html>

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Level 5 → Level 6 — Vigenère Cipher (Unknown Key Length) — Waseef's Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --bg2: #161b22; --bg3: #21262d;
+      --border: #30363d; --text: #e6edf3; --muted: #8b949e;
+      --accent: #58a6ff; --accent2: #3fb950; --red: #f85149;
+      --orange: #d29922; --radius: 8px;
+      --c-red: #f85149; --c-blue: #58a6ff; --c-green: #3fb950;
+      --c-yellow: #d29922; --c-purple: #bc8cff; --c-pink: #ff7b72;
+      --c-gray: #8b949e;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.7; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    nav { position: sticky; top: 0; z-index: 100; background: rgba(13,17,23,.9); backdrop-filter: blur(12px);
+          border-bottom: 1px solid var(--border); padding: .75rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { font-weight: 600; font-size: 1rem; color: var(--text); }
+    .nav-back { font-size: .85rem; color: var(--muted); display: flex; align-items: center; gap: .4rem; }
+    .nav-back:hover { color: var(--accent); text-decoration: none; }
+    .hero { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 3rem 2rem 2.5rem; }
+    .hero-inner { max-width: 860px; margin: 0 auto; }
+    .breadcrumb { font-size: .8rem; color: var(--muted); margin-bottom: 1rem; }
+    .breadcrumb a { color: var(--muted); }
+    .breadcrumb a:hover { color: var(--accent); }
+    .hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
+    .hero p.desc { color: var(--muted); max-width: 640px; margin-top: .5rem; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+    .badge { display: inline-flex; align-items: center; gap: .3rem; padding: .25rem .7rem;
+             border-radius: 20px; font-size: .75rem; font-weight: 500; }
+    .badge-platform { background: #1f3a5f; color: #58a6ff; border: 1px solid #1f4080; }
+    .badge-easy { background: #1a3a2a; color: #3fb950; border: 1px solid #2ea043; }
+    .badge-medium { background: #3a2a1a; color: #d29922; border: 1px solid #9e6a03; }
+    .badge-hard { background: #3a1a1a; color: #f85149; border: 1px solid #da3633; }
+    .badge-beginner { background: #1a3a2a; color: #56d364; border: 1px solid #2ea043; }
+    .badge-os { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .badge-date { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .content { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+    h1, h2, h3 { color: var(--text); font-weight: 600; margin: 2rem 0 .75rem; }
+    h2 { font-size: 1.35rem; padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 1.1rem; color: var(--accent); }
+    p { margin: .6rem 0; color: #c9d1d9; }
+    ul, ol { margin: .5rem 0 .5rem 1.5rem; }
+    li { margin: .3rem 0; color: #c9d1d9; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    blockquote { border-left: 3px solid var(--accent); padding: .5rem 1rem; margin: .75rem 0;
+                 background: var(--bg2); border-radius: 0 var(--radius) var(--radius) 0; color: var(--muted); }
+    pre { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+          padding: 1rem 1.25rem; overflow-x: auto; margin: .75rem 0; }
+    code { font-family: 'Fira Code', monospace; font-size: .85rem; color: #e6edf3; }
+    p code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; color: var(--accent); font-size: .82rem; }
+    strong code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; }
+    figure { margin: 1.25rem 0; }
+    img { max-width: 100%; border-radius: var(--radius); border: 1px solid var(--border);
+          display: block; margin: 0 auto; }
+    figcaption { text-align: center; font-size: .8rem; color: var(--muted); margin-top: .4rem; }
+    .callout { display: flex; gap: .75rem; align-items: flex-start; background: var(--bg2);
+               border: 1px solid var(--border); border-radius: var(--radius); padding: .9rem 1rem; margin: .75rem 0; }
+    .callout-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: .1rem; }
+    details { border: 1px solid var(--border); border-radius: var(--radius); margin: .5rem 0; }
+    summary { padding: .6rem 1rem; cursor: pointer; font-weight: 500; background: var(--bg2); border-radius: var(--radius); }
+    details[open] summary { border-radius: var(--radius) var(--radius) 0 0; border-bottom: 1px solid var(--border); }
+    details > *:not(summary) { padding: .75rem 1rem; }
+    .table-wrap { overflow-x: auto; margin: .75rem 0; }
+    table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+    th, td { padding: .6rem .9rem; border: 1px solid var(--border); text-align: left; }
+    th { background: var(--bg3); font-weight: 600; }
+    tr:nth-child(even) { background: rgba(33,38,45,.5); }
+    .columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin: .75rem 0; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem;
+            transition: border-color .15s, transform .15s; display: block; }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); text-decoration: none; }
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: .6rem; gap: .5rem; }
+    .card-title { font-size: 14px; font-weight: 600; color: var(--text); }
+    .card-meta { font-size: 12px; color: var(--muted); margin-bottom: .4rem; }
+    .card-desc { font-size: 13px; color: var(--muted); }
+    footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--muted); font-size: .85rem; }
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-logo">Waseef</span>
+  <a href="../../../index.html" class="nav-back">← Back to Portfolio</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#wargames">Wargames</a> / <a href="index.html">Krypton</a> / Level 5 → Level 6 — Vigenère Cipher (Unknown Key Length)</div>
+    <h1>Level 5 → Level 6 — Vigenère Cipher (Unknown Key Length)</h1>
+    <div class="meta-row">
+      <span class="badge badge-os">⚪ 🔴 Hard</span>
+      <span class="badge badge-date">📅 2026-06-15</span>
+      <span class="badge badge-os">🧩 Vigenère Cipher / Kasiski Examination + Index of Coincidence + Frequency Analysis</span>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+<h2 id="level-summary">📋 Level Summary</h2>
+<div class='table-wrap'><table>
+  <tr><th>Field</th><th>Value</th></tr>
+  <tr><td><strong>Type</strong></td><td>Krypton</td></tr>
+  <tr><td><strong>Cipher / Technique</strong></td><td>Vigenère Cipher / Kasiski Examination + Index of Coincidence + Frequency Analysis</td></tr>
+  <tr><td><strong>Difficulty</strong></td><td>🔴 Hard</td></tr>
+  <tr><td><strong>Date</strong></td><td>2026-06-15</td></tr>
+</table></div>
+<hr>
+<h2 id="description">🔍 Description</h2>
+<p>This level presents the hardest variant of the Vigenère cipher challenge: the key length is unknown. Without knowing how many columns to split the ciphertext into, per-column frequency analysis cannot begin. Two classical techniques are used in sequence to determine the key length. The <strong>Kasiski examination</strong> finds repeated trigrams in the ciphertext and measures the distances between them — if the same plaintext segment encrypted with the same key offset produces the same ciphertext, the distance between repeats will be a multiple of the key length. The <strong>Index of Coincidence (IoC)</strong> provides a statistical confirmation: when the ciphertext is split into the correct number of columns, each column behaves like a monoalphabetic cipher and its letter distribution matches English (IoC ≈ 0.065–0.070). Once the key length is confirmed, per-column chi-squared frequency analysis recovers each key letter independently.</p>
+<hr>
+<h2 id="end-goals">🎯 End Goals</h2>
+<ul>
+  <li>Read the intercepted ciphertext files and identify that the key length is unknown</li>
+  <li>Use the Kasiski examination to find repeated trigrams and derive a key length candidate</li>
+  <li>Confirm the key length using the Index of Coincidence across all three ciphertext files</li>
+  <li>Run per-column chi-squared frequency analysis to recover the full Vigenère key</li>
+  <li>Decrypt the <code>krypton6</code> password using the recovered key</li>
+  <li>SSH into krypton6 using the decoded password</li>
+</ul>
+<hr>
+<h2 id="steps-to-reproduce">🪜 Steps to Reproduce</h2>
+<ol>
+  <li>SSH into krypton5 and navigate to <code>/krypton/krypton5/</code> to read the README and list available files</li>
+  <li>Read the ciphertext files and consult Claude on the cryptanalysis strategy for an unknown-key-length Vigenère cipher</li>
+  <li>Run Kasiski examination and IoC analysis on found1 to determine the key length, then recover the key via per-column frequency analysis</li>
+  <li>Confirm the key length and key against found2 and found3 independently</li>
+  <li>Read <code>krypton6</code>, decrypt the ciphertext using the recovered key, and obtain the password</li>
+  <li>SSH into krypton6 using the decoded password</li>
+</ol>
+<hr>
+<h2 id="analysis">🧠 Analysis</h2>
+<p><strong>Step 1 — Navigate and read level files</strong>
+Logged in as krypton5. Ran <code>cd /krypton/krypton5</code> and <code>ls -la</code> to list files: <code>found1</code>, <code>found2</code>, <code>found3</code>, <code>krypton6</code>, and <code>README</code>. Ran <code>cat README</code> which explained that this level uses a Vigenère cipher — but this time the key length is unknown. Three intercepted ciphertext files are provided, and the README hints that frequency analysis can still break a known key length — the challenge is finding it first.</p>
+<blockquote>  <figure><img src="images/level-5-level-6-vigene-re-cipher-unknown-key-length/380b752371728060a5d3ec2fdb6a0575.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-5-level-6-vigene-re-cipher-unknown-key-length/380b752371728007bdf1e190014cea84.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 2 — Outline the cryptanalysis strategy (Kasiski + IoC + frequency analysis)</strong>
+Pasted the problem to Claude: polyalphabetic cipher, key length unknown, three ciphertext files available. Claude outlined the two-phase strategy. Phase 1 — determine the key length: (1) <strong>Kasiski examination</strong> — search for repeated 3-letter sequences (trigrams) in the ciphertext; if a distance between two repeats is a multiple of the key length, the GCD of all such distances is a strong key length candidate. (2) <strong>Index of Coincidence</strong> — for each candidate key length <code>k</code>, split the ciphertext into <code>k</code> columns and compute the average IoC across columns using <code>IC = Σ(n_i × (n_i − 1)) / (N × (N − 1))</code>; English text has IoC ≈ 0.065–0.070, random text ≈ 0.038 — the key length that pushes IoC closest to English is the correct one. Phase 2 — once the key length is confirmed, split into columns and run chi-squared frequency analysis on each column independently to recover each key letter.</p>
+<blockquote>  <figure><img src="images/level-5-level-6-vigene-re-cipher-unknown-key-length/380b7523717280aea7b2f8fc4d68c85e.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-5-level-6-vigene-re-cipher-unknown-key-length/380b75237172800d828bf244a0f1d670.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 3 — Frequency analysis on found1</strong>
+Pasted <code>found1</code> to Claude. Kasiski examination found that factor 9 appeared overwhelmingly in 166 repeated-trigram distances — a strong signal. IoC confirmation tested key lengths 6, 9, and 12: key length 6 gave IoC 0.0518, key length 9 gave <strong>0.0700</strong> (squarely in the English range), key length 12 gave 0.0523 — a clear standout. Per-column chi-squared analysis across 9 columns gave the following shifts:</p>
+<div class='table-wrap'><table>
+  <tr><th>Column</th><th>Best shift</th><th>Key letter</th></tr>
+  <tr><td>0</td><td>10</td><td>K</td></tr>
+  <tr><td>1</td><td>4</td><td>E</td></tr>
+  <tr><td>2</td><td>24</td><td>Y</td></tr>
+  <tr><td>3</td><td>11</td><td>L</td></tr>
+  <tr><td>4</td><td>4</td><td>E</td></tr>
+  <tr><td>5</td><td>13</td><td>N</td></tr>
+  <tr><td>6</td><td>6</td><td>G</td></tr>
+  <tr><td>7</td><td>19</td><td>T</td></tr>
+  <tr><td>8</td><td>7</td><td>H</td></tr>
+</table></div>
+<p>Derived key: <strong><code>KEYLENGTH</code></strong>.</p>
+<blockquote>  <figure><img src="images/level-5-level-6-vigene-re-cipher-unknown-key-length/380b752371728057bafccb4c3d741067.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-5-level-6-vigene-re-cipher-unknown-key-length/380b75237172804a97ebdf9547e31b90.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-5-level-6-vigene-re-cipher-unknown-key-length/380b7523717280b5a61feb72886d6f17.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 4 — Frequency analysis on found2</strong>
+Pasted <code>found2</code> to Claude with the same analysis. IoC for key length 9 came out at 0.0653 (vs. ~−0.04 for all other lengths), and the Kasiski factor 9 appeared in 166 repeated-trigram distances — independently confirming the key length. Per-column chi-squared produced the identical shift table: the same key <strong><code>KEYLENGTH</code></strong> was derived from the second file without any input from the first result.</p>
+<blockquote>  <figure><img src="images/level-5-level-6-vigene-re-cipher-unknown-key-length/380b75237172805d8819f8870dcf021e.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-5-level-6-vigene-re-cipher-unknown-key-length/380b75237172800ba854cdd6f0732cdf.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 5 — Frequency analysis on found3</strong>
+Pasted <code>found3</code> to Claude. IoC for key length 9 was again 0.0653 (vs. ~−0.04 elsewhere), and the per-column analysis produced the same shift table for all 9 columns. All three files independently converged on <strong><code>KEYLENGTH</code></strong> — a triple confirmation that the key is correct.</p>
+<blockquote>  <figure><img src="images/level-5-level-6-vigene-re-cipher-unknown-key-length/380b752371728021bad5e8380b8f3fc1.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-5-level-6-vigene-re-cipher-unknown-key-length/380b7523717280269fd9eac9d391ef27.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 6 — Read and decrypt the krypton6 password</strong>
+Ran <code>cat krypton6; echo</code> which showed the ciphertext <code>BELOS Z</code>. Asked Claude to decrypt <code>BELOSZ</code> using key <code>KEYLENGTH</code> (cycling through K-E-Y-L-E-N). The letter-by-letter decryption: B−K=R, E−E=A, L−Y=N, O−L=D, S−E=O, Z−N=M — giving the plaintext <strong><code>RANDOM</code></strong>.</p>
+<blockquote>  <figure><img src="images/level-5-level-6-vigene-re-cipher-unknown-key-length/380b7523717280b4a464c33d84eec573.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-5-level-6-vigene-re-cipher-unknown-key-length/380b7523717280c7861aed17e82ff1d3.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 7 — SSH into krypton6 with the decoded password</strong>
+Ran <code>exit</code> to leave krypton5, then <code>ssh krypton6@krypton.labs.overthewire.org -p 2231</code> and authenticated with password <strong><code>RANDOM</code></strong>. The OTW welcome banner confirmed a successful login to the krypton6 shell.</p>
+<blockquote>  <figure><img src="images/level-5-level-6-vigene-re-cipher-unknown-key-length/380b752371728096b006e979aebacf14.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-5-level-6-vigene-re-cipher-unknown-key-length/380b75237172807e9f6cdc4a6a0884e7.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<h2 id="key-concepts-learned">🔑 Key Concepts Learned</h2>
+<ul>
+  <li>When the <strong>Vigenère key length is unknown</strong>, frequency analysis cannot start — first you must determine how many columns to split into</li>
+  <li>The <strong>Kasiski examination</strong> exploits the fact that identical plaintext encrypted at key-cycle-aligned positions produces identical ciphertext; the GCD of all repeat distances is a reliable key length indicator</li>
+  <li>The <strong>Index of Coincidence</strong> provides a statistical confirmation: the correct key length produces columns whose letter distributions match English (IoC ≈ 0.065–0.070), while wrong lengths produce near-random distributions (IoC ≈ 0.038)</li>
+  <li>Running both methods across multiple ciphertext files gives triple confirmation — all three files independently agreed on key length 9 and key <code>KEYLENGTH</code></li>
+  <li>The derived key spelling out <strong>KEYLENGTH</strong> is a deliberate easter egg from the level designers — a reminder that the key itself encodes the technique used to crack it</li>
+  <li>Claude can automate the entire cryptanalysis pipeline (Kasiski → IoC → chi-squared) given just the raw ciphertext, making what was historically a days-long manual process a matter of seconds</li>
+</ul>
+<hr>
+<h2 id="references">📚 References</h2>
+<ul>
+  <li><a href="https://overthewire.org/wargames/krypton/krypton5.html" target="_blank" rel="noopener">OverTheWire: Krypton Level 5</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/Kasiski_examination" target="_blank" rel="noopener">Kasiski examination — Wikipedia</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/Index_of_coincidence" target="_blank" rel="noopener">Index of coincidence — Wikipedia</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/Vigen%C3%A8re_cipher" target="_blank" rel="noopener">Vigenère cipher — Wikipedia</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/Frequency_analysis" target="_blank" rel="noopener">Chi-squared test for cryptanalysis — Wikipedia</a></li>
+</ul>
+<hr>
+<blockquote>🤖 Documented with Claude otw-wargames skill</blockquote>
+
+</div>
+
+<footer>Built by Waseef · <a href="../../../index.html">Back to Portfolio</a></footer>
+</body>
+</html>

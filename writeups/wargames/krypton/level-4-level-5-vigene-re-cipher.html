@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Level 4 → Level 5 — Vigenère Cipher — Waseef's Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --bg2: #161b22; --bg3: #21262d;
+      --border: #30363d; --text: #e6edf3; --muted: #8b949e;
+      --accent: #58a6ff; --accent2: #3fb950; --red: #f85149;
+      --orange: #d29922; --radius: 8px;
+      --c-red: #f85149; --c-blue: #58a6ff; --c-green: #3fb950;
+      --c-yellow: #d29922; --c-purple: #bc8cff; --c-pink: #ff7b72;
+      --c-gray: #8b949e;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.7; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    nav { position: sticky; top: 0; z-index: 100; background: rgba(13,17,23,.9); backdrop-filter: blur(12px);
+          border-bottom: 1px solid var(--border); padding: .75rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { font-weight: 600; font-size: 1rem; color: var(--text); }
+    .nav-back { font-size: .85rem; color: var(--muted); display: flex; align-items: center; gap: .4rem; }
+    .nav-back:hover { color: var(--accent); text-decoration: none; }
+    .hero { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 3rem 2rem 2.5rem; }
+    .hero-inner { max-width: 860px; margin: 0 auto; }
+    .breadcrumb { font-size: .8rem; color: var(--muted); margin-bottom: 1rem; }
+    .breadcrumb a { color: var(--muted); }
+    .breadcrumb a:hover { color: var(--accent); }
+    .hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
+    .hero p.desc { color: var(--muted); max-width: 640px; margin-top: .5rem; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+    .badge { display: inline-flex; align-items: center; gap: .3rem; padding: .25rem .7rem;
+             border-radius: 20px; font-size: .75rem; font-weight: 500; }
+    .badge-platform { background: #1f3a5f; color: #58a6ff; border: 1px solid #1f4080; }
+    .badge-easy { background: #1a3a2a; color: #3fb950; border: 1px solid #2ea043; }
+    .badge-medium { background: #3a2a1a; color: #d29922; border: 1px solid #9e6a03; }
+    .badge-hard { background: #3a1a1a; color: #f85149; border: 1px solid #da3633; }
+    .badge-beginner { background: #1a3a2a; color: #56d364; border: 1px solid #2ea043; }
+    .badge-os { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .badge-date { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .content { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+    h1, h2, h3 { color: var(--text); font-weight: 600; margin: 2rem 0 .75rem; }
+    h2 { font-size: 1.35rem; padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 1.1rem; color: var(--accent); }
+    p { margin: .6rem 0; color: #c9d1d9; }
+    ul, ol { margin: .5rem 0 .5rem 1.5rem; }
+    li { margin: .3rem 0; color: #c9d1d9; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    blockquote { border-left: 3px solid var(--accent); padding: .5rem 1rem; margin: .75rem 0;
+                 background: var(--bg2); border-radius: 0 var(--radius) var(--radius) 0; color: var(--muted); }
+    pre { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+          padding: 1rem 1.25rem; overflow-x: auto; margin: .75rem 0; }
+    code { font-family: 'Fira Code', monospace; font-size: .85rem; color: #e6edf3; }
+    p code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; color: var(--accent); font-size: .82rem; }
+    strong code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; }
+    figure { margin: 1.25rem 0; }
+    img { max-width: 100%; border-radius: var(--radius); border: 1px solid var(--border);
+          display: block; margin: 0 auto; }
+    figcaption { text-align: center; font-size: .8rem; color: var(--muted); margin-top: .4rem; }
+    .callout { display: flex; gap: .75rem; align-items: flex-start; background: var(--bg2);
+               border: 1px solid var(--border); border-radius: var(--radius); padding: .9rem 1rem; margin: .75rem 0; }
+    .callout-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: .1rem; }
+    details { border: 1px solid var(--border); border-radius: var(--radius); margin: .5rem 0; }
+    summary { padding: .6rem 1rem; cursor: pointer; font-weight: 500; background: var(--bg2); border-radius: var(--radius); }
+    details[open] summary { border-radius: var(--radius) var(--radius) 0 0; border-bottom: 1px solid var(--border); }
+    details > *:not(summary) { padding: .75rem 1rem; }
+    .table-wrap { overflow-x: auto; margin: .75rem 0; }
+    table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+    th, td { padding: .6rem .9rem; border: 1px solid var(--border); text-align: left; }
+    th { background: var(--bg3); font-weight: 600; }
+    tr:nth-child(even) { background: rgba(33,38,45,.5); }
+    .columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin: .75rem 0; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem;
+            transition: border-color .15s, transform .15s; display: block; }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); text-decoration: none; }
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: .6rem; gap: .5rem; }
+    .card-title { font-size: 14px; font-weight: 600; color: var(--text); }
+    .card-meta { font-size: 12px; color: var(--muted); margin-bottom: .4rem; }
+    .card-desc { font-size: 13px; color: var(--muted); }
+    footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--muted); font-size: .85rem; }
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-logo">Waseef</span>
+  <a href="../../../index.html" class="nav-back">← Back to Portfolio</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#wargames">Wargames</a> / <a href="index.html">Krypton</a> / Level 4 → Level 5 — Vigenère Cipher</div>
+    <h1>Level 4 → Level 5 — Vigenère Cipher</h1>
+    <div class="meta-row">
+      <span class="badge badge-os">⚪ 🟡 Medium</span>
+      <span class="badge badge-date">📅 2026-06-15</span>
+      <span class="badge badge-os">🧩 Vigenère Cipher / Frequency Analysis by Key Position</span>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+<h2 id="level-summary">📋 Level Summary</h2>
+<div class='table-wrap'><table>
+  <tr><th>Field</th><th>Value</th></tr>
+  <tr><td><strong>Type</strong></td><td>Krypton</td></tr>
+  <tr><td><strong>Cipher / Technique</strong></td><td>Vigenère Cipher / Frequency Analysis by Key Position</td></tr>
+  <tr><td><strong>Difficulty</strong></td><td>🟡 Medium</td></tr>
+  <tr><td><strong>Date</strong></td><td>2026-06-15</td></tr>
+</table></div>
+<hr>
+<h2 id="description">🔍 Description</h2>
+<p>The Vigenère cipher is a polyalphabetic substitution cipher that uses a repeating keyword to encrypt plaintext. Each letter of the plaintext is shifted by the corresponding letter of the key (cycling through the key). Unlike a monoalphabetic cipher, the same plaintext letter can produce different ciphertext letters depending on its position — making simple frequency analysis ineffective. However, if the key length is known, the ciphertext can be split into groups (one per key position), and each group treated as a separate Caesar cipher. Standard frequency analysis can then be applied to each group independently to recover each key letter.</p>
+<hr>
+<h2 id="end-goals">🎯 End Goals</h2>
+<ul>
+  <li>Use the known key length (6) to split the intercepted ciphertext into 6 positional groups</li>
+  <li>Apply per-column frequency analysis to derive the full Vigenère key</li>
+  <li>Confirm the key against the second intercepted file</li>
+  <li>Decrypt the <code>krypton5</code> password using the recovered key</li>
+  <li>SSH into krypton5 using the decoded password</li>
+</ul>
+<hr>
+<h2 id="steps-to-reproduce">🪜 Steps to Reproduce</h2>
+<ol>
+  <li>SSH into krypton4 and navigate to <code>/krypton/krypton4/</code> to read the README and HINT</li>
+  <li>Read <code>found1</code> and <code>found2</code> to gather ciphertext for analysis</li>
+  <li>Split the ciphertext into 6 columns (by position mod 6) and run frequency analysis on each column to derive the key</li>
+  <li>Confirm the key against <code>found2</code></li>
+  <li>Read <code>krypton5</code> and decrypt it using the derived key</li>
+  <li>SSH into krypton5 using the decoded password</li>
+</ol>
+<hr>
+<h2 id="analysis">🧠 Analysis</h2>
+<p><strong>Step 1 — Navigate and read level files</strong>
+Logged in as krypton4. Ran <code>cd /krypton/krypton4</code> and <code>ls -la</code> to list files: <code>found1</code>, <code>found2</code>, <code>HINT</code>, <code>krypton5</code>, and <code>README</code>. Ran <code>cat README</code> which explained that this level uses a Vigenère cipher — a polyalphabetic cipher where each plaintext letter is shifted by the corresponding letter of a repeating key. The key length is 6. Ran <code>cat HINT</code> which confirmed: “Frequency analysis still works, but you need to analyze it by keylength. Analyse the 1st letter of the cipher text at offset 1, 7, 13, etc. — treat this as 6 different mono-alphabetic ciphers.”</p>
+<blockquote>  <figure><img src="images/level-4-level-5-vigene-re-cipher/380b75237172801b8fd5c97d8b34e4fe.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-4-level-5-vigene-re-cipher/380b75237172807b89ffe0a3acbc6f72.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-4-level-5-vigene-re-cipher/380b752371728057aa7ffcc904a1cff1.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 2 — Read the intercepted ciphertext files</strong>
+Ran <code>cat found1; echo</code> to read the first intercepted message — a large block of uppercase ciphertext to be used for key recovery.</p>
+<blockquote>  <figure><img src="images/level-4-level-5-vigene-re-cipher/380b7523717280fdad89cef187cbd02a.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 3 — Frequency analysis on found1 to derive the key</strong>
+Fed <code>found1</code> to Claude with the known key length of 6. Claude split the ciphertext into 6 columns (positions 0, 6, 12, … → column 0; positions 1, 7, 13, … → column 1; etc.) and ran chi-squared frequency analysis on each column against expected English letter frequencies. The per-column shift breakdown:</p>
+<ul>
+  <li>Column 0 → shift 5 → key letter <strong>F</strong></li>
+  <li>Column 1 → shift 17 → key letter <strong>R</strong></li>
+  <li>Column 2 → shift 4 → key letter <strong>E</strong></li>
+  <li>Column 3 → shift 10 → key letter <strong>K</strong></li>
+  <li>Column 4 → shift 4 → key letter <strong>E</strong></li>
+  <li>Column 5 → shift 24 → key letter <strong>Y</strong></li>
+</ul>
+<p>Derived key: <strong><code>FREKEY</code></strong>. Decrypting <code>found1</code> with this key produced clean English text — a passage from <em>The Wonderful Wizard of Oz</em>, confirming the key is correct.</p>
+<blockquote>  <figure><img src="images/level-4-level-5-vigene-re-cipher/380b7523717280e598d9dccd53997ad0.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-4-level-5-vigene-re-cipher/380b7523717280a5934cc61cf61e6fab.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-4-level-5-vigene-re-cipher/380b75237172805e9f3ffbe697f2748a.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 4 — Confirm key with found2</strong>
+Fed <code>found2</code> to Claude with the same key length. The chi-squared scores came out cleaner overall (2453 letters vs 1450), giving more reliable per-column statistics. The same key <strong><code>FREKEY</code></strong> was derived, fully confirming the result.</p>
+<blockquote>  <figure><img src="images/level-4-level-5-vigene-re-cipher/380b7523717280b781b4e23ce9ee4989.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 5 — Read and decrypt the krypton5 password</strong>
+Ran <code>cat krypton5; echo</code> which showed the ciphertext <code>HCIKV RJOX</code>. Asked Claude to decrypt <code>HCIKVRJOX</code> using key <code>FREKEY</code> — the plaintext was <strong><code>CLEARTEXT</code></strong>.</p>
+<blockquote>  <figure><img src="images/level-4-level-5-vigene-re-cipher/380b75237172804bb868fb618086903f.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-4-level-5-vigene-re-cipher/380b7523717280b1ae90edef5dcf263d.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 6 — SSH into krypton5 with the decoded password</strong>
+Ran <code>ssh krypton5@krypton.labs.overthewire.org -p 2231</code> and authenticated with password <strong><code>CLEARTEXT</code></strong>. The OTW welcome banner confirmed a successful login to the krypton5 shell.</p>
+<blockquote>  <figure><img src="images/level-4-level-5-vigene-re-cipher/380b7523717280d6a7ebe58818230f0d.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-4-level-5-vigene-re-cipher/380b752371728036870adb3970283692.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<h2 id="key-concepts-learned">🔑 Key Concepts Learned</h2>
+<ul>
+  <li>The <strong>Vigenère cipher</strong> is polyalphabetic — the same plaintext letter encrypts differently depending on its position in the key cycle, defeating simple frequency analysis</li>
+  <li>If the <strong>key length is known</strong>, the ciphertext can be split into independent Caesar cipher streams (one per key position), each crackable by standard frequency analysis</li>
+  <li><strong>Chi-squared analysis</strong> measures how closely a letter distribution matches expected English frequencies — the shift that minimizes chi-squared is the most likely Caesar shift for that column</li>
+  <li>More ciphertext = more reliable statistics — <code>found2</code> (2453 letters) gave cleaner results than <code>found1</code> (1450 letters)</li>
+  <li>Claude can serve as a powerful cryptanalysis assistant — given the ciphertext and key length, it can automate the column-splitting and chi-squared scoring to recover the full key in seconds</li>
+</ul>
+<hr>
+<h2 id="references">📚 References</h2>
+<ul>
+  <li><a href="https://overthewire.org/wargames/krypton/krypton4.html" target="_blank" rel="noopener">OverTheWire: Krypton Level 4</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/Vigen%C3%A8re_cipher" target="_blank" rel="noopener">Vigenère cipher — Wikipedia</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/Index_of_coincidence" target="_blank" rel="noopener">Index of coincidence — Wikipedia</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/Kasiski_examination" target="_blank" rel="noopener">Kasiski examination — Wikipedia</a></li>
+</ul>
+<hr>
+<blockquote>🤖 Documented with Claude otw-wargames skill</blockquote>
+
+</div>
+
+<footer>Built by Waseef · <a href="../../../index.html">Back to Portfolio</a></footer>
+</body>
+</html>

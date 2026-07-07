@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Level 6 → Level 7 — Stream Cipher (LFSR Keystream Recovery) — Waseef's Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --bg2: #161b22; --bg3: #21262d;
+      --border: #30363d; --text: #e6edf3; --muted: #8b949e;
+      --accent: #58a6ff; --accent2: #3fb950; --red: #f85149;
+      --orange: #d29922; --radius: 8px;
+      --c-red: #f85149; --c-blue: #58a6ff; --c-green: #3fb950;
+      --c-yellow: #d29922; --c-purple: #bc8cff; --c-pink: #ff7b72;
+      --c-gray: #8b949e;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.7; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    nav { position: sticky; top: 0; z-index: 100; background: rgba(13,17,23,.9); backdrop-filter: blur(12px);
+          border-bottom: 1px solid var(--border); padding: .75rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { font-weight: 600; font-size: 1rem; color: var(--text); }
+    .nav-back { font-size: .85rem; color: var(--muted); display: flex; align-items: center; gap: .4rem; }
+    .nav-back:hover { color: var(--accent); text-decoration: none; }
+    .hero { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 3rem 2rem 2.5rem; }
+    .hero-inner { max-width: 860px; margin: 0 auto; }
+    .breadcrumb { font-size: .8rem; color: var(--muted); margin-bottom: 1rem; }
+    .breadcrumb a { color: var(--muted); }
+    .breadcrumb a:hover { color: var(--accent); }
+    .hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
+    .hero p.desc { color: var(--muted); max-width: 640px; margin-top: .5rem; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+    .badge { display: inline-flex; align-items: center; gap: .3rem; padding: .25rem .7rem;
+             border-radius: 20px; font-size: .75rem; font-weight: 500; }
+    .badge-platform { background: #1f3a5f; color: #58a6ff; border: 1px solid #1f4080; }
+    .badge-easy { background: #1a3a2a; color: #3fb950; border: 1px solid #2ea043; }
+    .badge-medium { background: #3a2a1a; color: #d29922; border: 1px solid #9e6a03; }
+    .badge-hard { background: #3a1a1a; color: #f85149; border: 1px solid #da3633; }
+    .badge-beginner { background: #1a3a2a; color: #56d364; border: 1px solid #2ea043; }
+    .badge-os { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .badge-date { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .content { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+    h1, h2, h3 { color: var(--text); font-weight: 600; margin: 2rem 0 .75rem; }
+    h2 { font-size: 1.35rem; padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 1.1rem; color: var(--accent); }
+    p { margin: .6rem 0; color: #c9d1d9; }
+    ul, ol { margin: .5rem 0 .5rem 1.5rem; }
+    li { margin: .3rem 0; color: #c9d1d9; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    blockquote { border-left: 3px solid var(--accent); padding: .5rem 1rem; margin: .75rem 0;
+                 background: var(--bg2); border-radius: 0 var(--radius) var(--radius) 0; color: var(--muted); }
+    pre { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+          padding: 1rem 1.25rem; overflow-x: auto; margin: .75rem 0; }
+    code { font-family: 'Fira Code', monospace; font-size: .85rem; color: #e6edf3; }
+    p code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; color: var(--accent); font-size: .82rem; }
+    strong code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; }
+    figure { margin: 1.25rem 0; }
+    img { max-width: 100%; border-radius: var(--radius); border: 1px solid var(--border);
+          display: block; margin: 0 auto; }
+    figcaption { text-align: center; font-size: .8rem; color: var(--muted); margin-top: .4rem; }
+    .callout { display: flex; gap: .75rem; align-items: flex-start; background: var(--bg2);
+               border: 1px solid var(--border); border-radius: var(--radius); padding: .9rem 1rem; margin: .75rem 0; }
+    .callout-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: .1rem; }
+    details { border: 1px solid var(--border); border-radius: var(--radius); margin: .5rem 0; }
+    summary { padding: .6rem 1rem; cursor: pointer; font-weight: 500; background: var(--bg2); border-radius: var(--radius); }
+    details[open] summary { border-radius: var(--radius) var(--radius) 0 0; border-bottom: 1px solid var(--border); }
+    details > *:not(summary) { padding: .75rem 1rem; }
+    .table-wrap { overflow-x: auto; margin: .75rem 0; }
+    table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+    th, td { padding: .6rem .9rem; border: 1px solid var(--border); text-align: left; }
+    th { background: var(--bg3); font-weight: 600; }
+    tr:nth-child(even) { background: rgba(33,38,45,.5); }
+    .columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin: .75rem 0; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem;
+            transition: border-color .15s, transform .15s; display: block; }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); text-decoration: none; }
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: .6rem; gap: .5rem; }
+    .card-title { font-size: 14px; font-weight: 600; color: var(--text); }
+    .card-meta { font-size: 12px; color: var(--muted); margin-bottom: .4rem; }
+    .card-desc { font-size: 13px; color: var(--muted); }
+    footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--muted); font-size: .85rem; }
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-logo">Waseef</span>
+  <a href="../../../index.html" class="nav-back">← Back to Portfolio</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#wargames">Wargames</a> / <a href="index.html">Krypton</a> / Level 6 → Level 7 — Stream Cipher (LFSR Keystream Recovery)</div>
+    <h1>Level 6 → Level 7 — Stream Cipher (LFSR Keystream Recovery)</h1>
+    <div class="meta-row">
+      <span class="badge badge-os">⚪ 🔴 Hard</span>
+      <span class="badge badge-date">📅 2026-06-15</span>
+      <span class="badge badge-os">🧩 Stream Cipher / LFSR Keystream Recovery</span>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+<h2 id="level-summary">📋 Level Summary</h2>
+<div class='table-wrap'><table>
+  <tr><th>Field</th><th>Value</th></tr>
+  <tr><td><strong>Type</strong></td><td>Krypton</td></tr>
+  <tr><td><strong>Cipher / Technique</strong></td><td>Stream Cipher / LFSR Keystream Recovery</td></tr>
+  <tr><td><strong>Difficulty</strong></td><td>🔴 Hard</td></tr>
+  <tr><td><strong>Date</strong></td><td>2026-06-15</td></tr>
+</table></div>
+<hr>
+<h2 id="description">🔍 Description</h2>
+<p>This level introduces stream ciphers — a class of encryption where a pseudo-random keystream is generated and XOR’d (or added mod 26 in this alphabet-based variant) with the plaintext one byte at a time. The keystream is produced by an 8-bit Linear Feedback Shift Register (LFSR), a simple hardware circuit that cycles through states deterministically. Because an 8-bit LFSR has only 256 possible states, its output is periodic — it must repeat within 256 steps. The core weakness exploited here is the <strong>known-plaintext attack</strong>: by encrypting a message consisting entirely of the letter A (value 0 in the cipher’s alphabet), the ciphertext equals the keystream directly (<code>plaintext + keystream mod 26</code> = <code>0 + keystream</code> = <code>keystream</code>). Once the keystream is recovered and its repeating period identified, any ciphertext encrypted with the same key can be decrypted by subtracting the keystream values mod 26.</p>
+<hr>
+<h2 id="end-goals">🎯 End Goals</h2>
+<ul>
+  <li>Understand the stream cipher model and the LFSR weakness described in the hints</li>
+  <li>Use the <code>encrypt6</code> binary to perform a known-plaintext attack and recover the keystream</li>
+  <li>Identify the period of the repeating keystream (30 letters)</li>
+  <li>Use the recovered keystream to decrypt the <code>krypton7</code> password ciphertext</li>
+  <li>SSH into krypton7 using the decoded password</li>
+</ul>
+<hr>
+<h2 id="steps-to-reproduce">🪜 Steps to Reproduce</h2>
+<ol>
+  <li>SSH into krypton6, navigate to <code>/krypton/krypton6/</code>, and read the README and hints</li>
+  <li>Explore the <code>onetime/</code> subdirectory to examine the provided plain1 and cipher1 files</li>
+  <li>Create a working directory in <code>/tmp</code>, symlink the keyfile, and set permissions</li>
+  <li>Generate a 300-byte known plaintext of all A’s and encrypt it twice to confirm the keystream is deterministic</li>
+  <li>Analyze the hexdump to identify the keystream’s repeating period (30 letters)</li>
+  <li>Extract the 30-letter keystream cycle and decrypt the <code>krypton7</code> ciphertext using <code>plaintext = (ciphertext − keystream) mod 26</code></li>
+  <li>SSH into krypton7 using the recovered password</li>
+</ol>
+<hr>
+<h2 id="analysis">🧠 Analysis</h2>
+<p><strong>Step 1 — Navigate and read level files</strong>
+Logged in as krypton6. Ran <code>ls -la</code> in <code>/krypton/krypton6/</code> to list files: <code>encrypt0</code>, <code>HINT1</code>, <code>HINT2</code>, <code>keyfile.dat</code>, <code>krypton7</code>, <code>README</code>, and a <code>onetime/</code> subdirectory. Ran <code>cat README</code> which explained the level: frequency analysis defeats repeating-key substitution ciphers, so good encryption must make ciphertext appear random. The README introduced stream ciphers — each plaintext byte is encrypted with a corresponding byte from a pseudo-random keystream. An <code>encrypt6</code> binary is available that uses the keyfile to generate the keystream and encrypt any input. The password for krypton7 is encrypted with the same mechanism. The README also hinted that using plain language as a plaintext is a weakness — suggesting a known-plaintext attack — and pointed to <code>HINT1</code> and <code>HINT2</code> for further guidance.</p>
+<blockquote>  <figure><img src="images/level-6-level-7-stream-cipher-lfsr-keystream-recovery/380b752371728095ad3bfd1fbf6568f8.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-6-level-7-stream-cipher-lfsr-keystream-recovery/380b7523717280db8dbfe3c6954e0b3f.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-6-level-7-stream-cipher-lfsr-keystream-recovery/380b75237172808ba340dcc6d4f982ca.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-6-level-7-stream-cipher-lfsr-keystream-recovery/380b752371728001bc37c857bea54c01.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 2 — Read the hints</strong>
+Ran <code>cat HINT1</code> which revealed: “The random generator has a limited number of bits, and is periodic. Entropy analysis and a good look at the bytes in a hex editor will help. There is a pattern!” Ran <code>cat HINT2</code> which gave the critical clue: <strong>8 bit LFSR</strong>. An 8-bit Linear Feedback Shift Register has only 256 possible internal states — meaning the keystream must repeat within 256 bytes. The pattern is therefore findable by examining the raw keystream bytes.</p>
+<figure><img src="images/level-6-level-7-stream-cipher-lfsr-keystream-recovery/380b752371728022a713f87d9bfdb860.png" alt="screenshot" loading="lazy"></figure>
+<hr>
+<p><strong>Step 3 — Explore the onetime directory</strong>
+Ran <code>cd onetime/</code> and <code>ls -la</code> to inspect the provided files: <code>cipher1</code> (256 bytes) and <code>plain1</code> (256 bytes). Ran <code>cat plain1; echo</code> which showed the plaintext was 300 copies of the letter A — confirming that a known-plaintext scenario is already set up. Ran <code>cat key1; echo</code> to inspect the raw keystream, and <code>cat cipher1; echo</code> to see the corresponding ciphertext. Since <code>plain1</code> is all A’s (value 0), the ciphertext equals the keystream directly.</p>
+<blockquote>  <figure><img src="images/level-6-level-7-stream-cipher-lfsr-keystream-recovery/380b75237172800a891de3d37d012d5b.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 4 — Set up working directory and symlink keyfile</strong>
+Ran <code>mktemp -d</code> to create a temporary working directory (e.g. <code>/tmp/tmp.SnVxnjsWkb</code>). Changed into it with <code>cd /tmp/tmp.SnVxnjsWkb</code>. Symlinked the keyfile with <code>ln -s /krypton/krypton6/keyfile.dat keyfile.dat</code> so the <code>encrypt6</code> binary can find it. Ran <code>chmod 777 .</code> to allow the setuid binary to write output files. Confirmed the setup with <code>ls -la</code> showing the symlink and directory permissions.</p>
+<blockquote>  <figure><img src="images/level-6-level-7-stream-cipher-lfsr-keystream-recovery/380b75237172802ab0b6f2a9d94699ac.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-6-level-7-stream-cipher-lfsr-keystream-recovery/380b75237172805da3e0e0b99548c9e7.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 5 — Generate known plaintext and confirm deterministic keystream</strong>
+Ran <code>python3 -c 'print("A"*300, end="")' &gt; knownA.txt</code> to create a 300-byte file of all A’s. Ran <code>/krypton/krypton6/encrypt6 knownA.txt out1.bin</code> then <code>xxd out1.bin</code> to inspect the hexdump of the encrypted output. Since the plaintext is all A’s (value 0), the ciphertext equals the keystream. Ran <code>encrypt6 knownA.txt out2.bin</code> and <code>xxd out2.bin</code> a second time — the hexdumps of <code>out1.bin</code> and <code>out2.bin</code> were byte-for-byte identical across all 300 bytes (offsets 00000000 through 00000120). This confirmed the keystream is completely deterministic: the LFSR always produces the same sequence from the same starting state.</p>
+<blockquote>  <figure><img src="images/level-6-level-7-stream-cipher-lfsr-keystream-recovery/380b7523717280488d2bf2159d126a14.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-6-level-7-stream-cipher-lfsr-keystream-recovery/380b752371728029b998d86be08ad0d0.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 6 — Identify keystream period and derive the keystream cycle</strong>
+Asked Claude to analyze the hexdumps and find the repeating period. Claude observed that row <code>00000000</code> (<code>EICTDGYIZKTHNSIRFXYCPFUEDCKR</code>) is identical to row <code>000000F0</code> in the first dump — a gap of 240 bytes. However, checking letter-by-letter, the actual repeat unit is smaller: the sequence repeats every <strong>30 letters</strong>. Extracting the first 30 letters and converting each to its numeric value (A=0, B=1, …, Z=25):</p>
+<p><code>EICTDGYIZKTHNSIRFXYCPFUEDCKR</code> → <code>[4, 8, 2, 19, 3, 6, 24, 8, 25, 10, 19, 7, 13, 18, 8, 17, 5, 23, 24, 2, 15, 5, 20, 4, 3, 10, 17, 13]</code></p>
+<p>This 30-value list is the full keystream cycle produced by the 8-bit LFSR.</p>
+<blockquote>  <figure><img src="images/level-6-level-7-stream-cipher-lfsr-keystream-recovery/380b75237172806e91cde7e6346c2f9e.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-6-level-7-stream-cipher-lfsr-keystream-recovery/380b75237172806fb790ccfa0433d391.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 7 — Decrypt the password</strong>
+Asked Claude to decrypt the <code>krypton7</code> ciphertext <code>PNUKLYLWRQKGKBE</code> using the recovered keystream cycle, applying <code>plaintext = (ciphertext − keystream) mod 26</code> letter by letter:</p>
+<div class='table-wrap'><table>
+  <tr><th>Pos</th><th>Cipher</th><th>C-val</th><th>Key</th><th>C−K mod 26</th><th>Plain</th></tr>
+  <tr><td>1</td><td>P</td><td>15</td><td>4</td><td>11</td><td>L</td></tr>
+  <tr><td>2</td><td>N</td><td>13</td><td>8</td><td>5</td><td>F</td></tr>
+  <tr><td>3</td><td>U</td><td>20</td><td>2</td><td>18</td><td>S</td></tr>
+  <tr><td>4</td><td>K</td><td>10</td><td>19</td><td>−9→17</td><td>R</td></tr>
+  <tr><td>5</td><td>L</td><td>11</td><td>3</td><td>8</td><td>I</td></tr>
+  <tr><td>6</td><td>Y</td><td>24</td><td>6</td><td>18</td><td>S</td></tr>
+  <tr><td>7</td><td>L</td><td>11</td><td>24</td><td>−13→13</td><td>N</td></tr>
+  <tr><td>8</td><td>W</td><td>22</td><td>8</td><td>14</td><td>O</td></tr>
+  <tr><td>9</td><td>R</td><td>17</td><td>24</td><td>−7→19</td><td>T</td></tr>
+  <tr><td>10</td><td>Q</td><td>16</td><td>25</td><td>−9→17</td><td>R</td></tr>
+  <tr><td>11</td><td>K</td><td>10</td><td>10</td><td>0</td><td>A</td></tr>
+  <tr><td>12</td><td>G</td><td>6</td><td>19</td><td>−13→13</td><td>N</td></tr>
+  <tr><td>13</td><td>K</td><td>10</td><td>7</td><td>3</td><td>D</td></tr>
+  <tr><td>14</td><td>B</td><td>1</td><td>13</td><td>−12→14</td><td>O</td></tr>
+  <tr><td>15</td><td>E</td><td>4</td><td>18</td><td>−14→12</td><td>M</td></tr>
+</table></div>
+<p>Password: <strong><code>LFSRISNOTRANDOM</code></strong></p>
+<blockquote>  <figure><img src="images/level-6-level-7-stream-cipher-lfsr-keystream-recovery/380b7523717280238309d9568b315d42.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<figure><img src="images/level-6-level-7-stream-cipher-lfsr-keystream-recovery/380b7523717280c0b216c8c6815214ae.png" alt="screenshot" loading="lazy"></figure>
+<figure><img src="images/level-6-level-7-stream-cipher-lfsr-keystream-recovery/380b75237172807dbf48d8347556dbc5.png" alt="screenshot" loading="lazy"></figure>
+<hr>
+<p><strong>Step 8 — SSH into krypton7 with the decoded password</strong>
+Ran <code>exit</code> to leave krypton6, then <code>ssh krypton7@krypton.labs.overthewire.org -p 2231</code> and authenticated with password <strong><code>LFSRISNOTRANDOM</code></strong>. The OTW welcome banner confirmed a successful login to the krypton7 shell. Navigated to <code>/krypton/krypton7/</code> and ran <code>cat README</code> which displayed: “Congratulations on beating Krypton!” — confirming this is the final level of the wargame.</p>
+<blockquote>  <figure><img src="images/level-6-level-7-stream-cipher-lfsr-keystream-recovery/380b7523717280d49492c5fae29f6946.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-6-level-7-stream-cipher-lfsr-keystream-recovery/380b752371728083bfe5d35782dfee34.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<h2 id="key-concepts-learned">🔑 Key Concepts Learned</h2>
+<ul>
+  <li>A <strong>stream cipher</strong> encrypts one byte at a time by adding a pseudo-random keystream value to each plaintext byte mod 26 (or XOR in binary ciphers) — producing ciphertext that looks random</li>
+  <li>An <strong>8-bit LFSR</strong> (Linear Feedback Shift Register) has only 256 possible states, so its keystream must repeat within 256 steps — making it cryptographically weak despite appearing random</li>
+  <li>A <strong>known-plaintext attack</strong> defeats this: encrypting all A’s (value 0) yields ciphertext = keystream directly, since <code>0 + keystream mod 26 = keystream</code></li>
+  <li>The keystream period can be found by inspecting the hexdump for repeating rows — here the period was 30 letters despite 300 bytes of output (10 repetitions)</li>
+  <li>Once the keystream cycle is known, decryption is simple arithmetic: <code>plaintext = (ciphertext − keystream) mod 26</code></li>
+  <li>The password <strong>LFSRISNOTRANDOM</strong> is a direct reference to the vulnerability — Linear Feedback Shift Registers are decidedly not random</li>
+  <li>This level completes the Krypton wargame — progressing from Base64 through Caesar, monoalphabetic substitution, Vigenère (known and unknown key length), and finally stream ciphers</li>
+</ul>
+<hr>
+<h2 id="references">📚 References</h2>
+<ul>
+  <li><a href="https://overthewire.org/wargames/krypton/krypton6.html" target="_blank" rel="noopener">OverTheWire: Krypton Level 6</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/Linear-feedback_shift_register" target="_blank" rel="noopener">Linear Feedback Shift Register — Wikipedia</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/Stream_cipher" target="_blank" rel="noopener">Stream cipher — Wikipedia</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/Known-plaintext_attack" target="_blank" rel="noopener">Known-plaintext attack — Wikipedia</a></li>
+</ul>
+<hr>
+<blockquote>🤖 Documented with Claude otw-wargames skill</blockquote>
+
+</div>
+
+<footer>Built by Waseef · <a href="../../../index.html">Back to Portfolio</a></footer>
+</body>
+</html>

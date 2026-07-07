@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Level 3 → Level 4 — Frequency Analysis — Waseef's Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --bg2: #161b22; --bg3: #21262d;
+      --border: #30363d; --text: #e6edf3; --muted: #8b949e;
+      --accent: #58a6ff; --accent2: #3fb950; --red: #f85149;
+      --orange: #d29922; --radius: 8px;
+      --c-red: #f85149; --c-blue: #58a6ff; --c-green: #3fb950;
+      --c-yellow: #d29922; --c-purple: #bc8cff; --c-pink: #ff7b72;
+      --c-gray: #8b949e;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.7; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    nav { position: sticky; top: 0; z-index: 100; background: rgba(13,17,23,.9); backdrop-filter: blur(12px);
+          border-bottom: 1px solid var(--border); padding: .75rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { font-weight: 600; font-size: 1rem; color: var(--text); }
+    .nav-back { font-size: .85rem; color: var(--muted); display: flex; align-items: center; gap: .4rem; }
+    .nav-back:hover { color: var(--accent); text-decoration: none; }
+    .hero { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 3rem 2rem 2.5rem; }
+    .hero-inner { max-width: 860px; margin: 0 auto; }
+    .breadcrumb { font-size: .8rem; color: var(--muted); margin-bottom: 1rem; }
+    .breadcrumb a { color: var(--muted); }
+    .breadcrumb a:hover { color: var(--accent); }
+    .hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
+    .hero p.desc { color: var(--muted); max-width: 640px; margin-top: .5rem; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+    .badge { display: inline-flex; align-items: center; gap: .3rem; padding: .25rem .7rem;
+             border-radius: 20px; font-size: .75rem; font-weight: 500; }
+    .badge-platform { background: #1f3a5f; color: #58a6ff; border: 1px solid #1f4080; }
+    .badge-easy { background: #1a3a2a; color: #3fb950; border: 1px solid #2ea043; }
+    .badge-medium { background: #3a2a1a; color: #d29922; border: 1px solid #9e6a03; }
+    .badge-hard { background: #3a1a1a; color: #f85149; border: 1px solid #da3633; }
+    .badge-beginner { background: #1a3a2a; color: #56d364; border: 1px solid #2ea043; }
+    .badge-os { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .badge-date { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .content { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+    h1, h2, h3 { color: var(--text); font-weight: 600; margin: 2rem 0 .75rem; }
+    h2 { font-size: 1.35rem; padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 1.1rem; color: var(--accent); }
+    p { margin: .6rem 0; color: #c9d1d9; }
+    ul, ol { margin: .5rem 0 .5rem 1.5rem; }
+    li { margin: .3rem 0; color: #c9d1d9; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    blockquote { border-left: 3px solid var(--accent); padding: .5rem 1rem; margin: .75rem 0;
+                 background: var(--bg2); border-radius: 0 var(--radius) var(--radius) 0; color: var(--muted); }
+    pre { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+          padding: 1rem 1.25rem; overflow-x: auto; margin: .75rem 0; }
+    code { font-family: 'Fira Code', monospace; font-size: .85rem; color: #e6edf3; }
+    p code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; color: var(--accent); font-size: .82rem; }
+    strong code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; }
+    figure { margin: 1.25rem 0; }
+    img { max-width: 100%; border-radius: var(--radius); border: 1px solid var(--border);
+          display: block; margin: 0 auto; }
+    figcaption { text-align: center; font-size: .8rem; color: var(--muted); margin-top: .4rem; }
+    .callout { display: flex; gap: .75rem; align-items: flex-start; background: var(--bg2);
+               border: 1px solid var(--border); border-radius: var(--radius); padding: .9rem 1rem; margin: .75rem 0; }
+    .callout-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: .1rem; }
+    details { border: 1px solid var(--border); border-radius: var(--radius); margin: .5rem 0; }
+    summary { padding: .6rem 1rem; cursor: pointer; font-weight: 500; background: var(--bg2); border-radius: var(--radius); }
+    details[open] summary { border-radius: var(--radius) var(--radius) 0 0; border-bottom: 1px solid var(--border); }
+    details > *:not(summary) { padding: .75rem 1rem; }
+    .table-wrap { overflow-x: auto; margin: .75rem 0; }
+    table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+    th, td { padding: .6rem .9rem; border: 1px solid var(--border); text-align: left; }
+    th { background: var(--bg3); font-weight: 600; }
+    tr:nth-child(even) { background: rgba(33,38,45,.5); }
+    .columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin: .75rem 0; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem;
+            transition: border-color .15s, transform .15s; display: block; }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); text-decoration: none; }
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: .6rem; gap: .5rem; }
+    .card-title { font-size: 14px; font-weight: 600; color: var(--text); }
+    .card-meta { font-size: 12px; color: var(--muted); margin-bottom: .4rem; }
+    .card-desc { font-size: 13px; color: var(--muted); }
+    footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--muted); font-size: .85rem; }
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-logo">Waseef</span>
+  <a href="../../../index.html" class="nav-back">← Back to Portfolio</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#wargames">Wargames</a> / <a href="index.html">Krypton</a> / Level 3 → Level 4 — Frequency Analysis</div>
+    <h1>Level 3 → Level 4 — Frequency Analysis</h1>
+    <div class="meta-row">
+      <span class="badge badge-os">⚪ 🟡 Medium</span>
+      <span class="badge badge-date">📅 2026-06-14</span>
+      <span class="badge badge-os">🧩 Monoalphabetic Substitution Cipher / Frequency Analysis</span>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+<h2 id="level-summary">📋 Level Summary</h2>
+<div class='table-wrap'><table>
+  <tr><th>Field</th><th>Value</th></tr>
+  <tr><td><strong>Type</strong></td><td>Krypton</td></tr>
+  <tr><td><strong>Cipher / Technique</strong></td><td>Monoalphabetic Substitution Cipher / Frequency Analysis</td></tr>
+  <tr><td><strong>Difficulty</strong></td><td>🟡 Medium</td></tr>
+  <tr><td><strong>Date</strong></td><td>2026-06-14</td></tr>
+</table></div>
+<hr>
+<h2 id="description">🔍 Description</h2>
+<p>A monoalphabetic substitution cipher replaces each letter of the plaintext with a fixed, unique cipher letter. Unlike the Caesar cipher, the substitution is not a uniform shift — each letter has its own mapping, making brute force impractical (26! possible keys). The classical attack is <strong>frequency analysis</strong>: in any sufficiently long English ciphertext, the most frequent cipher letter is almost certainly <code>E</code>, the second most frequent is likely <code>T</code>, and so on. This level provides three intercepted ciphertext files encrypted with the same key, giving enough data to derive the full substitution alphabet and recover the password.</p>
+<hr>
+<h2 id="end-goals">🎯 End Goals</h2>
+<ul>
+  <li>Read the three intercepted ciphertext files (<code>found1</code>, <code>found2</code>, <code>found3</code>) encrypted with the same key</li>
+  <li>Use frequency analysis to derive the full substitution alphabet</li>
+  <li>Decode the <code>krypton4</code> password file using the recovered key</li>
+  <li>SSH into krypton4 using the decoded password</li>
+</ul>
+<hr>
+<h2 id="steps-to-reproduce">🪜 Steps to Reproduce</h2>
+<ol>
+  <li>SSH into krypton3 and navigate to <code>/krypton/krypton3/</code> to read the README, hints, and list available files</li>
+  <li>Read <code>HINT1</code>, <code>HINT2</code>, and <code>krypton4</code> to understand the approach and note the target ciphertext</li>
+  <li>Read <code>found1</code>, <code>found2</code>, and <code>found3</code> to gather ciphertext samples for analysis</li>
+  <li>Research standard English letter frequency distribution (ETAOIN SHRDLU)</li>
+  <li>Run frequency analysis on each of the three ciphertext files to map cipher letters to plaintext</li>
+  <li>Use the derived substitution key to decrypt the <code>krypton4</code> ciphertext word by word</li>
+  <li>SSH into krypton4 using the decoded password</li>
+</ol>
+<hr>
+<h2 id="analysis">🧠 Analysis</h2>
+<p><strong>Step 1 — Navigate and read level files</strong>
+Logged in as krypton3. Ran <code>ls</code>, <code>cd /krypton/</code>, <code>cd krypton3</code>, then <code>ls</code> to list available files: <code>found1</code>, <code>found2</code>, <code>found3</code>, <code>HINT1</code>, <code>HINT2</code>, <code>krypton4</code>, and <code>README</code>. Ran <code>cat README</code> which explained the level: a simple substitution cipher is in use, the cipher mechanism is not available to us, but three intercepted messages (<code>found1</code>, <code>found2</code>, <code>found3</code>) encrypted with the same key have been provided. The plaintexts are in American English — making frequency analysis viable.</p>
+<blockquote>  <figure><img src="images/level-3-level-4-frequency-analysis/37fb7523717280a4aa7bd631455d9f40.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-3-level-4-frequency-analysis/37fb75237172808997a5e36019130077.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-3-level-4-frequency-analysis/37fb7523717280339c2be24ec4346522.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 2 — Read the hints and the encrypted password</strong>
+Ran <code>cat HINT1</code> which showed “Some letters are more prevalent in English than others.” and <code>cat HINT2</code> which confirmed “Frequency Analysis is your friend.” Ran <code>cat krypton4</code> to read the target ciphertext: <code>KSVVW BGSJD SVSIS VXBMN YOUUK BNWCU ANMJS</code>.</p>
+<blockquote>  <figure><img src="images/level-3-level-4-frequency-analysis/37fb7523717280a9ae3dfee8a3d3223a.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-3-level-4-frequency-analysis/37fb7523717280398564e38e617660d8.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 3 — Read the intercepted ciphertext files</strong>
+Ran <code>cat found1</code>, <code>cat found2</code>, and <code>cat found3</code> to read all three intercepted messages. Each is a large block of uppercase ciphertext encrypted with the same substitution key — more ciphertext means more reliable frequency counts.</p>
+<blockquote>  <figure><img src="images/level-3-level-4-frequency-analysis/37fb7523717280129bacc2ac3370cb32.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-3-level-4-frequency-analysis/37fb7523717280f49ad0f31e3a8be763.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 4 — Research English letter frequency</strong>
+Looked up English letter frequency distribution using Gemini. The top letters by frequency are E (12%), T (9.1%), A (8.1%), O (7.7%), I (7.3%), N (7%), S (6.3%), R (6%), H (5.9%), D (4.3%) — summarized by the mnemonic <strong>ETAOIN SHRDLU</strong>. The rarest letters are Q, J, X, and Z. This distribution is the basis for mapping the most frequent cipher letters to their likely plaintext equivalents.</p>
+<blockquote>  <figure><img src="images/level-3-level-4-frequency-analysis/37fb75237172800390a7e7c62bf751a8.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-3-level-4-frequency-analysis/37fb7523717280b4be65ecd3a3307001.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-3-level-4-frequency-analysis/37fb7523717280ee9581fd086134a7b8.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 5 — Frequency analysis on found1</strong>
+Fed <code>found1</code> to Gemini and asked for frequency analysis. The most frequent cipher letters were S (11.23%), J (7.59%), Q (7.48%), C (7.38%), U (7.07%), B (6.44%), G (5.82%), N (5.41%), D (4.47%) — mapping closely to E, T, A, I, S, O, N, R, H respectively. Gemini derived the full substitution key: cipher <code>S→E</code>, <code>J→T</code>, <code>Q→A</code>, <code>C→I</code>, <code>U→S</code>, <code>B→O</code>, <code>G→N</code>, <code>N→R</code>, <code>D→H</code>, and so on across the full alphabet.</p>
+<blockquote>  <figure><img src="images/level-3-level-4-frequency-analysis/37fb75237172808b9f5dc7067a5d63d4.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-3-level-4-frequency-analysis/37fb7523717280939bc7fe0cc02f4769.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-3-level-4-frequency-analysis/37fb752371728072829fe73bd85df7e7.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-3-level-4-frequency-analysis/37fb75237172802983acfbca64c2ef5e.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 6 — Frequency analysis on found2</strong>
+Fed <code>found2</code> to Gemini with the same request. The frequency distribution matched found1 exactly (S→E at 11.75%), and the recurring 3-letter patterns <code>JDS→THE</code> and <code>JOO→THA</code> further confirmed the same key. The decoded text was biographical prose about William Shakespeare — confirming correct decryption.</p>
+<blockquote>  <figure><img src="images/level-3-level-4-frequency-analysis/37fb7523717280d1b38be9c344140e09.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-3-level-4-frequency-analysis/37fb752371728065853ddda1e4371a01.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-3-level-4-frequency-analysis/37fb752371728065b13fc4263850050e.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 7 — Frequency analysis on found3</strong>
+Fed <code>found3</code> to Gemini. Again the same cipher key emerged (S→E top at 11.82%), with short word patterns <code>JDS→THE</code>, <code>QGW→AND</code>, and <code>KCJD→WITH</code> confirming the shift. The decoded text was a passage from Edgar Allan Poe’s <em>The Gold-Bug</em> — a fitting choice given the story’s own cryptography theme.</p>
+<blockquote>  <figure><img src="images/level-3-level-4-frequency-analysis/37fb752371728001a58cf76abf211579.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-3-level-4-frequency-analysis/37fb7523717280ed97f4df8d02f13d5c.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-3-level-4-frequency-analysis/37fb7523717280e3bee2e3d5d34ec349.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-3-level-4-frequency-analysis/37fb7523717280e2a7ccc801c4e90e6e.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 8 — Decrypt the krypton4 password</strong>
+Asked Gemini to decrypt <code>KSVVW BGSJD SVSIS VXBMN YOUUK BNWCU ANMJS</code> word by word using the derived key. The decryption: KSVVW→welld, BGSJD→oneth, SVSIS→eleve, VXBMN→lfour, YOUUK→passw, BNWCU→ordis, ANMJS→brute. Combined and re-spaced: “well done the eleven level four password is <strong><code>BRUTE</code></strong>”.</p>
+<blockquote>  <figure><img src="images/level-3-level-4-frequency-analysis/37fb7523717280759eced29f00d99a48.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 9 — SSH into krypton4 with the decoded password</strong>
+Ran <code>ssh krypton4@krypton.labs.overthewire.org -p 2231</code> and authenticated with password <strong><code>BRUTE</code></strong>. The OTW welcome banner confirmed a successful login to the krypton4 shell.</p>
+<blockquote>  <figure><img src="images/level-3-level-4-frequency-analysis/37fb752371728074a953c240665bdb09.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/level-3-level-4-frequency-analysis/37fb75237172800f941fd26a7cd06bf2.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<h2 id="key-concepts-learned">🔑 Key Concepts Learned</h2>
+<ul>
+  <li>A <strong>monoalphabetic substitution cipher</strong> maps each plaintext letter to a unique cipher letter — there are 26! ≈ 4×10²⁶ possible keys, making brute force completely impractical</li>
+  <li><strong>Frequency analysis</strong> defeats it: English letter frequencies are highly predictable across large texts, and the most frequent cipher letter almost always corresponds to <code>E</code></li>
+  <li>More ciphertext = more reliable analysis — this is why three files were provided: combining them gives a larger, more statistically stable sample</li>
+  <li><strong>Short word patterns</strong> are a powerful secondary check: 3-letter combinations like <code>JDS</code> appearing repeatedly almost certainly decode to <code>THE</code>, confirming the key even before full decryption</li>
+  <li>AI tools like Gemini can accelerate frequency analysis significantly — but understanding <em>why</em> the mapping works (letter distribution, bigrams, trigrams) is what makes the technique transferable</li>
+  <li>The decoded texts (Shakespeare biography, Poe’s <em>The Gold-Bug</em>) were deliberately chosen — Poe’s story is itself about breaking a substitution cipher</li>
+</ul>
+<hr>
+<h2 id="references">📚 References</h2>
+<ul>
+  <li><a href="https://overthewire.org/wargames/krypton/krypton3.html" target="_blank" rel="noopener">OverTheWire: Krypton Level 3</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/Frequency_analysis" target="_blank" rel="noopener">Frequency Analysis — Wikipedia</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/Substitution_cipher" target="_blank" rel="noopener">Substitution cipher — Wikipedia</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/Etaoin_shrdlu" target="_blank" rel="noopener">ETAOIN SHRDLU — Wikipedia</a></li>
+</ul>
+<hr>
+<blockquote>🤖 Documented with Claude otw-wargames skill</blockquote>
+
+</div>
+
+<footer>Built by Waseef · <a href="../../../index.html">Back to Portfolio</a></footer>
+</body>
+</html>
