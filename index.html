@@ -46,6 +46,10 @@
     .badge { font-size: 11px; font-weight: 500; padding: 0.15rem 0.5rem; border-radius: 20px; white-space: nowrap; }
     .badge-easy { background: rgba(63,185,80,0.15); color: var(--accent2); border: 1px solid rgba(63,185,80,0.3); }
     .badge-beginner { background: rgba(88,166,255,0.15); color: var(--accent); border: 1px solid rgba(88,166,255,0.3); }
+    .badge-medium { background: rgba(210,153,34,0.15); color: var(--orange); border: 1px solid rgba(210,153,34,0.3); }
+    .badge-hard { background: rgba(248,81,73,0.15); color: var(--red); border: 1px solid rgba(248,81,73,0.3); }
+    .badge-platform { background: rgba(88,166,255,0.15); color: var(--accent); border: 1px solid rgba(88,166,255,0.3); }
+    .badge-os, .badge-date { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
     .card-meta { font-size: 12px; color: var(--muted); margin-bottom: 0.6rem; }
     .card-tags { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.75rem; }
     .tag { background: var(--bg3); border: 1px solid var(--border); border-radius: 3px; padding: 0.1rem 0.45rem; font-size: 11px; color: var(--muted); font-family: 'Fira Code', monospace; }
@@ -70,6 +74,7 @@
       <li><a href="#about">About</a></li>
       <li><a href="#machines">Machines</a></li>
       <li><a href="#labs">Labs</a></li>
+      <li><a href="#wargames">Wargames</a></li>
       <li><a href="#contact">Contact</a></li>
     </ul>
   </nav>
@@ -102,40 +107,51 @@
     <div class="section-label">// 02. write-ups</div>
     <h2>CTF Machines</h2>
     <div class="cards">
+<!-- AUTO:MACHINES:START -->
       <a href="writeups/pickle-rick.html" class="card" style="text-decoration:none;">
         <div class="card-header"><span class="card-title">Pickle Rick</span><span class="badge badge-easy">Easy</span></div>
         <div class="card-meta">TryHackMe</div>
         <p style="font-size:13px;color:var(--muted);">Web app exploitation, command injection, and Linux privilege escalation to find Rick's secret ingredients.</p>
-        <div class="card-tags"><span class="tag">command-injection</span><span class="tag">web</span><span class="tag">linux</span></div>
       </a>
       <a href="writeups/kioptrix-level-1.html" class="card" style="text-decoration:none;">
         <div class="card-header"><span class="card-title">Kioptrix Level 1</span><span class="badge badge-beginner">Beginner</span></div>
         <div class="card-meta">VulnHub</div>
         <p style="font-size:13px;color:var(--muted);">Classic boot-to-root machine exploiting outdated Samba service via Metasploit for root access.</p>
-        <div class="card-tags"><span class="tag">samba</span><span class="tag">metasploit</span><span class="tag">network</span></div>
       </a>
       <a href="writeups/kioptrix-level-2.html" class="card" style="text-decoration:none;">
         <div class="card-header"><span class="card-title">Kioptrix Level 2</span><span class="badge badge-easy">Easy</span></div>
         <div class="card-meta">VulnHub</div>
         <p style="font-size:13px;color:var(--muted);">SQL injection on the login form to bypass auth, then OS command injection to get a reverse shell.</p>
-        <div class="card-tags"><span class="tag">sqli</span><span class="tag">cmd-injection</span><span class="tag">privesc</span></div>
       </a>
+<!-- AUTO:MACHINES:END -->
     </div>
   </section>
   <section id="labs">
     <div class="section-label">// 03. labs</div>
     <h2>PortSwigger Web Security Labs</h2>
-    <p style="color:var(--muted);font-size:14px;margin-bottom:1.5rem;">Completed web security labs from the PortSwigger Web Security Academy, covering core vulnerability classes.</p>
+    <p style="color:var(--muted);font-size:14px;margin-bottom:1.5rem;">Completed web security labs from the PortSwigger Web Security Academy, covering core vulnerability classes. Click a category to see every lab.</p>
     <div class="labs-grid">
-      <div class="lab-card"><div class="lab-icon">💉</div><div class="lab-info"><div class="lab-name">SQL Injection</div><div class="lab-count">Labs completed</div></div></div>
-      <div class="lab-card"><div class="lab-icon">🔀</div><div class="lab-info"><div class="lab-name">XSS</div><div class="lab-count">Labs completed</div></div></div>
-      <div class="lab-card"><div class="lab-icon">🔀</div><div class="lab-info"><div class="lab-name">CSRF</div><div class="lab-count">Labs completed</div></div></div>
-      <div class="lab-card"><div class="lab-icon">🌐</div><div class="lab-info"><div class="lab-name">SSRF</div><div class="lab-count">Labs completed</div></div></div>
-      <div class="lab-card"><div class="lab-icon">📁</div><div class="lab-info"><div class="lab-name">File Upload</div><div class="lab-count">Labs completed</div></div></div>
+<!-- AUTO:LABS:START -->
+      <a href="writeups/labs/sql-injection/index.html" class="lab-card" style="text-decoration:none;color:inherit;"><div class="lab-icon">💉</div><div class="lab-info"><div class="lab-name">SQL Injection</div><div class="lab-count">Labs completed</div></div></a>
+      <a href="writeups/labs/xss/index.html" class="lab-card" style="text-decoration:none;color:inherit;"><div class="lab-icon">🔀</div><div class="lab-info"><div class="lab-name">XSS</div><div class="lab-count">Labs completed</div></div></a>
+      <a href="writeups/labs/csrf/index.html" class="lab-card" style="text-decoration:none;color:inherit;"><div class="lab-icon">🔀</div><div class="lab-info"><div class="lab-name">CSRF</div><div class="lab-count">Labs completed</div></div></a>
+      <a href="writeups/labs/ssrf/index.html" class="lab-card" style="text-decoration:none;color:inherit;"><div class="lab-icon">🌐</div><div class="lab-info"><div class="lab-name">SSRF</div><div class="lab-count">Labs completed</div></div></a>
+      <a href="writeups/labs/file-upload-vulnerabilities/index.html" class="lab-card" style="text-decoration:none;color:inherit;"><div class="lab-icon">📁</div><div class="lab-info"><div class="lab-name">File Upload</div><div class="lab-count">Labs completed</div></div></a>
+<!-- AUTO:LABS:END -->
+    </div>
+  </section>
+  <section id="wargames">
+    <div class="section-label">// 04. wargames</div>
+    <h2>OverTheWire Wargames</h2>
+    <p style="color:var(--muted);font-size:14px;margin-bottom:1.5rem;">Progressive Linux, crypto, and web fundamentals challenges from OverTheWire, documented level by level.</p>
+    <div class="labs-grid">
+<!-- AUTO:WARGAMES:START -->
+      <a href="writeups/wargames/krypton/index.html" class="lab-card" style="text-decoration:none;color:inherit;"><div class="lab-icon">🔐</div><div class="lab-info"><div class="lab-name">Krypton</div><div class="lab-count">Levels completed</div></div></a>
+<!-- AUTO:WARGAMES:END -->
     </div>
   </section>
   <section id="contact">
-    <div class="section-label">// 04. contact</div>
+    <div class="section-label">// 05. contact</div>
     <h2>Get in Touch</h2>
     <p style="color:var(--muted);margin-bottom:1.5rem;">Open to internships, junior security roles, and bug bounty collaborations.</p>
     <div class="contact-links">
