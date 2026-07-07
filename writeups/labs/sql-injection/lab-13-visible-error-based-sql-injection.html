@@ -88,7 +88,7 @@
 </head>
 <body>
 <nav>
-  <span class="nav-logo">Mostafa Elwaseef</span>
+  <span class="nav-logo">Waseef</span>
   <a href="../../../index.html" class="nav-back">← Back to Portfolio</a>
 </nav>
 
@@ -148,7 +148,7 @@
 </blockquote>
 <hr>
 <p><strong>Step 2 — Inject a single quote to trigger an error</strong></p>
-<p>A single quote was appended to the <code>TrackingId</code> value: <code>TrackingId=R9odV6qtSBZRwe8U'</code>. The server responded with HTTP 500 and reflected the full PostgreSQL error: <em>Unterminated string literal started at position 52 in SQL SELECT * FROM tracking WHERE id = ‘R9odV6qtSBZRwe8U’. Expected char</em>. This confirmed that the cookie value is embedded directly into a SQL query with no sanitization, and that database errors are visible in the response.</p>
+<p>A single quote was appended to the <code>TrackingId</code> value: <code>TrackingId=R9odV6qtSBZRwe8U'</code>. The server responded with HTTP 500 and reflected the full PostgreSQL error: <em>Unterminated string literal started at position 52 in SQL SELECT \</em> FROM tracking WHERE id = ‘R9odV6qtSBZRwe8U’. Expected char*. This confirmed that the cookie value is embedded directly into a SQL query with no sanitization, and that database errors are visible in the response.</p>
 <blockquote>  <figure><img src="images/lab-13-visible-error-based-sql-injection/365b7523717280dfbe20cf2709352e3f.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/lab-13-visible-error-based-sql-injection/365b752371728098b57ef5373bc56cfe.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
@@ -206,11 +206,9 @@
   <li><a href="https://portswigger.net/web-security/sql-injection/cheat-sheet" target="_blank" rel="noopener">PortSwigger: SQL injection cheat sheet</a></li>
   <li><a href="https://cwe.mitre.org/data/definitions/89.html" target="_blank" rel="noopener">CWE-89: Improper Neutralization of Special Elements used in an SQL Command</a></li>
 </ul>
-<hr>
-<blockquote>🤖 Documented with Claude pentest-findings skill</blockquote>
 
 </div>
 
-<footer>Built by Mostafa Elwaseef · <a href="../../../index.html">Back to Portfolio</a></footer>
+<footer>Built by Waseef · <a href="../../../index.html">Back to Portfolio</a></footer>
 </body>
 </html>
