@@ -453,14 +453,14 @@ LEAF_TEMPLATE = """<!DOCTYPE html>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>__TITLE__ — Waseef's Portfolio</title>
+  <title>__TITLE__ — Mostafa Elwaseef's Portfolio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
   <style>__STYLE__</style>
 </head>
 <body>
 <nav>
-  <span class="nav-logo">Waseef</span>
+  <span class="nav-logo">Mostafa Elwaseef</span>
   <a href="__ROOT__index.html" class="nav-back">← Back to Portfolio</a>
 </nav>
 
@@ -478,7 +478,7 @@ LEAF_TEMPLATE = """<!DOCTYPE html>
 __BODY__
 </div>
 
-<footer>Built by Waseef · <a href="__ROOT__index.html">Back to Portfolio</a></footer>
+<footer>Built by Mostafa Elwaseef · <a href="__ROOT__index.html">Back to Portfolio</a></footer>
 </body>
 </html>
 """
@@ -488,14 +488,14 @@ CATEGORY_TEMPLATE = """<!DOCTYPE html>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>__TITLE__ — Waseef's Portfolio</title>
+  <title>__TITLE__ — Mostafa Elwaseef's Portfolio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
   <style>__STYLE__</style>
 </head>
 <body>
 <nav>
-  <span class="nav-logo">Waseef</span>
+  <span class="nav-logo">Mostafa Elwaseef</span>
   <a href="__ROOT__index.html" class="nav-back">← Back to Portfolio</a>
 </nav>
 
@@ -513,7 +513,7 @@ __CARDS__
   </div>
 </div>
 
-<footer>Built by Waseef · <a href="__ROOT__index.html">Back to Portfolio</a></footer>
+<footer>Built by Mostafa Elwaseef · <a href="__ROOT__index.html">Back to Portfolio</a></footer>
 </body>
 </html>
 """
