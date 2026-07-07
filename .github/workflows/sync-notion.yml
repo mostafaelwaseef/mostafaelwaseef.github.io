@@ -1,0 +1,40 @@
+name: Sync Notion Writeups
+
+on:
+  workflow_dispatch:        # run manually from GitHub UI
+  schedule:
+    - cron: '0 4 * * 1'    # every Monday at 04:00 UTC (re-download fresh images)
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run Notion sync
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+        run: python .github/scripts/sync_notion.py
+
+      - name: Commit & push changes
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add writeups/
+          git diff --staged --quiet && echo "Nothing to commit." || (
+            git commit -m "chore: sync Notion writeups [skip ci]" &&
+            git push
+          )
