@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Metasploitable 2 — VulnHub — Mostafa Elwaseef's Portfolio</title>
+  <title>Metasploitable  1 — VulnHub — Mostafa Elwaseef's Portfolio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
   <style>
@@ -101,8 +101,8 @@
 
 <div class="hero">
   <div class="hero-inner">
-    <div class="breadcrumb"><a href="../../index.html">Portfolio</a> / <a href="../../index.html#machines">Machines</a> / Metasploitable 2 — VulnHub</div>
-    <h1>Metasploitable 2 — VulnHub</h1>
+    <div class="breadcrumb"><a href="../../index.html">Portfolio</a> / <a href="../../index.html#machines">Machines</a> / Metasploitable  1 — VulnHub</div>
+    <h1>Metasploitable  1 — VulnHub</h1>
     <div class="meta-row">
       <span class="badge badge-platform">🖥 VulnHub</span>
       <span class="badge badge-beginner">🟢 Beginner</span>
@@ -113,11 +113,11 @@
 </div>
 
 <div class="content">
-<h1 id="metasploitable-2-penetration-test-report">Metasploitable 2 — Penetration Test Report</h1>
+<h1 id="metasploitable-1-penetration-test-report">Metasploitable 1 — Penetration Test Report</h1>
 <h2 id="machine-info">Machine Info</h2>
 <div class='table-wrap'><table>
   <tr><th>Field</th><th>Value</th></tr>
-  <tr><td><strong>Machine</strong></td><td>Metasploitable 2</td></tr>
+  <tr><td><strong>Machine</strong></td><td>Metasploitable 1</td></tr>
   <tr><td><strong>Platform</strong></td><td>VulnHub</td></tr>
   <tr><td><strong>IP Address</strong></td><td>192.168.8.243</td></tr>
   <tr><td><strong>Attacker IP</strong></td><td><code>&lt;ATTACKER_IP&gt;</code></td></tr>
@@ -127,7 +127,7 @@
 </table></div>
 <hr>
 <h2 id="executive-summary">Executive Summary</h2>
-<p>Metasploitable 2 was compromised through four independent attack vectors: a Samba usermap_script vulnerability granting direct root access, a TWiki RCE exploit yielding a web shell, Apache Tomcat manager WAR deployment producing a Meterpreter session, and a TikiWiki backup upload chain delivering a reverse shell. Post-exploitation privilege escalation to root was achieved via the Dirty COW kernel exploit (CVE-2016-5195) on non-root shells, and <code>/etc/shadow</code> was successfully dumped on all vectors.</p>
+<p>Metasploitable 1 was compromised through four independent attack vectors: a Samba usermap_script vulnerability granting direct root access, a TWiki RCE exploit yielding a web shell, Apache Tomcat manager WAR deployment producing a Meterpreter session, and a TikiWiki backup upload chain delivering a reverse shell. Post-exploitation privilege escalation to root was achieved via the Dirty COW kernel exploit (CVE-2016-5195) on non-root shells, and <code>/etc/shadow</code> was successfully dumped on all vectors.</p>
 <hr>
 <h2 id="reconnaissance">Reconnaissance</h2>
 <h3 id="objective">Objective</h3>
@@ -138,8 +138,8 @@
 - <strong>Tools used</strong>: arp-scan, Nmap
 - <strong>Commands</strong>: <code>arp-scan -l</code> → <code>nmap -sV -O 192.168.8.243</code>
 - <strong>Result</strong>: Target at 192.168.8.243 confirmed; 20+ open ports identified; OS = Linux 2.6.24-16-server (Ubuntu); Samba 3.0.20-Debian, Apache httpd 2.2.8, MySQL 5.0.51a, Apache Tomcat/Coyote JSP 1.1 on :8180 noted as key targets.</p>
-<blockquote>  <figure><img src="images/metasploitable-2/397b75237172807389dbf4bcecadc47e.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b75237172802c9533d44bcfb3293a.png" alt="screenshot" loading="lazy"></figure>
+<blockquote>  <figure><img src="images/metasploitable-1/397b75237172807389dbf4bcecadc47e.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b75237172802c9533d44bcfb3293a.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
 <h2 id="attack-vector-1-samba-cve-2007-2447">Attack Vector 1 — Samba (CVE-2007-2447)</h2>
@@ -152,14 +152,14 @@
 - <strong>Tools used</strong>: enum4linux
 - <strong>Commands</strong>: <code>enum4linux 192.168.8.243</code>
 - <strong>Result</strong>: Null session successful; workgroup WORKGROUP; Samba 3.0.20-Debian confirmed; user accounts and share names enumerated.</p>
-<blockquote>  <figure><img src="images/metasploitable-2/397b7523717280d890bde71f154f2356.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b7523717280978e5dd6c8a69c3c8b.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b75237172800b91f7eb0b662fbf7d.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b7523717280ac83e0fdc643772682.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b75237172802d8c87c406b4ad6215.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b7523717280aeb28dfe5c34750202.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b752371728006a27cf334fe47f6bb.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b75237172803f8cbee79e5c9403ec.png" alt="screenshot" loading="lazy"></figure>
+<blockquote>  <figure><img src="images/metasploitable-1/397b7523717280d890bde71f154f2356.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b7523717280978e5dd6c8a69c3c8b.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b75237172800b91f7eb0b662fbf7d.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b7523717280ac83e0fdc643772682.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b75237172802d8c87c406b4ad6215.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b7523717280aeb28dfe5c34750202.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b752371728006a27cf334fe47f6bb.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b75237172803f8cbee79e5c9403ec.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
 <h3 id="exploitation">Exploitation</h3>
@@ -174,8 +174,8 @@
   <li>Run the exploit: <code>exploit</code></li>
   <li>Receive a reverse shell — confirm privilege with <code>id</code> (returns <code>uid=0(root)</code>)</li>
 </ol>
-<blockquote>  <figure><img src="images/metasploitable-2/397b7523717280ef89d1e9bfe5dd7541.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b752371728090ae65caa0a7f01572.png" alt="screenshot" loading="lazy"></figure>
+<blockquote>  <figure><img src="images/metasploitable-1/397b7523717280ef89d1e9bfe5dd7541.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b752371728090ae65caa0a7f01572.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
 <h2 id="attack-vector-2-twiki-rce">Attack Vector 2 — TWiki RCE</h2>
@@ -188,15 +188,15 @@
 - <strong>Tools used</strong>: gobuster, searchsploit
 - <strong>Commands</strong>: <code>gobuster dir -u http://192.168.8.243 -w /usr/share/wordlists/dirb/common.txt</code>
 - <strong>Result</strong>: <code>/twiki</code> directory identified; TWiki version 20030201 confirmed; CVE applicable via <code>exploits/cgi-bin/642.pl</code>.</p>
-<blockquote>  <figure><img src="images/metasploitable-2/397b752371728020867cfe0692e773f0.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b752371728050be31c2caf03ae40b.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b75237172804daf8cedcc173f08d6.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b7523717280739103c7e49db31ad4.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b75237172806da019ddf5f8968f71.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b75237172801cbf6bf9f5c1768591.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b752371728069a76acf4f2411eb51.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b752371728005accfd119908605e5.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b752371728018af9ef1a9ac07fadf.png" alt="screenshot" loading="lazy"></figure>
+<blockquote>  <figure><img src="images/metasploitable-1/397b752371728020867cfe0692e773f0.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b752371728050be31c2caf03ae40b.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b75237172804daf8cedcc173f08d6.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b7523717280739103c7e49db31ad4.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b75237172806da019ddf5f8968f71.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b75237172801cbf6bf9f5c1768591.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b752371728069a76acf4f2411eb51.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b752371728005accfd119908605e5.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b752371728018af9ef1a9ac07fadf.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
 <h3 id="exploitation">Exploitation</h3>
@@ -209,7 +209,7 @@
   <li>Catch the incoming shell on a Netcat listener: <code>nc -lvnp &lt;port&gt;</code></li>
   <li>Confirm access: <code>id</code> returns <code>uid=33(www-data)</code></li>
 </ol>
-<blockquote>  <figure><img src="images/metasploitable-2/397b752371728055a241dcdb63799304.png" alt="screenshot" loading="lazy"></figure>
+<blockquote>  <figure><img src="images/metasploitable-1/397b752371728055a241dcdb63799304.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
 <h2 id="attack-vector-3-apache-tomcat-5-5-port-8180">Attack Vector 3 — Apache Tomcat 5.5 (Port 8180)</h2>
@@ -222,15 +222,15 @@
 - <strong>Tools used</strong>: gobuster, Metasploit (tomcat_mgr_login)
 - <strong>Commands</strong>: <code>gobuster dir -u http://192.168.8.243:8180 -w /usr/share/wordlists/dirb/common.txt</code>
 - <strong>Result</strong>: <code>/manager</code> path confirmed; default credentials <code>[REDACTED]</code> valid on the Manager application.</p>
-<blockquote>  <figure><img src="images/metasploitable-2/397b75237172807dbac0f1950bf7237a.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b7523717280b289ecdb606a5d1bcc.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b752371728031854ffa69230e47d0.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b7523717280a6977dcf957ca621eb.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b7523717280f4b512de88393b544a.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b75237172802aa44bcc32fb8ebe06.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b752371728048939fcdffa36899b0.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b7523717280d5bd6bf9a780080b89.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b752371728066891bc2ec559ebff0.png" alt="screenshot" loading="lazy"></figure>
+<blockquote>  <figure><img src="images/metasploitable-1/397b75237172807dbac0f1950bf7237a.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b7523717280b289ecdb606a5d1bcc.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b752371728031854ffa69230e47d0.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b7523717280a6977dcf957ca621eb.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b7523717280f4b512de88393b544a.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b75237172802aa44bcc32fb8ebe06.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b752371728048939fcdffa36899b0.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b7523717280d5bd6bf9a780080b89.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b752371728066891bc2ec559ebff0.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
 <h3 id="exploitation">Exploitation</h3>
@@ -247,9 +247,9 @@
   <li>Run: <code>exploit</code></li>
   <li>Receive a Java Meterpreter session as <code>tomcat55</code>; confirm with <code>getuid</code></li>
 </ol>
-<blockquote>  <figure><img src="images/metasploitable-2/397b7523717280f5a39ed45d194491e6.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b7523717280838f28d25c347831ad.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b752371728045a847deadef442c89.png" alt="screenshot" loading="lazy"></figure>
+<blockquote>  <figure><img src="images/metasploitable-1/397b7523717280f5a39ed45d194491e6.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b7523717280838f28d25c347831ad.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b752371728045a847deadef442c89.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
 <h2 id="attack-vector-4-tikiwiki-1-9-5">Attack Vector 4 — TikiWiki 1.9.5</h2>
@@ -262,12 +262,12 @@
 - <strong>Tools used</strong>: gobuster, Metasploit (tikidblib), MySQL client
 - <strong>Commands</strong>: <code>gobuster dir -u http://192.168.8.243/tikiwiki -w /usr/share/wordlists/dirb/big.txt</code> (directory enumeration); <code>use auxiliary/admin/tikiwiki/tikidblib</code> → <code>set RHOSTS 192.168.8.243</code> → <code>run</code> (credential extraction)
 - <strong>Result</strong>: <code>/backups</code> directory discovered; TikiWiki database credentials extracted; MySQL access confirmed; <code>tikiwiki195</code> database enumerated.</p>
-<blockquote>  <figure><img src="images/metasploitable-2/397b7523717280d1b931dea6a8594dc7.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b7523717280adbb80facdc3cfb1f5.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b75237172809e8341f2429b1c0cce.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b7523717280e3b65df6f030c22a9a.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b7523717280da8543cb7b6d736e88.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b752371728068ab98e15e371dd37c.png" alt="screenshot" loading="lazy"></figure>
+<blockquote>  <figure><img src="images/metasploitable-1/397b7523717280d1b931dea6a8594dc7.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b7523717280adbb80facdc3cfb1f5.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b75237172809e8341f2429b1c0cce.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b7523717280e3b65df6f030c22a9a.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b7523717280da8543cb7b6d736e88.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b752371728068ab98e15e371dd37c.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
 <h3 id="exploitation">Exploitation</h3>
@@ -286,17 +286,17 @@
   <li>Receive shell as <code>www-data</code>.</li>
   <li>Upgrade to PTY: <code>python -c 'import pty; pty.spawn("/bin/bash")'</code></li>
 </ol>
-<blockquote>  <figure><img src="images/metasploitable-2/397b7523717280beadcbece11afc5306.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b752371728084907fd17bf36f8390.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b7523717280c1a80dd059506da65c.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b752371728041a2f3e8113d2050b9.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b752371728026bfc4d418239a1411.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b752371728035b774d31d95ad8d5f.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b7523717280c8b2cdc4ce651c0427.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b7523717280b59e90dc04dcd65310.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b752371728077a3edc6cbb895c105.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b752371728027a0c2d8b5f43f18ae.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b7523717280bfa49ecb6a83103ff8.png" alt="screenshot" loading="lazy"></figure>
+<blockquote>  <figure><img src="images/metasploitable-1/397b7523717280beadcbece11afc5306.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b752371728084907fd17bf36f8390.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b7523717280c1a80dd059506da65c.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b752371728041a2f3e8113d2050b9.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b752371728026bfc4d418239a1411.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b752371728035b774d31d95ad8d5f.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b7523717280c8b2cdc4ce651c0427.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b7523717280b59e90dc04dcd65310.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b752371728077a3edc6cbb895c105.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b752371728027a0c2d8b5f43f18ae.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b7523717280bfa49ecb6a83103ff8.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
 <h2 id="post-exploitation">Post-Exploitation</h2>
@@ -314,12 +314,12 @@
   <li>Switch to root: <code>su root</code> with the new password set by the exploit.</li>
   <li>Confirm: <code>id</code> returns <code>uid=0(root)</code></li>
 </ol>
-<blockquote>  <figure><img src="images/metasploitable-2/397b7523717280f9ae30f09dfe21bed4.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b75237172809f8cd8c8738291f6e4.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b7523717280f9a749fca6a7a14a05.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b7523717280088f38e443db7b53f8.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b75237172800d85adeda4b6eb1577.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/metasploitable-2/397b7523717280d9b162dd2fbd36a127.png" alt="screenshot" loading="lazy"></figure>
+<blockquote>  <figure><img src="images/metasploitable-1/397b7523717280f9ae30f09dfe21bed4.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b75237172809f8cd8c8738291f6e4.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b7523717280f9a749fca6a7a14a05.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b7523717280088f38e443db7b53f8.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b75237172800d85adeda4b6eb1577.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/metasploitable-1/397b7523717280d9b162dd2fbd36a127.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
 <h3 id="shadow-file-dump">Shadow File Dump</h3>
@@ -327,11 +327,11 @@
 <ul>
   <li><strong>Command</strong>: <code>cat /etc/shadow</code></li>
 </ul>
-<blockquote>  <figure><img src="images/metasploitable-2/397b7523717280f8aecfcc30fc0c3b7b.png" alt="screenshot" loading="lazy"></figure>
+<blockquote>  <figure><img src="images/metasploitable-1/397b7523717280f8aecfcc30fc0c3b7b.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
 <h2 id="lessons-learned">Lessons Learned</h2>
-<p>Metasploitable 2 demonstrates how a single network-accessible host can present multiple independently exploitable attack surfaces simultaneously. The Samba usermap_script flaw (CVE-2007-2447) is a reminder that legacy SMB configurations with <code>username map script</code> enabled are trivially exploitable — any exposure of Samba 3.0.20 on a network is a critical finding requiring immediate patching or isolation. Default credentials on Apache Tomcat Manager (<code>[REDACTED]</code>:<code>[REDACTED]</code>) remain one of the most common real-world findings; Manager interfaces should never be internet-facing and should always require strong, unique credentials. The TikiWiki chain illustrates how database credential disclosure combined with file upload functionality chains into full RCE without needing a memory corruption exploit. Finally, the Dirty COW kernel exploit (CVE-2016-5195) underscores the importance of kernel patching — a Linux 2.6 kernel in a 2016+ environment is years out of support and trivially escalated regardless of service-level hardening.</p>
+<p>Metasploitable 1 demonstrates how a single network-accessible host can present multiple independently exploitable attack surfaces simultaneously. The Samba usermap_script flaw (CVE-2007-2447) is a reminder that legacy SMB configurations with <code>username map script</code> enabled are trivially exploitable — any exposure of Samba 3.0.20 on a network is a critical finding requiring immediate patching or isolation. Default credentials on Apache Tomcat Manager (<code>[REDACTED]</code>:<code>[REDACTED]</code>) remain one of the most common real-world findings; Manager interfaces should never be internet-facing and should always require strong, unique credentials. The TikiWiki chain illustrates how database credential disclosure combined with file upload functionality chains into full RCE without needing a memory corruption exploit. Finally, the Dirty COW kernel exploit (CVE-2016-5195) underscores the importance of kernel patching — a Linux 2.6 kernel in a 2016+ environment is years out of support and trivially escalated regardless of service-level hardening.</p>
 
 </div>
 
