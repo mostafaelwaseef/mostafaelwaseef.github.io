@@ -619,16 +619,61 @@ def category_tile_html(cat_slug, label, icon, href, count, kind):
             f'<div class="lab-info"><div class="lab-name">{esc(label)}</div>'
             f'<div class="lab-count">{count} {noun} completed</div></div></a>\n')
 
+# PortSwigger Web Security Academy's own topic order, split into their
+# server-side / client-side groupings. Unknown categories (a new topic
+# added later in Notion) fall back to the end of the server-side group
+# so nothing is silently dropped from the page.
+SERVER_SIDE_ORDER = [
+    "sql-injection", "authentication", "path-traversal", "command-injection",
+    "os-command-injection", "business-logic-vulnerabilities",
+    "information-disclosure", "access-control", "file-upload-vulnerabilities",
+    "race-conditions", "ssrf", "server-side-request-forgery",
+    "xxe-injection", "xxe", "request-smuggling", "server-side-template-injection",
+    "ssti", "insecure-deserialization", "graphql-api-vulnerabilities",
+    "web-cache-poisoning", "http-host-header-attacks",
+    "oauth-authentication", "jwt", "prototype-pollution",
+]
+CLIENT_SIDE_ORDER = [
+    "xss", "cross-site-scripting", "csrf", "cross-site-request-forgery",
+    "cors", "cross-origin-resource-sharing", "clickjacking",
+    "dom-based-vulnerabilities", "websockets", "web-cache-deception",
+]
+
+def category_group_order(slug):
+    if slug in SERVER_SIDE_ORDER:
+        return ("server", SERVER_SIDE_ORDER.index(slug))
+    if slug in CLIENT_SIDE_ORDER:
+        return ("client", CLIENT_SIDE_ORDER.index(slug))
+    return ("server", 999)
+
+def render_labs_groups(labs_buckets):
+    server, client = [], []
+    for slug, b in labs_buckets.items():
+        group, order = category_group_order(slug)
+        (server if group == "server" else client).append((order, slug, b))
+    server.sort(key=lambda x: x[0])
+    client.sort(key=lambda x: x[0])
+
+    def group_block(title, items):
+        if not items:
+            return ""
+        tiles = "".join(category_tile_html(slug, b["label"], b["icon"], b["href"], len(b["leaves"]), "labs")
+                         for _, slug, b in items)
+        return (f'    <div class="labs-group">\n'
+                f'      <h3 class="labs-group-title">{esc(title)}</h3>\n'
+                f'      <div class="labs-grid">\n{tiles}      </div>\n'
+                f'    </div>\n')
+
+    html = group_block("Server-Side", server) + group_block("Client-Side", client)
+    return html or "      <p style=\"color:var(--muted);\">No labs synced yet.</p>\n"
+
 def update_index_html(machines, labs_buckets, wargames_buckets):
     text = INDEX_HTML.read_text(encoding="utf-8")
 
     machines_html = "".join(machine_card_html(e) for e in machines) or "      <p style=\"color:var(--muted);\">No machines synced yet.</p>\n"
     text = replace_between(text, "MACHINES", machines_html)
 
-    labs_html = "".join(
-        category_tile_html(slug, b["label"], b["icon"], b["href"], len(b["leaves"]), "labs")
-        for slug, b in sorted(labs_buckets.items())
-    ) or "      <p style=\"color:var(--muted);\">No labs synced yet.</p>\n"
+    labs_html = render_labs_groups(labs_buckets)
     text = replace_between(text, "LABS", labs_html)
 
     wargames_html = "".join(
