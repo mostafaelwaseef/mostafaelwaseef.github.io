@@ -144,35 +144,42 @@
 <h2 id="analysis">🧠 Analysis</h2>
 <p><strong>Step 1 — Browse the shop and capture traffic in Burp</strong></p>
 <p>Opened the lab environment and browsed to the shop at <code>/product?productId=1</code>. Burp Proxy captured the HTTP history, including GET requests for product images via <code>/image?filename=</code>.</p>
-<figure><img src="images/lab-4-file-path-traversal-traversal-sequences-stripped-with-superfluous-url-decode/39bb752371728033a967ebaa5598ff16.png" alt="screenshot" loading="lazy"></figure>
-<figure><img src="images/lab-4-file-path-traversal-traversal-sequences-stripped-with-superfluous-url-decode/39bb7523717280938a35f2a7ca1f4e1e.png" alt="screenshot" loading="lazy"></figure>
+<blockquote>  <figure><img src="images/lab-4-file-path-traversal-traversal-sequences-stripped-with-superfluous-url-decode/39bb752371728033a967ebaa5598ff16.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-4-file-path-traversal-traversal-sequences-stripped-with-superfluous-url-decode/39bb7523717280938a35f2a7ca1f4e1e.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
 <hr>
 <p><strong>Step 2 — Send image request to Repeater</strong></p>
 <p>Selected the <code>GET /image?filename=1</code> request from Proxy history and sent it to Repeater to use as a baseline for payload testing.</p>
-<figure><img src="images/lab-4-file-path-traversal-traversal-sequences-stripped-with-superfluous-url-decode/39bb7523717280cf8128f5f5dabc110b.png" alt="screenshot" loading="lazy"></figure>
+<blockquote>  <figure><img src="images/lab-4-file-path-traversal-traversal-sequences-stripped-with-superfluous-url-decode/39bb7523717280cf8128f5f5dabc110b.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
 <hr>
 <p><strong>Step 3 — Test plain and absolute path traversal variants</strong></p>
 <p>Tested three payloads to confirm the traversal filter is active. <code>../../../etc/passwd</code> returned 400 “No such file”. <code>/etc/passwd</code> (absolute path) also returned 400 “No such file”. Increasing the depth to <code>../../../../etc/passwd</code> also failed. All plain traversal attempts were blocked, indicating the server strips <code>../</code> sequences.</p>
-<figure><img src="images/lab-4-file-path-traversal-traversal-sequences-stripped-with-superfluous-url-decode/39bb7523717280349f03e924123310db.png" alt="screenshot" loading="lazy"></figure>
-<figure><img src="images/lab-4-file-path-traversal-traversal-sequences-stripped-with-superfluous-url-decode/39bb75237172800f8caac9be9b99ad5e.png" alt="screenshot" loading="lazy"></figure>
-<figure><img src="images/lab-4-file-path-traversal-traversal-sequences-stripped-with-superfluous-url-decode/39bb75237172802796a0d587c5f14305.png" alt="screenshot" loading="lazy"></figure>
+<blockquote>  <figure><img src="images/lab-4-file-path-traversal-traversal-sequences-stripped-with-superfluous-url-decode/39bb7523717280349f03e924123310db.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-4-file-path-traversal-traversal-sequences-stripped-with-superfluous-url-decode/39bb75237172800f8caac9be9b99ad5e.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-4-file-path-traversal-traversal-sequences-stripped-with-superfluous-url-decode/39bb75237172802796a0d587c5f14305.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
 <hr>
 <p><strong>Step 4 — URL-encode the payload using Burp’s context menu</strong></p>
 <p>Highlighted <code>../../../etc/passwd</code> in the Repeater request, right-clicked, and selected Convert selection → URL → URL-encode all characters. This produced the single-encoded payload <code>%2e%2e%2f%2e%2e%2f%2e%2e%2f%65%74%63%2f%70%61%73%73%77%64</code>, where every character is percent-encoded.</p>
-<figure><img src="images/lab-4-file-path-traversal-traversal-sequences-stripped-with-superfluous-url-decode/39bb752371728094bbfaedc897d18f06.png" alt="screenshot" loading="lazy"></figure>
+<blockquote>  <figure><img src="images/lab-4-file-path-traversal-traversal-sequences-stripped-with-superfluous-url-decode/39bb752371728094bbfaedc897d18f06.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
 <hr>
 <p><strong>Step 5 — Test single URL-encoded payload (fails)</strong></p>
 <p>Sent the single-encoded payload. The server returned 400 “No such file”, indicating it URL-decodes the input before applying the strip, which converts <code>%2e%2e%2f</code> back to <code>../</code> — and then strips it. Single encoding is therefore insufficient to bypass the filter.</p>
-<figure><img src="images/lab-4-file-path-traversal-traversal-sequences-stripped-with-superfluous-url-decode/39bb75237172805b8a3df898118c5fae.png" alt="screenshot" loading="lazy"></figure>
+<blockquote>  <figure><img src="images/lab-4-file-path-traversal-traversal-sequences-stripped-with-superfluous-url-decode/39bb75237172805b8a3df898118c5fae.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
 <hr>
 <p><strong>Step 6 — Double URL-encode and send (200 OK)</strong></p>
 <p>Applied URL-encode all characters a second time to the single-encoded payload, percent-encoding each <code>%</code> sign as <code>%25</code>. The resulting double-encoded payload begins <code>%25%32%65%25%32%65%25%32%66%25%32%65%25%32%65%25%32%66%25%32%65%25%32%65%25%32%66%25%36%35%25%37%34%25%36%33%25%32%66%25%37%30%25%36%31%25%37%33%25%37%33%25%37%37%25%36%34</code>. The server’s first decode converts this to <code>%2e%2e%2f%2e%2e%2f%2e%2e%2f%65%74%63%2f%70%61%73%73%77%64</code>, which does not match the <code>../</code> filter pattern and passes through. A second decode pass then resolves it to <code>../../../etc/passwd</code>, traversing three directory levels and returning the contents of <code>/etc/passwd</code> with HTTP 200 OK. The Inspector panel confirmed the two-level decode chain.</p>
-<figure><img src="images/lab-4-file-path-traversal-traversal-sequences-stripped-with-superfluous-url-decode/39bb7523717280e199d6d9f7d181ea3d.png" alt="screenshot" loading="lazy"></figure>
-<figure><img src="images/lab-4-file-path-traversal-traversal-sequences-stripped-with-superfluous-url-decode/39bb7523717280659960efb0fcd5dcf1.png" alt="screenshot" loading="lazy"></figure>
+<blockquote>  <figure><img src="images/lab-4-file-path-traversal-traversal-sequences-stripped-with-superfluous-url-decode/39bb7523717280e199d6d9f7d181ea3d.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-4-file-path-traversal-traversal-sequences-stripped-with-superfluous-url-decode/39bb7523717280659960efb0fcd5dcf1.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
 <hr>
 <p><strong>Step 7 — Verify lab solved in browser</strong></p>
 <p>Navigated back to the lab in the browser, which displayed the “Congratulations, you solved the lab!” banner confirming successful exploitation.</p>
-<figure><img src="images/lab-4-file-path-traversal-traversal-sequences-stripped-with-superfluous-url-decode/39bb752371728053a59cf6215d862876.png" alt="screenshot" loading="lazy"></figure>
+<blockquote>  <figure><img src="images/lab-4-file-path-traversal-traversal-sequences-stripped-with-superfluous-url-decode/39bb752371728053a59cf6215d862876.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
 <hr>
 <h2 id="impact">🎯 Impact</h2>
 <p>An attacker can bypass URL-decode-then-strip defenses by double-encoding the traversal payload. Any server that performs URL decoding before input sanitization — and then decodes again when accessing the filesystem — is vulnerable. Sensitive files such as <code>/etc/passwd</code>, <code>/etc/shadow</code>, application configuration files, private keys, and source code are all at risk of unauthorized disclosure.</p>

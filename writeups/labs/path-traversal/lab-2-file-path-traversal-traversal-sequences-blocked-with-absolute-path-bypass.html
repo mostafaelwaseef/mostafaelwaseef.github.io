@@ -141,19 +141,23 @@
 <h2 id="analysis">🧠 Analysis</h2>
 <p><strong>Step 1 — Browse the shop</strong></p>
 <p>Opened the lab environment and browsed to the shop homepage. The lab banner confirmed the title “File path traversal, traversal sequences blocked with absolute path bypass” with status “Not solved”.</p>
-<figure><img src="images/lab-2-file-path-traversal-traversal-sequences-blocked-with-absolute-path-bypass/39bb7523717280feac7ef598fafa4a3d.png" alt="screenshot" loading="lazy"></figure>
+<blockquote>  <figure><img src="images/lab-2-file-path-traversal-traversal-sequences-blocked-with-absolute-path-bypass/39bb7523717280feac7ef598fafa4a3d.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
 <hr>
 <p><strong>Step 2 — Capture image request in Burp HTTP history</strong></p>
 <p>With Burp Proxy active, browsed the shop to trigger product image loads. The HTTP history showed GET requests to <code>/image?filename=38.jpg</code>, exposing the <code>filename</code> parameter used to serve product images.</p>
-<figure><img src="images/lab-2-file-path-traversal-traversal-sequences-blocked-with-absolute-path-bypass/39bb752371728035a81fd6f2b6f3dea7.png" alt="screenshot" loading="lazy"></figure>
+<blockquote>  <figure><img src="images/lab-2-file-path-traversal-traversal-sequences-blocked-with-absolute-path-bypass/39bb752371728035a81fd6f2b6f3dea7.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
 <hr>
 <p><strong>Step 3 — Use absolute path </strong><strong><code>/etc/passwd</code></strong><strong> (200 OK)</strong></p>
 <p>Sent the image request to Repeater and modified the <code>filename</code> parameter to <code>/etc/passwd</code>. Rather than using <code>../</code> traversal sequences (which the application blocks), the absolute path was supplied directly. The server passed the value to a file-read operation without validating that it resolved within an allowed base directory, returning 200 OK with the full contents of <code>/etc/passwd</code> in the response body.</p>
-<figure><img src="images/lab-2-file-path-traversal-traversal-sequences-blocked-with-absolute-path-bypass/39bb7523717280578c27da022f90f077.png" alt="screenshot" loading="lazy"></figure>
+<blockquote>  <figure><img src="images/lab-2-file-path-traversal-traversal-sequences-blocked-with-absolute-path-bypass/39bb7523717280578c27da022f90f077.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
 <hr>
 <p><strong>Step 4 — Verify lab solved in browser</strong></p>
 <p>Navigated back to the lab in the browser, which displayed the “Congratulations, you solved the lab!” banner confirming successful exploitation.</p>
-<figure><img src="images/lab-2-file-path-traversal-traversal-sequences-blocked-with-absolute-path-bypass/39bb752371728086aed6d65992b4ee59.png" alt="screenshot" loading="lazy"></figure>
+<blockquote>  <figure><img src="images/lab-2-file-path-traversal-traversal-sequences-blocked-with-absolute-path-bypass/39bb752371728086aed6d65992b4ee59.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
 <hr>
 <h2 id="impact">🎯 Impact</h2>
 <p>An attacker can read arbitrary files from the server filesystem by bypassing naive traversal filters with absolute paths. Any defense that only strips or blocks <code>../</code> sequences without also enforcing that the resolved path falls within an allowed base directory is trivially circumvented. Sensitive files such as <code>/etc/passwd</code>, <code>/etc/shadow</code>, application configuration files, and private keys are all at risk.</p>

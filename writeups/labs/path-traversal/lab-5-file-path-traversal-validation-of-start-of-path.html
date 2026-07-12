@@ -142,23 +142,28 @@
 <h2 id="analysis">🧠 Analysis</h2>
 <p><strong>Step 1 — Browse the shop</strong></p>
 <p>Opened the lab environment and browsed to the shop homepage. The lab banner confirmed the title “File path traversal, validation of start of path” with status “Not solved”.</p>
-<figure><img src="images/lab-5-file-path-traversal-validation-of-start-of-path/39bb7523717280e0bd0ec9be18a78870.png" alt="screenshot" loading="lazy"></figure>
+<blockquote>  <figure><img src="images/lab-5-file-path-traversal-validation-of-start-of-path/39bb7523717280e0bd0ec9be18a78870.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
 <hr>
 <p><strong>Step 2 — Capture image request in Burp HTTP history</strong></p>
 <p>With Burp Proxy active, browsed the shop to trigger product image loads. The HTTP history revealed that image requests use the full server-side file path as the <code>filename</code> parameter — for example, <code>GET /image?filename=/var/www/images/11.jpg</code>. This exposed the expected folder prefix <code>/var/www/images/</code> that the server validates against.</p>
-<figure><img src="images/lab-5-file-path-traversal-validation-of-start-of-path/39bb75237172804f8bebc433ed0b4376.png" alt="screenshot" loading="lazy"></figure>
+<blockquote>  <figure><img src="images/lab-5-file-path-traversal-validation-of-start-of-path/39bb75237172804f8bebc433ed0b4376.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
 <hr>
 <p><strong>Step 3 — Test plain path traversal (fails)</strong></p>
 <p>Sent the image request to Repeater and modified the <code>filename</code> parameter to <code>/etc/passwd</code>, removing the expected prefix entirely. The server returned 400 Bad Request with the message <code>"Missing parameter 'filename'"</code>, indicating the path failed the start-of-path validation because it did not begin with the required folder.</p>
-<figure><img src="images/lab-5-file-path-traversal-validation-of-start-of-path/39bb75237172800fb45adb1eae7bf35a.png" alt="screenshot" loading="lazy"></figure>
+<blockquote>  <figure><img src="images/lab-5-file-path-traversal-validation-of-start-of-path/39bb75237172800fb45adb1eae7bf35a.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
 <hr>
 <p><strong>Step 4 — Bypass using expected folder prefix and traversal sequences</strong></p>
 <p>Modified the payload to <code>/var/www/images/../../../etc/passwd</code>. This satisfies the prefix check — the path begins with <code>/var/www/images/</code> — while the three <code>../</code> sequences that follow traverse three directory levels up to the filesystem root. The server returned 200 OK with Content-Type <code>image/jpeg</code> and the full contents of <code>/etc/passwd</code> in the response body.</p>
-<figure><img src="images/lab-5-file-path-traversal-validation-of-start-of-path/39bb7523717280d79f14dc3e1e33f52b.png" alt="screenshot" loading="lazy"></figure>
+<blockquote>  <figure><img src="images/lab-5-file-path-traversal-validation-of-start-of-path/39bb7523717280d79f14dc3e1e33f52b.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
 <hr>
 <p><strong>Step 5 — Verify lab solved in browser</strong></p>
 <p>Navigated back to the lab in the browser, which displayed the “Congratulations, you solved the lab!” banner confirming successful exploitation.</p>
-<figure><img src="images/lab-5-file-path-traversal-validation-of-start-of-path/39bb7523717280d1973af467ec458448.png" alt="screenshot" loading="lazy"></figure>
+<blockquote>  <figure><img src="images/lab-5-file-path-traversal-validation-of-start-of-path/39bb7523717280d1973af467ec458448.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
 <hr>
 <h2 id="impact">🎯 Impact</h2>
 <p>An attacker can bypass start-of-path validation by prepending the expected folder prefix to a traversal payload. Any server that validates only that a path begins with a trusted directory — without canonicalizing the path first (e.g. resolving <code>..</code> components) — is trivially circumvented. Sensitive files such as <code>/etc/passwd</code>, <code>/etc/shadow</code>, application configuration files, and private keys are all at risk of unauthorized disclosure.</p>
