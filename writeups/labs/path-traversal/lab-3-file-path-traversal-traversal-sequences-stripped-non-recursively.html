@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lab 1 — File path traversal, simple case — Mostafa Elwaseef's Portfolio</title>
+  <title>Lab 3 — File path traversal, traversal sequences stripped non-recursively — Mostafa Elwaseef's Portfolio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
   <style>
@@ -101,8 +101,8 @@
 
 <div class="hero">
   <div class="hero-inner">
-    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#labs">Labs</a> / <a href="index.html">Path Traversal</a> / Lab 1 — File path traversal, simple case</div>
-    <h1>Lab 1 — File path traversal, simple case</h1>
+    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#labs">Labs</a> / <a href="index.html">Path Traversal</a> / Lab 3 — File path traversal, traversal sequences stripped non-recursively</div>
+    <h1>Lab 3 — File path traversal, traversal sequences stripped non-recursively</h1>
     <div class="meta-row">
       <span class="badge badge-hard">🔴 High</span>
       <span class="badge badge-date">📅 2026-07-12</span>
@@ -121,45 +121,39 @@
 </table></div>
 <hr>
 <h2 id="description">🔍 Description</h2>
-<p>Path traversal (also known as directory traversal) allows an attacker to read arbitrary files on the server by manipulating file path parameters. In this lab, the application uses a <code>filename</code> parameter in the <code>/image</code> endpoint to load product images. No sanitization or restriction is applied to this parameter, allowing an attacker to supply traversal sequences (<code>../</code>) to walk up the directory tree and access sensitive files outside the web root.</p>
+<p>The application attempts to block path traversal attacks by stripping <code>../</code> sequences from the user-supplied <code>filename</code> parameter in the <code>/image</code> endpoint. However, the stripping is performed only once (non-recursively). By supplying nested traversal sequences such as <code>....//</code>, the filter removes the inner <code>./</code> on its single pass, leaving a valid <code>../</code> sequence intact. Chaining three such sequences (<code>....//....//....//etc/passwd</code>) causes the server to traverse three directory levels up and return the contents of <code>/etc/passwd</code>.</p>
 <hr>
 <h2 id="end-goals">🎯 End Goals</h2>
 <ul>
   <li>Exploit the path traversal vulnerability in the product image endpoint</li>
+  <li>Bypass the non-recursive traversal sequence filter</li>
   <li>Retrieve the contents of <code>/etc/passwd</code> from the server</li>
 </ul>
 <hr>
 <h2 id="steps-to-reproduce">🪜 Steps to Reproduce</h2>
 <ol>
   <li>Browse to any product page on the shop</li>
-  <li>Open browser DevTools and inspect the product image element to identify the vulnerable <code>filename</code> parameter</li>
-  <li>Modify the <code>filename</code> parameter value to a path traversal payload pointing to <code>/etc/passwd</code></li>
-  <li>Observe the server returns the file contents, solving the lab</li>
+  <li>Open browser DevTools and inspect the product image element to identify the <code>filename</code> parameter</li>
+  <li>Modify the <code>filename</code> parameter using nested traversal sequences that survive a single-pass strip</li>
+  <li>Observe the server returns the contents of <code>/etc/passwd</code>, solving the lab</li>
 </ol>
 <hr>
 <h2 id="analysis">🧠 Analysis</h2>
-<p><strong>Step 1 — Browse the shop and identify the target product</strong></p>
-<p>Opened the lab environment and browsed to the product page for “Babbage Web Spray” at <code>/product?productId=1</code>. The page loaded normally with product images displayed.</p>
-<blockquote>  <figure><img src="images/lab-1-file-path-traversal-simple-case/39bb752371728053ac2affca766dbecb.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/lab-1-file-path-traversal-simple-case/39bb75237172803dbc2fc633214b96c0.png" alt="screenshot" loading="lazy"></figure>
-</blockquote>
+<p><strong>Step 1 — Browse the shop and navigate to a product page</strong></p>
+<p>Opened the lab environment and browsed to the product page for “Dancing In The Dark” at <code>/product?productId=1</code>. The page loaded normally with the product image displayed.</p>
 <hr>
 <p><strong>Step 2 — Identify the vulnerable filename parameter via DevTools</strong></p>
-<p>Opened browser DevTools and used the Inspector to examine the HTML source of the product page. The product image was found to load via the endpoint <code>/image?filename=22.jpg</code>, directly exposing a <code>filename</code> parameter with no apparent sanitization.</p>
-<blockquote></blockquote>
+<p>Opened browser DevTools and used the Inspector to examine the product page HTML. The product image was found to load via <code>/image?filename=60.jpg</code>, directly exposing the <code>filename</code> parameter. The application is documented to strip path traversal sequences, but the stripping is performed non-recursively — only a single pass is applied.</p>
 <hr>
-<p><strong>Step 3 — Inject traversal payload and solve the lab</strong></p>
-<p>Modified the <code>src</code> attribute of the image element in DevTools to <code>/image?filename=../../../etc/passwd</code>. The server processed the traversal sequence without restriction, walking three directory levels up from the images directory to the filesystem root and returning the contents of <code>/etc/passwd</code>. The lab banner confirmed success with “Congratulations, you solved the lab!”</p>
-<blockquote>  <figure><img src="images/lab-1-file-path-traversal-simple-case/39bb7523717280938ba5fdfe9f2fe31e.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/lab-1-file-path-traversal-simple-case/39bb752371728055b52bed158966eb6c.png" alt="screenshot" loading="lazy"></figure>
-</blockquote>
+<p><strong>Step 3 — Inject nested traversal payload and solve the lab</strong></p>
+<p>Modified the <code>src</code> attribute in DevTools to <code>/image?filename=....//....//....//etc/passwd</code>. Each <code>....//</code> sequence is constructed so that after the application’s single-pass strip removes the inner <code>./</code>, the outer two dots and remaining slash reconstitute a valid <code>../</code>. Three nested sequences chain together to traverse three directory levels up to the filesystem root, and the server returned the contents of <code>/etc/passwd</code>. The lab was marked Solved with the “Congratulations, you solved the lab!” banner.</p>
 <hr>
 <h2 id="impact">🎯 Impact</h2>
-<p>An attacker can read arbitrary files from the server filesystem, including sensitive system files (<code>/etc/passwd</code>, <code>/etc/shadow</code>), application configuration files containing credentials, private keys, and source code. On Windows systems, equivalent payloads using <code>..\</code> can expose files such as <code>C:\Windows\win.ini</code>. This can lead to full server compromise if credentials or keys are exposed.</p>
+<p>An attacker can bypass naive single-pass traversal filters by embedding traversal sequences within themselves. Any server-side defense that strips <code>../</code> only once — without iterating until the output stabilizes or using an allowlist-based path validation — is trivially circumvented. Sensitive files such as <code>/etc/passwd</code>, <code>/etc/shadow</code>, application configuration files, and private keys are all at risk of unauthorized disclosure.</p>
 <hr>
 <h2 id="references">📚 References</h2>
 <ul>
-  <li><a href="https://portswigger.net/web-security/file-path-traversal" target="_blank" rel="noopener">PortSwigger: Path traversal</a></li>
+  <li><a href="https://portswigger.net/web-security/file-path-traversal/lab-sequences-stripped-non-recursively" target="_blank" rel="noopener">PortSwigger: File path traversal, traversal sequences stripped non-recursively</a></li>
   <li><a href="https://cwe.mitre.org/data/definitions/22.html" target="_blank" rel="noopener">CWE-22: Improper Limitation of a Pathname to a Restricted Directory</a></li>
   <li><a href="https://owasp.org/www-community/attacks/Path_Traversal" target="_blank" rel="noopener">OWASP: Path Traversal</a></li>
 </ul>
