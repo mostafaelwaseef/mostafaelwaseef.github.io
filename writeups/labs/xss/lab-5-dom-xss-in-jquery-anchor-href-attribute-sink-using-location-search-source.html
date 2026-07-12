@@ -141,53 +141,43 @@
 </ol>
 <hr>
 <h2 id="analysis">🧠 Analysis</h2>
-<p><strong>Step 1 — Access the lab</strong>
-The lab environment loaded a blog application with a “Submit feedback” link in the navigation. The lab status showed “Not solved”.</p>
+<p><strong>Step 1 — Access the lab</strong><br>The lab environment loaded a blog application with a “Submit feedback” link in the navigation. The lab status showed “Not solved”.</p>
 <blockquote>  <figure><img src="images/lab-5-dom-xss-in-jquery-anchor-href-attribute-sink-using-location-search-source/366b75237172801e98cbe52389cbacf5.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 2 — Navigate to the Submit Feedback page</strong>
-Clicked “Submit feedback” — the feedback form loaded. The URL contained a <code>returnPath</code> parameter (e.g. <code>?returnPath=/</code>) which is used to set the destination of the “Back” link on the page.</p>
+<p><strong>Step 2 — Navigate to the Submit Feedback page</strong><br>Clicked “Submit feedback” — the feedback form loaded. The URL contained a <code>returnPath</code> parameter (e.g. <code>?returnPath=/</code>) which is used to set the destination of the “Back” link on the page.</p>
 <blockquote>  <figure><img src="images/lab-5-dom-xss-in-jquery-anchor-href-attribute-sink-using-location-search-source/366b7523717280a58af7c92cf6aae755.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 3 — Inspect the DOM — Back link identified</strong>
-DevTools was opened and the <code>&lt;a id="backLink"&gt;</code> anchor element was inspected. Its <code>href</code> attribute is set dynamically from the <code>returnPath</code> URL parameter, confirming this element as the injection point.</p>
+<p><strong>Step 3 — Inspect the DOM — Back link identified</strong><br>DevTools was opened and the <code>&lt;a id="backLink"&gt;</code> anchor element was inspected. Its <code>href</code> attribute is set dynamically from the <code>returnPath</code> URL parameter, confirming this element as the injection point.</p>
 <blockquote>  <figure><img src="images/lab-5-dom-xss-in-jquery-anchor-href-attribute-sink-using-location-search-source/366b7523717280fc98c3d166c708f845.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 4 — Inspect the jQuery sink</strong>
-The page source revealed the jQuery function responsible for the sink: <code>$(function() { $('#backLink').attr("href", (new URLSearchParams(window.location.search)).get('returnPath')); });</code>. This reads the <code>returnPath</code> parameter from <code>location.search</code> and passes it directly to jQuery’s <code>.attr()</code> to set the <code>href</code> — with no sanitization or validation.</p>
+<p><strong>Step 4 — Inspect the jQuery sink</strong><br>The page source revealed the jQuery function responsible for the sink: <code>$(function() { $('#backLink').attr("href", (new URLSearchParams(window.location.search)).get('returnPath')); });</code>. This reads the <code>returnPath</code> parameter from <code>location.search</code> and passes it directly to jQuery’s <code>.attr()</code> to set the <code>href</code> — with no sanitization or validation.</p>
 <blockquote>  <figure><img src="images/lab-5-dom-xss-in-jquery-anchor-href-attribute-sink-using-location-search-source/366b75237172806693f5d3a5ad98c5a6.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 5 — Inject </strong><strong><code>&lt;script&gt;</code></strong><strong> payload (no execution)</strong>
-The URL was modified to set <code>returnPath=&lt;Script&gt;alert(document.cookie)&lt;/Script&gt;</code>. The payload was injected into the URL and passed through to the href attribute, but the script tag did not execute — browsers do not evaluate <code>&lt;script&gt;</code> tags placed inside an <code>href</code> attribute.</p>
+<p><strong>Step 5 — Inject </strong><strong><code>&lt;script&gt;</code></strong><strong> payload (no execution)</strong><br>The URL was modified to set <code>returnPath=&lt;Script&gt;alert(document.cookie)&lt;/Script&gt;</code>. The payload was injected into the URL and passed through to the href attribute, but the script tag did not execute — browsers do not evaluate <code>&lt;script&gt;</code> tags placed inside an <code>href</code> attribute.</p>
 <blockquote>  <figure><img src="images/lab-5-dom-xss-in-jquery-anchor-href-attribute-sink-using-location-search-source/366b7523717280f9b57ae6a656eb5ec7.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 6 — Confirm href updated with script payload in DOM</strong>
-DevTools confirmed the <code>&lt;a id="backLink"&gt;</code> <code>href</code> attribute was updated to the <code>&lt;script&gt;</code> payload value — proving the injection point works. However, since script tags are inert in href context, a <code>javascript:</code> URI was needed to achieve execution.</p>
+<p><strong>Step 6 — Confirm href updated with script payload in DOM</strong><br>DevTools confirmed the <code>&lt;a id="backLink"&gt;</code> <code>href</code> attribute was updated to the <code>&lt;script&gt;</code> payload value — proving the injection point works. However, since script tags are inert in href context, a <code>javascript:</code> URI was needed to achieve execution.</p>
 <blockquote>  <figure><img src="images/lab-5-dom-xss-in-jquery-anchor-href-attribute-sink-using-location-search-source/366b75237172804699e5d1803d025951.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 7 — Craft correct payload using </strong><strong><code>javascript:</code></strong><strong> URI</strong>
-The URL was modified to set <code>returnPath=javascript:alert(document.cookie)</code>. The browser tooltip on the Back link confirmed the <code>href</code> was now set to <code>javascript:alert(document.cookie)</code>, meaning clicking the link would execute the payload directly in the browser.</p>
+<p><strong>Step 7 — Craft correct payload using </strong><strong><code>javascript:</code></strong><strong> URI</strong><br>The URL was modified to set <code>returnPath=javascript:alert(document.cookie)</code>. The browser tooltip on the Back link confirmed the <code>href</code> was now set to <code>javascript:alert(document.cookie)</code>, meaning clicking the link would execute the payload directly in the browser.</p>
 <blockquote>  <figure><img src="images/lab-5-dom-xss-in-jquery-anchor-href-attribute-sink-using-location-search-source/366b7523717280e78c4cf439a4185b6f.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 8 — Lab solved</strong>
-Navigating to the feedback page with the <code>javascript:</code> payload caused the lab to register as solved — the “Congratulations, you solved the lab!” banner appeared and the status updated to Solved.</p>
+<p><strong>Step 8 — Lab solved</strong><br>Navigating to the feedback page with the <code>javascript:</code> payload caused the lab to register as solved — the “Congratulations, you solved the lab!” banner appeared and the status updated to Solved.</p>
 <blockquote>  <figure><img src="images/lab-5-dom-xss-in-jquery-anchor-href-attribute-sink-using-location-search-source/366b75237172804bad0bfbe30edb6f05.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 9 — Hover over Back link — javascript: URI confirmed</strong>
-Hovering over the <code>&lt; Back</code> link showed <code>javascript:alert(document.cookie)</code> in the browser status bar, confirming the <code>href</code> attribute was successfully poisoned with the malicious URI.</p>
+<p><strong>Step 9 — Hover over Back link — javascript: URI confirmed</strong><br>Hovering over the <code>&lt; Back</code> link showed <code>javascript:alert(document.cookie)</code> in the browser status bar, confirming the <code>href</code> attribute was successfully poisoned with the malicious URI.</p>
 <blockquote>  <figure><img src="images/lab-5-dom-xss-in-jquery-anchor-href-attribute-sink-using-location-search-source/366b752371728035aa25f4a1dce8f2a5.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 10 — alert fires with cookie value</strong>
-Clicking the <code>&lt; Back</code> link triggered the <code>javascript:</code> URI. An alert dialog appeared displaying the value of <code>document.cookie</code>, confirming successful execution of the injected script in the context of the vulnerable page.</p>
+<p><strong>Step 10 — alert fires with cookie value</strong><br>Clicking the <code>&lt; Back</code> link triggered the <code>javascript:</code> URI. An alert dialog appeared displaying the value of <code>document.cookie</code>, confirming successful execution of the injected script in the context of the vulnerable page.</p>
 <blockquote>  <figure><img src="images/lab-5-dom-xss-in-jquery-anchor-href-attribute-sink-using-location-search-source/366b75237172800088b0fbb18bfe871c.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>

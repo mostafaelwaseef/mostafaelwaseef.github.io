@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Level 1 → Level 2 — ROT13 Cipher — Mostafa Elwaseef's Portfolio</title>
+  <title>Lab 2 — File path traversal, traversal sequences blocked with absolute path bypass — Mostafa Elwaseef's Portfolio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
   <style>
@@ -101,83 +101,64 @@
 
 <div class="hero">
   <div class="hero-inner">
-    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#wargames">Wargames</a> / <a href="index.html">Krypton</a> / Level 1 → Level 2 — ROT13 Cipher</div>
-    <h1>Level 1 → Level 2 — ROT13 Cipher</h1>
+    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#labs">Labs</a> / <a href="index.html">Path Traversal</a> / Lab 2 — File path traversal, traversal sequences blocked with absolute path bypass</div>
+    <h1>Lab 2 — File path traversal, traversal sequences blocked with absolute path bypass</h1>
     <div class="meta-row">
-      <span class="badge badge-os">⚪ 🔵 Easy</span>
-      <span class="badge badge-date">📅 2026-06-14</span>
-      <span class="badge badge-os">🧩 ROT13</span>
+      <span class="badge badge-os">⚪ 🔴 High</span>
+      <span class="badge badge-date">📅 2026-07-12</span>
     </div>
   </div>
 </div>
 
 <div class="content">
-<h2 id="level-summary">📋 Level Summary</h2>
+<h2 id="finding-summary">📋 Finding Summary</h2>
 <div class='table-wrap'><table>
   <tr><th>Field</th><th>Value</th></tr>
-  <tr><td><strong>Type</strong></td><td>Krypton</td></tr>
-  <tr><td><strong>Cipher / Technique</strong></td><td>ROT13</td></tr>
-  <tr><td><strong>Difficulty</strong></td><td>🔵 Easy</td></tr>
-  <tr><td><strong>Date</strong></td><td>2026-06-14</td></tr>
+  <tr><td><strong>Type</strong></td><td>Web App</td></tr>
+  <tr><td><strong>Severity</strong></td><td>🔴 High</td></tr>
+  <tr><td><strong>CVE / CWE</strong></td><td>CWE-22: Improper Limitation of a Pathname to a Restricted Directory</td></tr>
+  <tr><td><strong>Date</strong></td><td>2026-07-12</td></tr>
 </table></div>
 <hr>
 <h2 id="description">🔍 Description</h2>
-<p>ROT13 is a simple substitution cipher that rotates each letter 13 positions forward in the alphabet. Because the alphabet has 26 letters, applying ROT13 twice returns the original text — making it its own inverse. It provides no real security and is trivially reversible without a key. Krypton uses a non-standard ciphertext format where word boundaries are preserved rather than grouped into 5-letter clusters.</p>
+<p>The application blocks traversal sequences such as <code>../</code> in the <code>filename</code> parameter used by the <code>/image</code> endpoint to load product images. However, the server treats the supplied filename as relative to a default working directory, and fails to restrict absolute paths. By supplying an absolute filesystem path (e.g. <code>/etc/passwd</code>) directly as the <code>filename</code> value — without any traversal sequences — the block is bypassed entirely, and the server reads and returns the target file.</p>
 <hr>
 <h2 id="end-goals">🎯 End Goals</h2>
 <ul>
-  <li>Find the encrypted password file <code>krypton2</code> inside <code>/krypton/krypton1/</code></li>
-  <li>Decode the ROT13 ciphertext to obtain the plaintext password</li>
-  <li>Use the decoded password to SSH into krypton2</li>
+  <li>Exploit the path traversal vulnerability in the product image endpoint</li>
+  <li>Bypass the traversal sequence block using an absolute path</li>
+  <li>Retrieve the contents of <code>/etc/passwd</code> from the server</li>
 </ul>
 <hr>
 <h2 id="steps-to-reproduce">🪜 Steps to Reproduce</h2>
 <ol>
-  <li>SSH into krypton1 and navigate to <code>/krypton/</code></li>
-  <li>Read the README file inside <code>/krypton/krypton1/</code> for level instructions</li>
-  <li>List files in <code>/krypton/krypton1/</code>, identify the file type of <code>krypton2</code>, and read its contents</li>
-  <li>Decode the ciphertext using ROT13</li>
-  <li>SSH into krypton2 using the decoded password</li>
+  <li>Browse to any product page on the shop</li>
+  <li>Open browser DevTools and inspect the product image element to identify the <code>filename</code> parameter</li>
+  <li>Modify the <code>filename</code> parameter to an absolute path (<code>/etc/passwd</code>) instead of a relative traversal sequence</li>
+  <li>Observe the server returns the file contents, solving the lab</li>
 </ol>
 <hr>
 <h2 id="analysis">🧠 Analysis</h2>
-<p><strong>Step 1 — Navigate to the krypton directory</strong><br>After logging in as krypton1, ran <code>cd /krypton</code> to navigate to the wargame directory, then <code>ls</code> to list available level directories: <code>krypton1</code> through <code>krypton7</code>.</p>
-<blockquote>  <figure><img src="images/level-1-level-2-rot13-cipher/37fb7523717280afaf6ed24cf004daa1.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/level-1-level-2-rot13-cipher/37fb7523717280b6bf1df6af50ef0a65.png" alt="screenshot" loading="lazy"></figure>
+<p><strong>Step 1 — Browse the shop and navigate to a product page</strong></p>
+<p>Opened the lab environment and browsed to the product page for “WTF? - The adult party game” at <code>/product?productId=1</code>. The page loaded normally with the product image displayed.</p>
+<blockquote>  <figure><img src="images/lab-2-file-path-traversal-traversal-sequences-blocked-with-absolute-path-bypass/39bb7523717280cc997fed910da1d835.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-2-file-path-traversal-traversal-sequences-blocked-with-absolute-path-bypass/39bb7523717280ba9759da26bb33f7d0.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 2 — Read the level instructions (README)</strong><br>Inside <code>/krypton/krypton1/</code>, ran <code>cat README</code> which confirmed the password for Level 2 is in the file <code>krypton2</code>, encrypted with a simple rotation cipher called ROT13. The file preserves plain text word boundaries in the ciphertext.</p>
-<blockquote>  <figure><img src="images/level-1-level-2-rot13-cipher/37fb7523717280298e8aeb49993be0c0.png" alt="screenshot" loading="lazy"></figure>
-</blockquote>
+<p><strong>Step 2 — Identify the vulnerable filename parameter via DevTools</strong></p>
+<p>Opened browser DevTools and used the Inspector to examine the product page HTML. The product image was found to load via <code>/image?filename=55.jpg</code>, directly exposing the <code>filename</code> parameter. The application blocks <code>../</code> traversal sequences, but the parameter accepts user-supplied input with no path restriction beyond filtering relative traversal characters.</p>
 <hr>
-<p><strong>Step 3 — List files and identify krypton2 file type</strong><br>Ran <code>ls</code> inside <code>/krypton/krypton1/</code> revealing two files: <code>krypton2</code> and <code>README</code>. Ran <code>file krypton2</code> which confirmed it is <code>ASCII text</code>, then <code>cat krypton2</code> to read the ciphertext: <code>YRIRY GJB CNFFJBEQ EBGGRA</code>.</p>
-<blockquote>  <figure><img src="images/level-1-level-2-rot13-cipher/37fb7523717280d69f92d00105da72f5.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/level-1-level-2-rot13-cipher/37fb75237172808fbde1e89bb76e617d.png" alt="screenshot" loading="lazy"></figure>
-</blockquote>
+<p><strong>Step 3 — Inject absolute path payload and solve the lab</strong></p>
+<p>Modified the <code>src</code> attribute in DevTools to <code>/image?filename=/etc/passwd</code>. Rather than using traversal sequences, the absolute path was supplied directly. The server passed the value to a file-read operation without validating that it resolved within an allowed base directory, returning the contents of <code>/etc/passwd</code>. The lab was marked Solved with the “Congratulations” banner.</p>
 <hr>
-<p><strong>Step 4 — Decode ROT13 using CyberChef</strong><br>Entered the ciphertext <code>YRIRY GJB CNFFJBEQ EBGGRA</code> into CyberChef with the ROT13 recipe (rotating upper and lower case chars by 13). The decoded output was <code>LEVEL TWO PASSWORD ROTTEN</code>, revealing the password <strong><code>ROTTEN</code></strong>.</p>
-<blockquote>  <figure><img src="images/level-1-level-2-rot13-cipher/37fb752371728030aa9ef59075b7abd9.png" alt="screenshot" loading="lazy"></figure>
-</blockquote>
-<hr>
-<p><strong>Step 5 — SSH into krypton2 with decoded password</strong><br>Ran <code>ssh krypton2@krypton.labs.overthewire.org -p 2231</code> and authenticated with password <strong><code>ROTTEN</code></strong>. The OTW welcome banner confirmed a successful login to the krypton2 shell.</p>
-<blockquote>  <figure><img src="images/level-1-level-2-rot13-cipher/37fb7523717280aea9dddb47964ad3f5.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/level-1-level-2-rot13-cipher/37fb7523717280148faee29d5d04cff7.png" alt="screenshot" loading="lazy"></figure>
-</blockquote>
-<hr>
-<h2 id="key-concepts-learned">🔑 Key Concepts Learned</h2>
-<ul>
-  <li>ROT13 is a Caesar cipher with a fixed shift of 13 — it is not encryption and provides zero security</li>
-  <li>Because the English alphabet has 26 letters, ROT13 is self-inverse: applying it twice restores the original text</li>
-  <li>Standard ciphertext groups letters into 5-character clusters to hide word boundaries; Krypton Level 1 deliberately skips this to ease the introduction</li>
-  <li>CyberChef is a powerful browser-based tool for quickly applying and chaining encoding/decoding/cipher operations</li>
-  <li>Recognizing ROT13 visually: common giveaways are <code>YRIRY</code> (LEVEL), <code>CNFFJBEQ</code> (PASSWORD), or the <code>=</code> → <code>=</code> symmetry in Base64-adjacent contexts</li>
-</ul>
+<h2 id="impact">🎯 Impact</h2>
+<p>An attacker can read arbitrary files from the server filesystem by bypassing naive traversal filters with absolute paths. Any defense that only strips or blocks <code>../</code> sequences without also enforcing that the resolved path falls within an allowed base directory is trivially circumvented. Sensitive files such as <code>/etc/passwd</code>, <code>/etc/shadow</code>, application configs, and private keys are all at risk.</p>
 <hr>
 <h2 id="references">📚 References</h2>
 <ul>
-  <li><a href="https://overthewire.org/wargames/krypton/krypton1.html" target="_blank" rel="noopener">OverTheWire: Krypton Level 1</a></li>
-  <li><a href="https://en.wikipedia.org/wiki/ROT13" target="_blank" rel="noopener">ROT13 — Wikipedia</a></li>
-  <li><a href="https://gchq.github.io/CyberChef/" target="_blank" rel="noopener">CyberChef</a></li>
+  <li><a href="https://portswigger.net/web-security/file-path-traversal/lab-absolute-path-bypass" target="_blank" rel="noopener">PortSwigger: File path traversal, traversal sequences blocked with absolute path bypass</a></li>
+  <li><a href="https://cwe.mitre.org/data/definitions/22.html" target="_blank" rel="noopener">CWE-22: Improper Limitation of a Pathname to a Restricted Directory</a></li>
+  <li><a href="https://owasp.org/www-community/attacks/Path_Traversal" target="_blank" rel="noopener">OWASP: Path Traversal</a></li>
 </ul>
 
 </div>

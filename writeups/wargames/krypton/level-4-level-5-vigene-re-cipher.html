@@ -144,20 +144,17 @@
 </ol>
 <hr>
 <h2 id="analysis">🧠 Analysis</h2>
-<p><strong>Step 1 — Navigate and read level files</strong>
-Logged in as krypton4. Ran <code>cd /krypton/krypton4</code> and <code>ls -la</code> to list files: <code>found1</code>, <code>found2</code>, <code>HINT</code>, <code>krypton5</code>, and <code>README</code>. Ran <code>cat README</code> which explained that this level uses a Vigenère cipher — a polyalphabetic cipher where each plaintext letter is shifted by the corresponding letter of a repeating key. The key length is 6. Ran <code>cat HINT</code> which confirmed: “Frequency analysis still works, but you need to analyze it by keylength. Analyse the 1st letter of the cipher text at offset 1, 7, 13, etc. — treat this as 6 different mono-alphabetic ciphers.”</p>
+<p><strong>Step 1 — Navigate and read level files</strong><br>Logged in as krypton4. Ran <code>cd /krypton/krypton4</code> and <code>ls -la</code> to list files: <code>found1</code>, <code>found2</code>, <code>HINT</code>, <code>krypton5</code>, and <code>README</code>. Ran <code>cat README</code> which explained that this level uses a Vigenère cipher — a polyalphabetic cipher where each plaintext letter is shifted by the corresponding letter of a repeating key. The key length is 6. Ran <code>cat HINT</code> which confirmed: “Frequency analysis still works, but you need to analyze it by keylength. Analyse the 1st letter of the cipher text at offset 1, 7, 13, etc. — treat this as 6 different mono-alphabetic ciphers.”</p>
 <blockquote>  <figure><img src="images/level-4-level-5-vigene-re-cipher/380b75237172801b8fd5c97d8b34e4fe.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/level-4-level-5-vigene-re-cipher/380b75237172807b89ffe0a3acbc6f72.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/level-4-level-5-vigene-re-cipher/380b752371728057aa7ffcc904a1cff1.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 2 — Read the intercepted ciphertext files</strong>
-Ran <code>cat found1; echo</code> to read the first intercepted message — a large block of uppercase ciphertext to be used for key recovery.</p>
+<p><strong>Step 2 — Read the intercepted ciphertext files</strong><br>Ran <code>cat found1; echo</code> to read the first intercepted message — a large block of uppercase ciphertext to be used for key recovery.</p>
 <blockquote>  <figure><img src="images/level-4-level-5-vigene-re-cipher/380b7523717280fdad89cef187cbd02a.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 3 — Frequency analysis on found1 to derive the key</strong>
-Fed <code>found1</code> to Claude with the known key length of 6. Claude split the ciphertext into 6 columns (positions 0, 6, 12, … → column 0; positions 1, 7, 13, … → column 1; etc.) and ran chi-squared frequency analysis on each column against expected English letter frequencies. The per-column shift breakdown:</p>
+<p><strong>Step 3 — Frequency analysis on found1 to derive the key</strong><br>Fed <code>found1</code> to Claude with the known key length of 6. Claude split the ciphertext into 6 columns (positions 0, 6, 12, … → column 0; positions 1, 7, 13, … → column 1; etc.) and ran chi-squared frequency analysis on each column against expected English letter frequencies. The per-column shift breakdown:</p>
 <ul>
   <li>Column 0 → shift 5 → key letter <strong>F</strong></li>
   <li>Column 1 → shift 17 → key letter <strong>R</strong></li>
@@ -172,19 +169,16 @@ Fed <code>found1</code> to Claude with the known key length of 6. Claude split t
   <figure><img src="images/level-4-level-5-vigene-re-cipher/380b75237172805e9f3ffbe697f2748a.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 4 — Confirm key with found2</strong>
-Fed <code>found2</code> to Claude with the same key length. The chi-squared scores came out cleaner overall (2453 letters vs 1450), giving more reliable per-column statistics. The same key <strong><code>FREKEY</code></strong> was derived, fully confirming the result.</p>
+<p><strong>Step 4 — Confirm key with found2</strong><br>Fed <code>found2</code> to Claude with the same key length. The chi-squared scores came out cleaner overall (2453 letters vs 1450), giving more reliable per-column statistics. The same key <strong><code>FREKEY</code></strong> was derived, fully confirming the result.</p>
 <blockquote>  <figure><img src="images/level-4-level-5-vigene-re-cipher/380b7523717280b781b4e23ce9ee4989.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 5 — Read and decrypt the krypton5 password</strong>
-Ran <code>cat krypton5; echo</code> which showed the ciphertext <code>HCIKV RJOX</code>. Asked Claude to decrypt <code>HCIKVRJOX</code> using key <code>FREKEY</code> — the plaintext was <strong><code>CLEARTEXT</code></strong>.</p>
+<p><strong>Step 5 — Read and decrypt the krypton5 password</strong><br>Ran <code>cat krypton5; echo</code> which showed the ciphertext <code>HCIKV RJOX</code>. Asked Claude to decrypt <code>HCIKVRJOX</code> using key <code>FREKEY</code> — the plaintext was <strong><code>CLEARTEXT</code></strong>.</p>
 <blockquote>  <figure><img src="images/level-4-level-5-vigene-re-cipher/380b75237172804bb868fb618086903f.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/level-4-level-5-vigene-re-cipher/380b7523717280b1ae90edef5dcf263d.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 6 — SSH into krypton5 with the decoded password</strong>
-Ran <code>ssh krypton5@krypton.labs.overthewire.org -p 2231</code> and authenticated with password <strong><code>CLEARTEXT</code></strong>. The OTW welcome banner confirmed a successful login to the krypton5 shell.</p>
+<p><strong>Step 6 — SSH into krypton5 with the decoded password</strong><br>Ran <code>ssh krypton5@krypton.labs.overthewire.org -p 2231</code> and authenticated with password <strong><code>CLEARTEXT</code></strong>. The OTW welcome banner confirmed a successful login to the krypton5 shell.</p>
 <blockquote>  <figure><img src="images/level-4-level-5-vigene-re-cipher/380b7523717280d6a7ebe58818230f0d.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/level-4-level-5-vigene-re-cipher/380b752371728036870adb3970283692.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
@@ -205,8 +199,6 @@ Ran <code>ssh krypton5@krypton.labs.overthewire.org -p 2231</code> and authentic
   <li><a href="https://en.wikipedia.org/wiki/Index_of_coincidence" target="_blank" rel="noopener">Index of coincidence — Wikipedia</a></li>
   <li><a href="https://en.wikipedia.org/wiki/Kasiski_examination" target="_blank" rel="noopener">Kasiski examination — Wikipedia</a></li>
 </ul>
-<hr>
-<blockquote>🤖 Documented with Claude otw-wargames skill</blockquote>
 
 </div>
 

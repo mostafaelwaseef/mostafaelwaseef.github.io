@@ -139,24 +139,20 @@
 </ol>
 <hr>
 <h2 id="analysis">🧠 Analysis</h2>
-<p><strong>Step 1 — Read the level instructions</strong>
-The Krypton Level 0 page provides a Base64-encoded string <code>S1JZUFRPTklTR1JFQVQ=</code> and instructs the user to decode it to obtain the password for krypton1. SSH details are also provided: host <code>krypton.labs.overthewire.org</code>, port <code>2231</code>, username <code>krypton1</code>.</p>
+<p><strong>Step 1 — Read the level instructions</strong><br>The Krypton Level 0 page provides a Base64-encoded string <code>S1JZUFRPTklTR1JFQVQ=</code> and instructs the user to decode it to obtain the password for krypton1. SSH details are also provided: host <code>krypton.labs.overthewire.org</code>, port <code>2231</code>, username <code>krypton1</code>.</p>
 <blockquote>  <figure><img src="images/level-0-level-1-base64-encoding/37fb75237172807d8aead518e0b46f16.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 2 — Save the Base64 string to a file and verify</strong>
-Ran <code>echo "S1JZUFRPTklTR1JFQVQ=" &gt; Password_0.txt</code> to save the encoded string to a file, then <code>cat Password_0.txt</code> to confirm the contents were written correctly, showing <code>S1JZUFRPTklTR1JFQVQ=</code>.</p>
+<p><strong>Step 2 — Save the Base64 string to a file and verify</strong><br>Ran <code>echo "S1JZUFRPTklTR1JFQVQ=" &gt; Password_0.txt</code> to save the encoded string to a file, then <code>cat Password_0.txt</code> to confirm the contents were written correctly, showing <code>S1JZUFRPTklTR1JFQVQ=</code>.</p>
 <blockquote>  <figure><img src="images/level-0-level-1-base64-encoding/37fb75237172809aabf9e51a275f04c6.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 3 — Decode the Base64 string</strong>
-Ran <code>base64 -d Password_0.txt</code> which decoded the string and produced the plaintext password <strong><code>KRYPTONISGREAT</code></strong>.</p>
+<p><strong>Step 3 — Decode the Base64 string</strong><br>Ran <code>base64 -d Password_0.txt</code> which decoded the string and produced the plaintext password <strong><code>KRYPTONISGREAT</code></strong>.</p>
 <blockquote>  <figure><img src="images/level-0-level-1-base64-encoding/37fb75237172807ea272d5c4c0336a6e.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/level-0-level-1-base64-encoding/37fb752371728014ba36c71566a78428.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 4 — SSH into krypton1 with the decoded password</strong>
-Ran <code>ssh krypton1@krypton.labs.overthewire.org -p 2231</code>, accepted the host fingerprint, and authenticated with the decoded password <strong><code>KRYPTONISGREAT</code></strong>. Successfully logged into the krypton1 shell, confirmed by the OverTheWire welcome banner.</p>
+<p><strong>Step 4 — SSH into krypton1 with the decoded password</strong><br>Ran <code>ssh krypton1@krypton.labs.overthewire.org -p 2231</code>, accepted the host fingerprint, and authenticated with the decoded password <strong><code>KRYPTONISGREAT</code></strong>. Successfully logged into the krypton1 shell, confirmed by the OverTheWire welcome banner.</p>
 <blockquote>  <figure><img src="images/level-0-level-1-base64-encoding/37fb752371728083a65fd7e36cd5e5bc.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
@@ -173,8 +169,6 @@ Ran <code>ssh krypton1@krypton.labs.overthewire.org -p 2231</code>, accepted the
   <li><a href="https://overthewire.org/wargames/krypton/krypton0.html" target="_blank" rel="noopener">OverTheWire: Krypton Level 0</a></li>
   <li><a href="https://en.wikipedia.org/wiki/Base64" target="_blank" rel="noopener">Base64 — Wikipedia</a></li>
 </ul>
-<hr>
-<blockquote>🤖 Documented with Claude otw-wargames skill</blockquote>
 
 </div>
 

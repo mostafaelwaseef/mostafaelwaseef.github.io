@@ -151,6 +151,7 @@
 <blockquote>  <figure><img src="images/lab-12-csrf-with-broken-referer-validation/38fb7523717280a2bc1bf718c7aca353.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/lab-12-csrf-with-broken-referer-validation/38fb75237172808ea1a9f47d471c672c.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/lab-12-csrf-with-broken-referer-validation/38fb7523717280a5bd64d0c4a165b595.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-12-csrf-with-broken-referer-validation/399b75237172803b8980d7e352756eb5.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
 <p><strong>Step 3 — Generate CSRF PoC, test, and probe Referer validation</strong></p>
@@ -171,7 +172,8 @@
 <hr>
 <p><strong>Step 5 — Build PoC with </strong><strong><code>history.pushState</code></strong><strong> → “Invalid referer header”</strong></p>
 <p>A fresh CSRF PoC was generated and modified to include <code>history.pushState('', '/', '/?LAB-DOMAIN')</code> before the form submission. This manipulates the browser’s current URL so the Referer sent with the form POST would include the lab domain as a query parameter. The exploit was tested in browser — the server returned <code>"Invalid referer header"</code> because modern browsers automatically strip query strings from the Referer header on cross-origin submissions, so the lab domain never reached the server.</p>
-<blockquote>  <figure><img src="images/lab-12-csrf-with-broken-referer-validation/38fb75237172801d8d17cd2190f5c204.png" alt="screenshot" loading="lazy"></figure>
+<blockquote>  <figure><img src="images/lab-12-csrf-with-broken-referer-validation/399b7523717280a2b7a5d720b6b948e9.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-12-csrf-with-broken-referer-validation/38fb75237172801d8d17cd2190f5c204.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/lab-12-csrf-with-broken-referer-validation/38fb752371728056a998c1ad3b5fd44f.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>

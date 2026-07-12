@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Web Shell Upload via Content-Type Restriction Bypass — Mostafa Elwaseef's Portfolio</title>
+  <title>Lab 2 — Web Shell Upload via Content-Type Restriction Bypass — Mostafa Elwaseef's Portfolio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
   <style>
@@ -101,8 +101,8 @@
 
 <div class="hero">
   <div class="hero-inner">
-    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#labs">Labs</a> / <a href="index.html">File Upload Vulnerabilities</a> / Web Shell Upload via Content-Type Restriction Bypass</div>
-    <h1>Web Shell Upload via Content-Type Restriction Bypass</h1>
+    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#labs">Labs</a> / <a href="index.html">File Upload Vulnerabilities</a> / Lab 2 — Web Shell Upload via Content-Type Restriction Bypass</div>
+    <h1>Lab 2 — Web Shell Upload via Content-Type Restriction Bypass</h1>
     <div class="meta-row">
       <span class="badge badge-os">⚪ 🔴 High</span>
       <span class="badge badge-date">📅 2026-05-13</span>
@@ -145,40 +145,40 @@
 <h2 id="analysis">🧠 Analysis</h2>
 <p><strong>Step 1 — Logging in and observing the upload function</strong></p>
 <p>Logged in as <code>wiener</code> using credentials <code>wiener:peter</code>. The account page presented an avatar upload form. A cat image was already set as the avatar, confirming the upload function was previously used.</p>
-<blockquote>  <figure><img src="images/web-shell-upload-via-content-type-restriction-bypass/35fb7523717280c896b9f4121baeab4f.png" alt="screenshot" loading="lazy"></figure>
+<blockquote>  <figure><img src="images/lab-2-web-shell-upload-via-content-type-restriction-bypass/35fb7523717280c896b9f4121baeab4f.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
 <p><strong>Step 2 — Uploading a benign image to confirm behavior</strong></p>
 <p>Selected <code>images.jpeg</code> and uploaded it via the avatar form. The server accepted it and responded: <code>The file avatars/images.jpeg has been uploaded.</code> Burp Suite confirmed the POST request to <code>/my-account/avatar</code> returned HTTP 200 OK with <code>Content-Type: text/html</code>.</p>
-<blockquote>  <figure><img src="images/web-shell-upload-via-content-type-restriction-bypass/35fb75237172807f988cf7b554999139.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/web-shell-upload-via-content-type-restriction-bypass/35fb75237172801eae82fd24701fd1d8.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/web-shell-upload-via-content-type-restriction-bypass/35fb75237172805d92b5f4f18ee22a47.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/web-shell-upload-via-content-type-restriction-bypass/35fb752371728027b6abdb3edb81927f.png" alt="screenshot" loading="lazy"></figure>
+<blockquote>  <figure><img src="images/lab-2-web-shell-upload-via-content-type-restriction-bypass/35fb75237172807f988cf7b554999139.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-2-web-shell-upload-via-content-type-restriction-bypass/35fb75237172801eae82fd24701fd1d8.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-2-web-shell-upload-via-content-type-restriction-bypass/35fb75237172805d92b5f4f18ee22a47.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-2-web-shell-upload-via-content-type-restriction-bypass/35fb752371728027b6abdb3edb81927f.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
 <p><strong>Step 3 — Crafting the payload and attempting to upload the PHP web shell directly</strong></p>
 <p>The PHP web shell <code>exploit.php</code> was created using nano with the following payload:</p>
 <pre><code class="language-javascript">&lt;?php echo file_get_contents('/home/carlos/secret'); ?&gt;</code></pre>
 <p>The file was then uploaded directly without modification. The server rejected it with the error: <code>Sorry, file type application/x-php is not allowed. Only image/jpeg and image/png are allowed.</code> Burp confirmed the POST returned HTTP 403 Forbidden, revealing the server validates only the <code>Content-Type</code> header.</p>
-<blockquote>  <figure><img src="images/web-shell-upload-via-content-type-restriction-bypass/35fb75237172809f906efaa9b56ff47c.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/web-shell-upload-via-content-type-restriction-bypass/35fb75237172809bb2eef251676fda3e.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/web-shell-upload-via-content-type-restriction-bypass/35fb7523717280b295cee4f643ce88d7.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/web-shell-upload-via-content-type-restriction-bypass/35fb7523717280fda70dd80381d8868a.png" alt="screenshot" loading="lazy"></figure>
+<blockquote>  <figure><img src="images/lab-2-web-shell-upload-via-content-type-restriction-bypass/35fb75237172809f906efaa9b56ff47c.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-2-web-shell-upload-via-content-type-restriction-bypass/35fb75237172809bb2eef251676fda3e.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-2-web-shell-upload-via-content-type-restriction-bypass/35fb7523717280b295cee4f643ce88d7.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-2-web-shell-upload-via-content-type-restriction-bypass/35fb7523717280fda70dd80381d8868a.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
 <p><strong>Step 4 — Bypassing the restriction via Content-Type manipulation</strong></p>
 <p>With Burp Suite Intercept enabled, the PHP upload request was captured. The <code>Content-Type</code> header in the multipart form data was changed from <code>application/x-php</code> to <code>image/jpeg</code> while keeping the PHP payload intact. The modified request was forwarded. The server accepted it and responded: <code>The file avatars/exploit.php has been uploaded.</code></p>
-<blockquote>  <figure><img src="images/web-shell-upload-via-content-type-restriction-bypass/35fb7523717280d3be9ded943f910329.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/web-shell-upload-via-content-type-restriction-bypass/35fb75237172800299a0cfa219f08fd7.png" alt="screenshot" loading="lazy"></figure>
+<blockquote>  <figure><img src="images/lab-2-web-shell-upload-via-content-type-restriction-bypass/35fb7523717280d3be9ded943f910329.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-2-web-shell-upload-via-content-type-restriction-bypass/35fb75237172800299a0cfa219f08fd7.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
 <p><strong>Step 5 — Triggering the web shell and retrieving the secret</strong></p>
 <p>A GET request was sent directly to <code>/files/avatars/exploit.php</code>. The server executed the PHP file and returned the secret:</p>
 <pre><code class="language-javascript">kFOZfjRYDMFRmMNmuDmS0wn6sVJXVl2</code></pre>
 <p>The secret was submitted via the lab banner to confirm the lab was solved.</p>
-<blockquote>  <figure><img src="images/web-shell-upload-via-content-type-restriction-bypass/35fb752371728023a355df8b640f31b7.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/web-shell-upload-via-content-type-restriction-bypass/35fb7523717280dcae5dc7a283cb9108.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/web-shell-upload-via-content-type-restriction-bypass/35fb75237172808fb404ccf7ef4ce46d.png" alt="screenshot" loading="lazy"></figure>
+<blockquote>  <figure><img src="images/lab-2-web-shell-upload-via-content-type-restriction-bypass/35fb752371728023a355df8b640f31b7.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-2-web-shell-upload-via-content-type-restriction-bypass/35fb7523717280dcae5dc7a283cb9108.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-2-web-shell-upload-via-content-type-restriction-bypass/35fb75237172808fb404ccf7ef4ce46d.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
 <h2 id="impact">🎯 Impact</h2>

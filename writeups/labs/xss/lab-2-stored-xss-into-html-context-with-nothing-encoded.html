@@ -139,28 +139,23 @@
 </ol>
 <hr>
 <h2 id="analysis">🧠 Analysis</h2>
-<p><strong>Step 1 — Access the lab</strong>
-The lab environment loaded a blog application showing a list of posts. The lab status showed “Not solved”, indicating no prior interaction.</p>
+<p><strong>Step 1 — Access the lab</strong><br>The lab environment loaded a blog application showing a list of posts. The lab status showed “Not solved”, indicating no prior interaction.</p>
 <blockquote>  <figure><img src="images/lab-2-stored-xss-into-html-context-with-nothing-encoded/366b7523717280a190fad502e3dc12c0.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 2 — Submit XSS payload as a comment</strong>
-A blog post was opened and the comment form was filled with the payload <code>&lt;Script&gt;alert("TEST")&lt;/Script&gt;</code> in the Comment field, along with name “test” and email “me@test.com”. The form was submitted by clicking Post Comment. The application accepted the input without any validation or sanitization, storing the raw script tag in the database.</p>
+<p><strong>Step 2 — Submit XSS payload as a comment</strong><br>A blog post was opened and the comment form was filled with the payload <code>&lt;Script&gt;alert("TEST")&lt;/Script&gt;</code> in the Comment field, along with name “test” and email “me@test.com”. The form was submitted by clicking Post Comment. The application accepted the input without any validation or sanitization, storing the raw script tag in the database.</p>
 <blockquote>  <figure><img src="images/lab-2-stored-xss-into-html-context-with-nothing-encoded/366b752371728004ba8ffddb1b8ad337.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 3 — Comment submitted, lab solved</strong>
-After submitting the comment, the page displayed “Thank you for your comment! Your comment has been submitted.” and the lab status banner updated to Solved, confirming the stored payload was accepted.</p>
+<p><strong>Step 3 — Comment submitted, lab solved</strong><br>After submitting the comment, the page displayed “Thank you for your comment! Your comment has been submitted.” and the lab status banner updated to Solved, confirming the stored payload was accepted.</p>
 <blockquote>  <figure><img src="images/lab-2-stored-xss-into-html-context-with-nothing-encoded/366b7523717280649597c37da3978706.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 4 — Revisit blog post — stored comment visible</strong>
-Navigating back to the blog post revealed the stored comment by “test | 20 May 2026”, confirming the payload was persisted in the application and rendered into the page HTML.</p>
+<p><strong>Step 4 — Revisit blog post — stored comment visible</strong><br>Navigating back to the blog post revealed the stored comment by “test | 20 May 2026”, confirming the payload was persisted in the application and rendered into the page HTML.</p>
 <blockquote><em>(Drag 05.png here)</em>  <figure><img src="images/lab-2-stored-xss-into-html-context-with-nothing-encoded/366b752371728070b1fae676915c7b2c.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 5 — alert() fires</strong>
-Upon loading the blog post, the stored script executed automatically and an alert dialog appeared with the text “TEST”. This confirmed that the injected payload runs in the browser of any user who visits the page — without any further interaction required. The alert fired on each subsequent page load, demonstrating the persistent nature of the vulnerability.</p>
+<p><strong>Step 5 — alert() fires</strong><br>Upon loading the blog post, the stored script executed automatically and an alert dialog appeared with the text “TEST”. This confirmed that the injected payload runs in the browser of any user who visits the page — without any further interaction required. The alert fired on each subsequent page load, demonstrating the persistent nature of the vulnerability.</p>
 <blockquote>  <figure><img src="images/lab-2-stored-xss-into-html-context-with-nothing-encoded/366b752371728043aac1eb33e62d6795.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>

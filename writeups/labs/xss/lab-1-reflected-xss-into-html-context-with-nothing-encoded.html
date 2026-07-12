@@ -139,23 +139,19 @@
 </ol>
 <hr>
 <h2 id="analysis">🧠 Analysis</h2>
-<p><strong>Step 1 — Access the lab</strong>
-The lab environment loaded a blog application with a search field. The lab status showed “Not solved”, indicating no prior interaction.</p>
+<p><strong>Step 1 — Access the lab</strong><br>The lab environment loaded a blog application with a search field. The lab status showed “Not solved”, indicating no prior interaction.</p>
 <blockquote>  <figure><img src="images/lab-1-reflected-xss-into-html-context-with-nothing-encoded/366b7523717280a1aec0ee27f455098c.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 2 — Inject the XSS payload</strong>
-The payload <code>&lt;Script&gt;alert("test")&lt;/Script&gt;</code> was entered into the search box and submitted. The application reflected the input directly back into the HTML response without any encoding or sanitization, allowing the script tag to be interpreted by the browser.</p>
+<p><strong>Step 2 — Inject the XSS payload</strong><br>The payload <code>&lt;Script&gt;alert("test")&lt;/Script&gt;</code> was entered into the search box and submitted. The application reflected the input directly back into the HTML response without any encoding or sanitization, allowing the script tag to be interpreted by the browser.</p>
 <blockquote>  <figure><img src="images/lab-1-reflected-xss-into-html-context-with-nothing-encoded/366b752371728039bf41fb1fd32a872a.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 3 — alert() fires</strong>
-Upon submission, the browser executed the injected script and displayed an alert dialog with the text “test”. This confirms that the search parameter is vulnerable to reflected XSS — unsanitized user input is rendered as executable JavaScript in the page.</p>
+<p><strong>Step 3 — alert() fires</strong><br>Upon submission, the browser executed the injected script and displayed an alert dialog with the text “test”. This confirms that the search parameter is vulnerable to reflected XSS — unsanitized user input is rendered as executable JavaScript in the page.</p>
 <blockquote>  <figure><img src="images/lab-1-reflected-xss-into-html-context-with-nothing-encoded/366b75237172807a8ac5ea4c27979153.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 4 — Lab solved</strong>
-After dismissing the alert, the page displayed “Congratulations, you solved the lab!” and the lab status updated to Solved, confirming successful exploitation.</p>
+<p><strong>Step 4 — Lab solved</strong><br>After dismissing the alert, the page displayed “Congratulations, you solved the lab!” and the lab status updated to Solved, confirming successful exploitation.</p>
 <blockquote>  <figure><img src="images/lab-1-reflected-xss-into-html-context-with-nothing-encoded/366b752371728024ac24f72babda70c6.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>

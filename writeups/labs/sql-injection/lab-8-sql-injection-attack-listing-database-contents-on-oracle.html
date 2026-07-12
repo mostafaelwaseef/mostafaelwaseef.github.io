@@ -147,9 +147,7 @@
 <h2 id="analysis">🧠 Analysis</h2>
 <p><strong>Step 1 — Column count confirmation</strong></p>
 <p>The lab home page confirmed the target was unsolved. The product category filter parameter was intercepted in Burp Suite. An initial probe with <code>' UNION SELECT NULL--</code> returned a 500 error, indicating the query returns more than one column. A follow-up with two NULLs (<code>' UNION SELECT NULL,NULL--</code>) also returned a 500 — the query was syntactically valid in column count but Oracle requires a <code>FROM</code> clause in every <code>SELECT</code> statement, which standard syntax omits. Adding <code>FROM DUAL</code> (<code>' UNION SELECT NULL,NULL FROM DUAL--</code>) returned a 200 OK, confirming exactly two columns.</p>
-<pre><code class="language-javascript">' UNION SELECT NULL--
-' UNION SELECT NULL,NULL--
-' UNION SELECT NULL,NULL FROM DUAL--</code></pre>
+<pre><code class="language-javascript">' UNION SELECT NULL--<br>' UNION SELECT NULL,NULL--<br>' UNION SELECT NULL,NULL FROM DUAL--</code></pre>
 <blockquote>  <figure><img src="images/lab-8-sql-injection-attack-listing-database-contents-on-oracle/35db7523717280079005fc9670226614.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/lab-8-sql-injection-attack-listing-database-contents-on-oracle/35db75237172801aa805fdb2746957e5.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/lab-8-sql-injection-attack-listing-database-contents-on-oracle/35db7523717280158782f1cba42ae179.png" alt="screenshot" loading="lazy"></figure>
@@ -158,8 +156,7 @@
 <hr>
 <p><strong>Step 2 — String type confirmation</strong></p>
 <p>With two columns established, each was tested individually for string compatibility by injecting a string literal into one column while keeping the other as NULL. The payload <code>' UNION SELECT 'a',NULL FROM DUAL--</code> confirmed the first column accepts strings; <code>' UNION SELECT NULL,'a' FROM DUAL--</code> confirmed the second. Both columns could be used to extract text data.</p>
-<pre><code class="language-javascript">' UNION SELECT 'a',NULL FROM DUAL--
-' UNION SELECT NULL,'a' FROM DUAL--</code></pre>
+<pre><code class="language-javascript">' UNION SELECT 'a',NULL FROM DUAL--<br>' UNION SELECT NULL,'a' FROM DUAL--</code></pre>
 <blockquote>  <figure><img src="images/lab-8-sql-injection-attack-listing-database-contents-on-oracle/35db75237172809b9bb6ccb2cfc5c0c5.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/lab-8-sql-injection-attack-listing-database-contents-on-oracle/35db7523717280c498dbfb4338047e25.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>

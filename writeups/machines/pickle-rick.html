@@ -133,10 +133,7 @@
 <p>Identify open ports, running services, and the target operating system to map the attack surface.</p>
 <h3 id="findings">Findings</h3>
 <p>An Nmap service and OS detection scan revealed two open ports: SSH on port 22 running OpenSSH 8.2p1 on Ubuntu, and HTTP on port 80 running Apache 2.4.41. Nmap could not find an exact OS match but service info confirmed the target is running Linux. With only two services exposed, the HTTP server was the primary target for further enumeration.</p>
-<p><strong>PoC:</strong>
-- <strong>Tools used</strong>: Nmap
-- <strong>Command</strong>: <code>nmap -sV -O &lt;TARGET_IP&gt;</code>
-- <strong>Result</strong>: Two open ports — 22/tcp (OpenSSH 8.2p1 Ubuntu) and 80/tcp (Apache httpd 2.4.41). No exact OS match; service info confirmed Linux.</p>
+<p><strong>PoC:</strong><br>- <strong>Tools used</strong>: Nmap<br>- <strong>Command</strong>: <code>nmap -sV -O &lt;TARGET_IP&gt;</code><br>- <strong>Result</strong>: Two open ports — 22/tcp (OpenSSH 8.2p1 Ubuntu) and 80/tcp (Apache httpd 2.4.41). No exact OS match; service info confirmed Linux.</p>
 <p>Navigating to the web server on port 80 presented a themed page requesting help finding three secret ingredients — confirming this is the target application.</p>
 <blockquote>  <figure><img src="images/pickle-rick/394b75237172805e9608fc139b0a8946.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/pickle-rick/394b75237172803296bff1d66e408a0b.png" alt="screenshot" loading="lazy"></figure>
@@ -148,34 +145,22 @@
 <h3 id="findings">Findings</h3>
 <p>Source Code Inspection</p>
 <p>Viewing the page source revealed an HTML comment containing a username in cleartext — a common developer oversight where debug or reminder comments are left in production code.</p>
-<p><strong>PoC:</strong>
-- <strong>Tools used</strong>: Browser
-- <strong>Command</strong>: View page source (<code>Ctrl+U</code>)
-- <strong>Result</strong>: HTML comment containing a username in cleartext [REDACTED]</p>
+<p><strong>PoC:</strong><br>- <strong>Tools used</strong>: Browser<br>- <strong>Command</strong>: View page source (<code>Ctrl+U</code>)<br>- <strong>Result</strong>: HTML comment containing a username in cleartext [REDACTED]</p>
 <blockquote>  <figure><img src="images/pickle-rick/394b7523717280b591d3e0e10343a790.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <p>Directory and File Enumeration</p>
 <p>Gobuster was used to brute-force directories and files with <code>php</code> and <code>html</code> extensions. The scan revealed several interesting endpoints: <code>/login.php</code> (a login form), <code>/portal.php</code> (redirecting to login — suggesting authenticated content behind it), <code>/robots.txt</code>, and <code>/denied.php</code>. The <code>/server-status</code> endpoint returned 403 Forbidden.</p>
-<p><strong>PoC:</strong>
-- <strong>Tools used</strong>: Gobuster
-- <strong>Command</strong>: <code>gobuster dir -u http://&lt;TARGET_IP&gt; -w /usr/share/wordlists/dirb/common.txt -x php,html -t 50</code>
-- <strong>Result</strong>: Discovered <code>/login.php</code> (200), <code>/portal.php</code> (302 → /login.php), <code>/robots.txt</code> (200), <code>/assets/</code> (301), <code>/denied.php</code> (302 → /login.php)</p>
+<p><strong>PoC:</strong><br>- <strong>Tools used</strong>: Gobuster<br>- <strong>Command</strong>: <code>gobuster dir -u http://&lt;TARGET_IP&gt; -w /usr/share/wordlists/dirb/common.txt -x php,html -t 50</code><br>- <strong>Result</strong>: Discovered <code>/login.php</code> (200), <code>/portal.php</code> (302 → /login.php), <code>/robots.txt</code> (200), <code>/assets/</code> (301), <code>/denied.php</code> (302 → /login.php)</p>
 <blockquote>  <figure><img src="images/pickle-rick/394b7523717280bcbf69f6265f1f5ba7.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <p>robots.txt</p>
 <p>The <code>robots.txt</code> file contained a single string that did not correspond to any directory or user-agent — instead, it appeared to be a password. Combined with the username found in the page source, this formed a complete credential pair.</p>
-<p><strong>PoC:</strong>
-- <strong>Tools used</strong>: Browser
-- <strong>Command</strong>: Navigate to <code>http://&lt;TARGET_IP&gt;/robots.txt</code>
-- <strong>Result</strong>: Single string identified as a potential password [REDACTED]</p>
+<p><strong>PoC:</strong><br>- <strong>Tools used</strong>: Browser<br>- <strong>Command</strong>: Navigate to <code>http://&lt;TARGET_IP&gt;/robots.txt</code><br>- <strong>Result</strong>: Single string identified as a potential password [REDACTED]</p>
 <blockquote>  <figure><img src="images/pickle-rick/394b75237172802693fbe23b160cc96d.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <p>SSH Login Attempt (Failed)</p>
 <p>Before using the credentials on the web application, an SSH login was attempted to test credential reuse. The connection was rejected with “Permission denied (publickey)” — the server only accepts public key authentication and does not allow password-based logins. This eliminated SSH as a viable entry point.</p>
-<p><strong>PoC:</strong>
-- <strong>Tools used</strong>: SSH client
-- <strong>Command</strong>: <code>ssh &lt;USERNAME&gt;@&lt;TARGET_IP&gt;</code>
-- <strong>Result</strong>: Permission denied (publickey)</p>
+<p><strong>PoC:</strong><br>- <strong>Tools used</strong>: SSH client<br>- <strong>Command</strong>: <code>ssh &lt;USERNAME&gt;@&lt;TARGET_IP&gt;</code><br>- <strong>Result</strong>: Permission denied (publickey)</p>
 <blockquote>  <figure><img src="images/pickle-rick/394b752371728017bca0cc9995c652b0.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>

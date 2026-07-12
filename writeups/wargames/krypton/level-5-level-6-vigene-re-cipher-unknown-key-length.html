@@ -145,20 +145,17 @@
 </ol>
 <hr>
 <h2 id="analysis">🧠 Analysis</h2>
-<p><strong>Step 1 — Navigate and read level files</strong>
-Logged in as krypton5. Ran <code>cd /krypton/krypton5</code> and <code>ls -la</code> to list files: <code>found1</code>, <code>found2</code>, <code>found3</code>, <code>krypton6</code>, and <code>README</code>. Ran <code>cat README</code> which explained that this level uses a Vigenère cipher — but this time the key length is unknown. Three intercepted ciphertext files are provided, and the README hints that frequency analysis can still break a known key length — the challenge is finding it first.</p>
+<p><strong>Step 1 — Navigate and read level files</strong><br>Logged in as krypton5. Ran <code>cd /krypton/krypton5</code> and <code>ls -la</code> to list files: <code>found1</code>, <code>found2</code>, <code>found3</code>, <code>krypton6</code>, and <code>README</code>. Ran <code>cat README</code> which explained that this level uses a Vigenère cipher — but this time the key length is unknown. Three intercepted ciphertext files are provided, and the README hints that frequency analysis can still break a known key length — the challenge is finding it first.</p>
 <blockquote>  <figure><img src="images/level-5-level-6-vigene-re-cipher-unknown-key-length/380b752371728060a5d3ec2fdb6a0575.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/level-5-level-6-vigene-re-cipher-unknown-key-length/380b752371728007bdf1e190014cea84.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 2 — Outline the cryptanalysis strategy (Kasiski + IoC + frequency analysis)</strong>
-Pasted the problem to Claude: polyalphabetic cipher, key length unknown, three ciphertext files available. Claude outlined the two-phase strategy. Phase 1 — determine the key length: (1) <strong>Kasiski examination</strong> — search for repeated 3-letter sequences (trigrams) in the ciphertext; if a distance between two repeats is a multiple of the key length, the GCD of all such distances is a strong key length candidate. (2) <strong>Index of Coincidence</strong> — for each candidate key length <code>k</code>, split the ciphertext into <code>k</code> columns and compute the average IoC across columns using <code>IC = Σ(n_i × (n_i − 1)) / (N × (N − 1))</code>; English text has IoC ≈ 0.065–0.070, random text ≈ 0.038 — the key length that pushes IoC closest to English is the correct one. Phase 2 — once the key length is confirmed, split into columns and run chi-squared frequency analysis on each column independently to recover each key letter.</p>
+<p><strong>Step 2 — Outline the cryptanalysis strategy (Kasiski + IoC + frequency analysis)</strong><br>Pasted the problem to Claude: polyalphabetic cipher, key length unknown, three ciphertext files available. Claude outlined the two-phase strategy. Phase 1 — determine the key length: (1) <strong>Kasiski examination</strong> — search for repeated 3-letter sequences (trigrams) in the ciphertext; if a distance between two repeats is a multiple of the key length, the GCD of all such distances is a strong key length candidate. (2) <strong>Index of Coincidence</strong> — for each candidate key length <code>k</code>, split the ciphertext into <code>k</code> columns and compute the average IoC across columns using <code>IC = Σ(n_i × (n_i − 1)) / (N × (N − 1))</code>; English text has IoC ≈ 0.065–0.070, random text ≈ 0.038 — the key length that pushes IoC closest to English is the correct one. Phase 2 — once the key length is confirmed, split into columns and run chi-squared frequency analysis on each column independently to recover each key letter.</p>
 <blockquote>  <figure><img src="images/level-5-level-6-vigene-re-cipher-unknown-key-length/380b7523717280aea7b2f8fc4d68c85e.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/level-5-level-6-vigene-re-cipher-unknown-key-length/380b75237172800d828bf244a0f1d670.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 3 — Frequency analysis on found1</strong>
-Pasted <code>found1</code> to Claude. Kasiski examination found that factor 9 appeared overwhelmingly in 166 repeated-trigram distances — a strong signal. IoC confirmation tested key lengths 6, 9, and 12: key length 6 gave IoC 0.0518, key length 9 gave <strong>0.0700</strong> (squarely in the English range), key length 12 gave 0.0523 — a clear standout. Per-column chi-squared analysis across 9 columns gave the following shifts:</p>
+<p><strong>Step 3 — Frequency analysis on found1</strong><br>Pasted <code>found1</code> to Claude. Kasiski examination found that factor 9 appeared overwhelmingly in 166 repeated-trigram distances — a strong signal. IoC confirmation tested key lengths 6, 9, and 12: key length 6 gave IoC 0.0518, key length 9 gave <strong>0.0700</strong> (squarely in the English range), key length 12 gave 0.0523 — a clear standout. Per-column chi-squared analysis across 9 columns gave the following shifts:</p>
 <div class='table-wrap'><table>
   <tr><th>Column</th><th>Best shift</th><th>Key letter</th></tr>
   <tr><td>0</td><td>10</td><td>K</td></tr>
@@ -177,26 +174,22 @@ Pasted <code>found1</code> to Claude. Kasiski examination found that factor 9 ap
   <figure><img src="images/level-5-level-6-vigene-re-cipher-unknown-key-length/380b7523717280b5a61feb72886d6f17.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 4 — Frequency analysis on found2</strong>
-Pasted <code>found2</code> to Claude with the same analysis. IoC for key length 9 came out at 0.0653 (vs. ~−0.04 for all other lengths), and the Kasiski factor 9 appeared in 166 repeated-trigram distances — independently confirming the key length. Per-column chi-squared produced the identical shift table: the same key <strong><code>KEYLENGTH</code></strong> was derived from the second file without any input from the first result.</p>
+<p><strong>Step 4 — Frequency analysis on found2</strong><br>Pasted <code>found2</code> to Claude with the same analysis. IoC for key length 9 came out at 0.0653 (vs. ~−0.04 for all other lengths), and the Kasiski factor 9 appeared in 166 repeated-trigram distances — independently confirming the key length. Per-column chi-squared produced the identical shift table: the same key <strong><code>KEYLENGTH</code></strong> was derived from the second file without any input from the first result.</p>
 <blockquote>  <figure><img src="images/level-5-level-6-vigene-re-cipher-unknown-key-length/380b75237172805d8819f8870dcf021e.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/level-5-level-6-vigene-re-cipher-unknown-key-length/380b75237172800ba854cdd6f0732cdf.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 5 — Frequency analysis on found3</strong>
-Pasted <code>found3</code> to Claude. IoC for key length 9 was again 0.0653 (vs. ~−0.04 elsewhere), and the per-column analysis produced the same shift table for all 9 columns. All three files independently converged on <strong><code>KEYLENGTH</code></strong> — a triple confirmation that the key is correct.</p>
+<p><strong>Step 5 — Frequency analysis on found3</strong><br>Pasted <code>found3</code> to Claude. IoC for key length 9 was again 0.0653 (vs. ~−0.04 elsewhere), and the per-column analysis produced the same shift table for all 9 columns. All three files independently converged on <strong><code>KEYLENGTH</code></strong> — a triple confirmation that the key is correct.</p>
 <blockquote>  <figure><img src="images/level-5-level-6-vigene-re-cipher-unknown-key-length/380b752371728021bad5e8380b8f3fc1.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/level-5-level-6-vigene-re-cipher-unknown-key-length/380b7523717280269fd9eac9d391ef27.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 6 — Read and decrypt the krypton6 password</strong>
-Ran <code>cat krypton6; echo</code> which showed the ciphertext <code>BELOS Z</code>. Asked Claude to decrypt <code>BELOSZ</code> using key <code>KEYLENGTH</code> (cycling through K-E-Y-L-E-N). The letter-by-letter decryption: B−K=R, E−E=A, L−Y=N, O−L=D, S−E=O, Z−N=M — giving the plaintext <strong><code>RANDOM</code></strong>.</p>
+<p><strong>Step 6 — Read and decrypt the krypton6 password</strong><br>Ran <code>cat krypton6; echo</code> which showed the ciphertext <code>BELOS Z</code>. Asked Claude to decrypt <code>BELOSZ</code> using key <code>KEYLENGTH</code> (cycling through K-E-Y-L-E-N). The letter-by-letter decryption: B−K=R, E−E=A, L−Y=N, O−L=D, S−E=O, Z−N=M — giving the plaintext <strong><code>RANDOM</code></strong>.</p>
 <blockquote>  <figure><img src="images/level-5-level-6-vigene-re-cipher-unknown-key-length/380b7523717280b4a464c33d84eec573.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/level-5-level-6-vigene-re-cipher-unknown-key-length/380b7523717280c7861aed17e82ff1d3.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 7 — SSH into krypton6 with the decoded password</strong>
-Ran <code>exit</code> to leave krypton5, then <code>ssh krypton6@krypton.labs.overthewire.org -p 2231</code> and authenticated with password <strong><code>RANDOM</code></strong>. The OTW welcome banner confirmed a successful login to the krypton6 shell.</p>
+<p><strong>Step 7 — SSH into krypton6 with the decoded password</strong><br>Ran <code>exit</code> to leave krypton5, then <code>ssh krypton6@krypton.labs.overthewire.org -p 2231</code> and authenticated with password <strong><code>RANDOM</code></strong>. The OTW welcome banner confirmed a successful login to the krypton6 shell.</p>
 <blockquote>  <figure><img src="images/level-5-level-6-vigene-re-cipher-unknown-key-length/380b752371728096b006e979aebacf14.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/level-5-level-6-vigene-re-cipher-unknown-key-length/380b75237172807e9f6cdc4a6a0884e7.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
@@ -219,8 +212,6 @@ Ran <code>exit</code> to leave krypton5, then <code>ssh krypton6@krypton.labs.ov
   <li><a href="https://en.wikipedia.org/wiki/Vigen%C3%A8re_cipher" target="_blank" rel="noopener">Vigenère cipher — Wikipedia</a></li>
   <li><a href="https://en.wikipedia.org/wiki/Frequency_analysis" target="_blank" rel="noopener">Chi-squared test for cryptanalysis — Wikipedia</a></li>
 </ul>
-<hr>
-<blockquote>🤖 Documented with Claude otw-wargames skill</blockquote>
 
 </div>
 

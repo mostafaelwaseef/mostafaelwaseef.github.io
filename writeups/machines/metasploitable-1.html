@@ -134,10 +134,7 @@
 <p>Identify live hosts on the local network, discover open ports, and fingerprint running services and the OS to determine viable attack vectors.</p>
 <h3 id="findings">Findings</h3>
 <p>Host discovery was performed with <code>arp-scan -l</code>, which revealed the Metasploitable 2 target at 192.168.8.243. A full service and OS fingerprint scan was then run with <code>nmap -sV -O 192.168.8.243</code>, identifying a broad attack surface including FTP (21), SSH (22), SMTP (25), HTTP (80), Samba (139/445), MySQL (3306), PostgreSQL (5432), AJP (8009), and Apache Tomcat on port 8180, among others. The OS was fingerprinted as Linux 2.6.24-16-server.</p>
-<p><strong>PoC:</strong>
-- <strong>Tools used</strong>: arp-scan, Nmap
-- <strong>Commands</strong>: <code>arp-scan -l</code> → <code>nmap -sV -O 192.168.8.243</code>
-- <strong>Result</strong>: Target at 192.168.8.243 confirmed; 20+ open ports identified; OS = Linux 2.6.24-16-server (Ubuntu); Samba 3.0.20-Debian, Apache httpd 2.2.8, MySQL 5.0.51a, Apache Tomcat/Coyote JSP 1.1 on :8180 noted as key targets.</p>
+<p><strong>PoC:</strong><br>- <strong>Tools used</strong>: arp-scan, Nmap<br>- <strong>Commands</strong>: <code>arp-scan -l</code> → <code>nmap -sV -O 192.168.8.243</code><br>- <strong>Result</strong>: Target at 192.168.8.243 confirmed; 20+ open ports identified; OS = Linux 2.6.24-16-server (Ubuntu); Samba 3.0.20-Debian, Apache httpd 2.2.8, MySQL 5.0.51a, Apache Tomcat/Coyote JSP 1.1 on :8180 noted as key targets.</p>
 <blockquote>  <figure><img src="images/metasploitable-1/397b75237172807389dbf4bcecadc47e.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/metasploitable-1/397b75237172802c9533d44bcfb3293a.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
@@ -148,10 +145,7 @@
 <p>Enumerate Samba shares and version details to identify exploitable misconfigurations or known vulnerabilities.</p>
 <p>Findings</p>
 <p><code>enum4linux 192.168.8.243</code> was run for null-session SMB enumeration, revealing the workgroup name, OS version, Samba version (3.0.20-Debian), user accounts, and share listings.</p>
-<p><strong>PoC:</strong>
-- <strong>Tools used</strong>: enum4linux
-- <strong>Commands</strong>: <code>enum4linux 192.168.8.243</code>
-- <strong>Result</strong>: Null session successful; workgroup WORKGROUP; Samba 3.0.20-Debian confirmed; user accounts and share names enumerated.</p>
+<p><strong>PoC:</strong><br>- <strong>Tools used</strong>: enum4linux<br>- <strong>Commands</strong>: <code>enum4linux 192.168.8.243</code><br>- <strong>Result</strong>: Null session successful; workgroup WORKGROUP; Samba 3.0.20-Debian confirmed; user accounts and share names enumerated.</p>
 <blockquote>  <figure><img src="images/metasploitable-1/397b7523717280d890bde71f154f2356.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/metasploitable-1/397b7523717280978e5dd6c8a69c3c8b.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/metasploitable-1/397b75237172800b91f7eb0b662fbf7d.png" alt="screenshot" loading="lazy"></figure>
@@ -184,10 +178,7 @@
 <p>Enumerate web directories on port 80 and identify exploitable web applications.</p>
 <p>Findings</p>
 <p><code>gobuster dir</code> was run against <code>http://192.168.8.243</code> with a standard wordlist, uncovering <code>/twiki</code> among other directories. Navigating to the TWiki instance revealed version 20030201. <code>searchsploit twiki</code> was used to identify available exploits, surfacing the <code>642.pl</code> script for TWiki RCE.</p>
-<p><strong>PoC:</strong>
-- <strong>Tools used</strong>: gobuster, searchsploit
-- <strong>Commands</strong>: <code>gobuster dir -u http://192.168.8.243 -w /usr/share/wordlists/dirb/common.txt</code>
-- <strong>Result</strong>: <code>/twiki</code> directory identified; TWiki version 20030201 confirmed; CVE applicable via <code>exploits/cgi-bin/642.pl</code>.</p>
+<p><strong>PoC:</strong><br>- <strong>Tools used</strong>: gobuster, searchsploit<br>- <strong>Commands</strong>: <code>gobuster dir -u http://192.168.8.243 -w /usr/share/wordlists/dirb/common.txt</code><br>- <strong>Result</strong>: <code>/twiki</code> directory identified; TWiki version 20030201 confirmed; CVE applicable via <code>exploits/cgi-bin/642.pl</code>.</p>
 <blockquote>  <figure><img src="images/metasploitable-1/397b752371728020867cfe0692e773f0.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/metasploitable-1/397b752371728050be31c2caf03ae40b.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/metasploitable-1/397b75237172804daf8cedcc173f08d6.png" alt="screenshot" loading="lazy"></figure>
@@ -218,10 +209,7 @@
 <p>Enumerate the Apache Tomcat Manager interface on port 8180 and test for default credential access.</p>
 <p>Findings</p>
 <p><code>gobuster dir</code> was run against <code>http://192.168.8.243:8180</code>, revealing the <code>/manager</code> path. The Metasploit <code>auxiliary/scanner/http/tomcat_mgr_login</code> module was used to brute-force the Manager interface and confirmed valid credentials: <code>[REDACTED]</code>.</p>
-<p><strong>PoC:</strong>
-- <strong>Tools used</strong>: gobuster, Metasploit (tomcat_mgr_login)
-- <strong>Commands</strong>: <code>gobuster dir -u http://192.168.8.243:8180 -w /usr/share/wordlists/dirb/common.txt</code>
-- <strong>Result</strong>: <code>/manager</code> path confirmed; default credentials <code>[REDACTED]</code> valid on the Manager application.</p>
+<p><strong>PoC:</strong><br>- <strong>Tools used</strong>: gobuster, Metasploit (tomcat_mgr_login)<br>- <strong>Commands</strong>: <code>gobuster dir -u http://192.168.8.243:8180 -w /usr/share/wordlists/dirb/common.txt</code><br>- <strong>Result</strong>: <code>/manager</code> path confirmed; default credentials <code>[REDACTED]</code> valid on the Manager application.</p>
 <blockquote>  <figure><img src="images/metasploitable-1/397b75237172807dbac0f1950bf7237a.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/metasploitable-1/397b7523717280b289ecdb606a5d1bcc.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/metasploitable-1/397b752371728031854ffa69230e47d0.png" alt="screenshot" loading="lazy"></figure>
@@ -258,10 +246,7 @@
 <p>Enumerate the TikiWiki application on port 80, map its directory structure, and extract database credentials to identify further exploitation paths.</p>
 <p>Findings</p>
 <p><code>gobuster dir</code> was run against <code>http://192.168.8.243/tikiwiki</code> with a large wordlist, revealing key directories including <code>/backups</code>, <code>/files</code>, <code>/db</code>, and <code>/lib</code>. The <code>/backups</code> path in particular was noted as a potential upload and retrieval vector. The Metasploit <code>auxiliary/admin/tikiwiki/tikidblib</code> module was then run against the TikiWiki instance, exploiting a known information disclosure vulnerability to extract the database name (<code>tikiwiki195</code>) and credentials (<code>[REDACTED]</code>). These credentials were subsequently used with <code>mysql -h 192.168.8.243 -u root --ssl=0</code> to connect to MySQL and enumerate the TikiWiki database schema and user table.</p>
-<p><strong>PoC:</strong>
-- <strong>Tools used</strong>: gobuster, Metasploit (tikidblib), MySQL client
-- <strong>Commands</strong>: <code>gobuster dir -u http://192.168.8.243/tikiwiki -w /usr/share/wordlists/dirb/big.txt</code> (directory enumeration); <code>use auxiliary/admin/tikiwiki/tikidblib</code> → <code>set RHOSTS 192.168.8.243</code> → <code>run</code> (credential extraction)
-- <strong>Result</strong>: <code>/backups</code> directory discovered; TikiWiki database credentials extracted; MySQL access confirmed; <code>tikiwiki195</code> database enumerated.</p>
+<p><strong>PoC:</strong><br>- <strong>Tools used</strong>: gobuster, Metasploit (tikidblib), MySQL client<br>- <strong>Commands</strong>: <code>gobuster dir -u http://192.168.8.243/tikiwiki -w /usr/share/wordlists/dirb/big.txt</code> (directory enumeration); <code>use auxiliary/admin/tikiwiki/tikidblib</code> → <code>set RHOSTS 192.168.8.243</code> → <code>run</code> (credential extraction)<br>- <strong>Result</strong>: <code>/backups</code> directory discovered; TikiWiki database credentials extracted; MySQL access confirmed; <code>tikiwiki195</code> database enumerated.</p>
 <blockquote>  <figure><img src="images/metasploitable-1/397b7523717280d1b931dea6a8594dc7.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/metasploitable-1/397b7523717280adbb80facdc3cfb1f5.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/metasploitable-1/397b75237172809e8341f2429b1c0cce.png" alt="screenshot" loading="lazy"></figure>

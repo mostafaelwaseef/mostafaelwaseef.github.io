@@ -145,8 +145,7 @@
 <h2 id="analysis">🧠 Analysis</h2>
 <p><strong>Step 1 — Column count confirmation</strong></p>
 <p>The lab home page confirmed the target was unsolved. The product category filter parameter was intercepted in Burp Suite. An initial probe with <code>' UNION SELECT NULL--</code> returned a 500 Internal Server Error, indicating the query returns more than one column. A follow-up with two NULLs returned a 200 OK, confirming the query returns exactly two columns.</p>
-<pre><code class="language-javascript">' UNION SELECT NULL --
-' UNION SELECT NULL,NULL --</code></pre>
+<pre><code class="language-javascript">' UNION SELECT NULL --<br>' UNION SELECT NULL,NULL --</code></pre>
 <blockquote>  <figure><img src="images/lab-9-sql-injection-union-attack-retrieving-data-from-other-tables/35eb7523717280a6abb4cb1269867021.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/lab-9-sql-injection-union-attack-retrieving-data-from-other-tables/35eb7523717280d6ae52dd9d8b26da9c.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/lab-9-sql-injection-union-attack-retrieving-data-from-other-tables/35eb7523717280c39199e836e162ddce.png" alt="screenshot" loading="lazy"></figure>
@@ -157,8 +156,7 @@
 <hr>
 <p><strong>Step 2 — Database version confirmation</strong></p>
 <p>With two columns confirmed, the database type was probed using <code>@@version</code> — a syntax specific to MSSQL and MySQL. This returned a 500 error, ruling out both database types. The PostgreSQL-specific <code>version()</code> function was then tried, which returned a 200 OK and rendered the version string in the browser, confirming the target runs PostgreSQL 12.22.</p>
-<pre><code class="language-javascript">' UNION SELECT NULL,@@version --
-' UNION SELECT NULL,version() --</code></pre>
+<pre><code class="language-javascript">' UNION SELECT NULL,@@version --<br>' UNION SELECT NULL,version() --</code></pre>
 <blockquote><em>(Drag 05.png, 06.png here)</em>  <figure><img src="images/lab-9-sql-injection-union-attack-retrieving-data-from-other-tables/35eb752371728010b870ccaefb686faf.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/lab-9-sql-injection-union-attack-retrieving-data-from-other-tables/35eb7523717280648676cac48205c279.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>

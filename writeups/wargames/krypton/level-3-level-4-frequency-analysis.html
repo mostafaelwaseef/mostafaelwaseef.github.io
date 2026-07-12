@@ -144,62 +144,53 @@
 </ol>
 <hr>
 <h2 id="analysis">🧠 Analysis</h2>
-<p><strong>Step 1 — Navigate and read level files</strong>
-Logged in as krypton3. Ran <code>ls</code>, <code>cd /krypton/</code>, <code>cd krypton3</code>, then <code>ls</code> to list available files: <code>found1</code>, <code>found2</code>, <code>found3</code>, <code>HINT1</code>, <code>HINT2</code>, <code>krypton4</code>, and <code>README</code>. Ran <code>cat README</code> which explained the level: a simple substitution cipher is in use, the cipher mechanism is not available to us, but three intercepted messages (<code>found1</code>, <code>found2</code>, <code>found3</code>) encrypted with the same key have been provided. The plaintexts are in American English — making frequency analysis viable.</p>
+<p><strong>Step 1 — Navigate and read level files</strong><br>Logged in as krypton3. Ran <code>ls</code>, <code>cd /krypton/</code>, <code>cd krypton3</code>, then <code>ls</code> to list available files: <code>found1</code>, <code>found2</code>, <code>found3</code>, <code>HINT1</code>, <code>HINT2</code>, <code>krypton4</code>, and <code>README</code>. Ran <code>cat README</code> which explained the level: a simple substitution cipher is in use, the cipher mechanism is not available to us, but three intercepted messages (<code>found1</code>, <code>found2</code>, <code>found3</code>) encrypted with the same key have been provided. The plaintexts are in American English — making frequency analysis viable.</p>
 <blockquote>  <figure><img src="images/level-3-level-4-frequency-analysis/37fb7523717280a4aa7bd631455d9f40.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/level-3-level-4-frequency-analysis/37fb75237172808997a5e36019130077.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/level-3-level-4-frequency-analysis/37fb7523717280339c2be24ec4346522.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 2 — Read the hints and the encrypted password</strong>
-Ran <code>cat HINT1</code> which showed “Some letters are more prevalent in English than others.” and <code>cat HINT2</code> which confirmed “Frequency Analysis is your friend.” Ran <code>cat krypton4</code> to read the target ciphertext: <code>KSVVW BGSJD SVSIS VXBMN YOUUK BNWCU ANMJS</code>.</p>
+<p><strong>Step 2 — Read the hints and the encrypted password</strong><br>Ran <code>cat HINT1</code> which showed “Some letters are more prevalent in English than others.” and <code>cat HINT2</code> which confirmed “Frequency Analysis is your friend.” Ran <code>cat krypton4</code> to read the target ciphertext: <code>KSVVW BGSJD SVSIS VXBMN YOUUK BNWCU ANMJS</code>.</p>
 <blockquote>  <figure><img src="images/level-3-level-4-frequency-analysis/37fb7523717280a9ae3dfee8a3d3223a.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/level-3-level-4-frequency-analysis/37fb7523717280398564e38e617660d8.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 3 — Read the intercepted ciphertext files</strong>
-Ran <code>cat found1</code>, <code>cat found2</code>, and <code>cat found3</code> to read all three intercepted messages. Each is a large block of uppercase ciphertext encrypted with the same substitution key — more ciphertext means more reliable frequency counts.</p>
+<p><strong>Step 3 — Read the intercepted ciphertext files</strong><br>Ran <code>cat found1</code>, <code>cat found2</code>, and <code>cat found3</code> to read all three intercepted messages. Each is a large block of uppercase ciphertext encrypted with the same substitution key — more ciphertext means more reliable frequency counts.</p>
 <blockquote>  <figure><img src="images/level-3-level-4-frequency-analysis/37fb7523717280129bacc2ac3370cb32.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/level-3-level-4-frequency-analysis/37fb7523717280f49ad0f31e3a8be763.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 4 — Research English letter frequency</strong>
-Looked up English letter frequency distribution using Gemini. The top letters by frequency are E (12%), T (9.1%), A (8.1%), O (7.7%), I (7.3%), N (7%), S (6.3%), R (6%), H (5.9%), D (4.3%) — summarized by the mnemonic <strong>ETAOIN SHRDLU</strong>. The rarest letters are Q, J, X, and Z. This distribution is the basis for mapping the most frequent cipher letters to their likely plaintext equivalents.</p>
+<p><strong>Step 4 — Research English letter frequency</strong><br>Looked up English letter frequency distribution using Gemini. The top letters by frequency are E (12%), T (9.1%), A (8.1%), O (7.7%), I (7.3%), N (7%), S (6.3%), R (6%), H (5.9%), D (4.3%) — summarized by the mnemonic <strong>ETAOIN SHRDLU</strong>. The rarest letters are Q, J, X, and Z. This distribution is the basis for mapping the most frequent cipher letters to their likely plaintext equivalents.</p>
 <blockquote>  <figure><img src="images/level-3-level-4-frequency-analysis/37fb75237172800390a7e7c62bf751a8.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/level-3-level-4-frequency-analysis/37fb7523717280b4be65ecd3a3307001.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/level-3-level-4-frequency-analysis/37fb7523717280ee9581fd086134a7b8.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 5 — Frequency analysis on found1</strong>
-Fed <code>found1</code> to Gemini and asked for frequency analysis. The most frequent cipher letters were S (11.23%), J (7.59%), Q (7.48%), C (7.38%), U (7.07%), B (6.44%), G (5.82%), N (5.41%), D (4.47%) — mapping closely to E, T, A, I, S, O, N, R, H respectively. Gemini derived the full substitution key: cipher <code>S→E</code>, <code>J→T</code>, <code>Q→A</code>, <code>C→I</code>, <code>U→S</code>, <code>B→O</code>, <code>G→N</code>, <code>N→R</code>, <code>D→H</code>, and so on across the full alphabet.</p>
+<p><strong>Step 5 — Frequency analysis on found1</strong><br>Fed <code>found1</code> to Gemini and asked for frequency analysis. The most frequent cipher letters were S (11.23%), J (7.59%), Q (7.48%), C (7.38%), U (7.07%), B (6.44%), G (5.82%), N (5.41%), D (4.47%) — mapping closely to E, T, A, I, S, O, N, R, H respectively. Gemini derived the full substitution key: cipher <code>S→E</code>, <code>J→T</code>, <code>Q→A</code>, <code>C→I</code>, <code>U→S</code>, <code>B→O</code>, <code>G→N</code>, <code>N→R</code>, <code>D→H</code>, and so on across the full alphabet.</p>
 <blockquote>  <figure><img src="images/level-3-level-4-frequency-analysis/37fb75237172808b9f5dc7067a5d63d4.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/level-3-level-4-frequency-analysis/37fb7523717280939bc7fe0cc02f4769.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/level-3-level-4-frequency-analysis/37fb752371728072829fe73bd85df7e7.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/level-3-level-4-frequency-analysis/37fb75237172802983acfbca64c2ef5e.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 6 — Frequency analysis on found2</strong>
-Fed <code>found2</code> to Gemini with the same request. The frequency distribution matched found1 exactly (S→E at 11.75%), and the recurring 3-letter patterns <code>JDS→THE</code> and <code>JOO→THA</code> further confirmed the same key. The decoded text was biographical prose about William Shakespeare — confirming correct decryption.</p>
+<p><strong>Step 6 — Frequency analysis on found2</strong><br>Fed <code>found2</code> to Gemini with the same request. The frequency distribution matched found1 exactly (S→E at 11.75%), and the recurring 3-letter patterns <code>JDS→THE</code> and <code>JOO→THA</code> further confirmed the same key. The decoded text was biographical prose about William Shakespeare — confirming correct decryption.</p>
 <blockquote>  <figure><img src="images/level-3-level-4-frequency-analysis/37fb7523717280d1b38be9c344140e09.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/level-3-level-4-frequency-analysis/37fb752371728065853ddda1e4371a01.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/level-3-level-4-frequency-analysis/37fb752371728065b13fc4263850050e.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 7 — Frequency analysis on found3</strong>
-Fed <code>found3</code> to Gemini. Again the same cipher key emerged (S→E top at 11.82%), with short word patterns <code>JDS→THE</code>, <code>QGW→AND</code>, and <code>KCJD→WITH</code> confirming the shift. The decoded text was a passage from Edgar Allan Poe’s <em>The Gold-Bug</em> — a fitting choice given the story’s own cryptography theme.</p>
+<p><strong>Step 7 — Frequency analysis on found3</strong><br>Fed <code>found3</code> to Gemini. Again the same cipher key emerged (S→E top at 11.82%), with short word patterns <code>JDS→THE</code>, <code>QGW→AND</code>, and <code>KCJD→WITH</code> confirming the shift. The decoded text was a passage from Edgar Allan Poe’s <em>The Gold-Bug</em> — a fitting choice given the story’s own cryptography theme.</p>
 <blockquote>  <figure><img src="images/level-3-level-4-frequency-analysis/37fb752371728001a58cf76abf211579.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/level-3-level-4-frequency-analysis/37fb7523717280ed97f4df8d02f13d5c.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/level-3-level-4-frequency-analysis/37fb7523717280e3bee2e3d5d34ec349.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/level-3-level-4-frequency-analysis/37fb7523717280e2a7ccc801c4e90e6e.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 8 — Decrypt the krypton4 password</strong>
-Asked Gemini to decrypt <code>KSVVW BGSJD SVSIS VXBMN YOUUK BNWCU ANMJS</code> word by word using the derived key. The decryption: KSVVW→welld, BGSJD→oneth, SVSIS→eleve, VXBMN→lfour, YOUUK→passw, BNWCU→ordis, ANMJS→brute. Combined and re-spaced: “well done the eleven level four password is <strong><code>BRUTE</code></strong>”.</p>
+<p><strong>Step 8 — Decrypt the krypton4 password</strong><br>Asked Gemini to decrypt <code>KSVVW BGSJD SVSIS VXBMN YOUUK BNWCU ANMJS</code> word by word using the derived key. The decryption: KSVVW→welld, BGSJD→oneth, SVSIS→eleve, VXBMN→lfour, YOUUK→passw, BNWCU→ordis, ANMJS→brute. Combined and re-spaced: “well done the eleven level four password is <strong><code>BRUTE</code></strong>”.</p>
 <blockquote>  <figure><img src="images/level-3-level-4-frequency-analysis/37fb7523717280759eced29f00d99a48.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 9 — SSH into krypton4 with the decoded password</strong>
-Ran <code>ssh krypton4@krypton.labs.overthewire.org -p 2231</code> and authenticated with password <strong><code>BRUTE</code></strong>. The OTW welcome banner confirmed a successful login to the krypton4 shell.</p>
+<p><strong>Step 9 — SSH into krypton4 with the decoded password</strong><br>Ran <code>ssh krypton4@krypton.labs.overthewire.org -p 2231</code> and authenticated with password <strong><code>BRUTE</code></strong>. The OTW welcome banner confirmed a successful login to the krypton4 shell.</p>
 <blockquote>  <figure><img src="images/level-3-level-4-frequency-analysis/37fb752371728074a953c240665bdb09.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/level-3-level-4-frequency-analysis/37fb75237172800f941fd26a7cd06bf2.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
@@ -221,8 +212,6 @@ Ran <code>ssh krypton4@krypton.labs.overthewire.org -p 2231</code> and authentic
   <li><a href="https://en.wikipedia.org/wiki/Substitution_cipher" target="_blank" rel="noopener">Substitution cipher — Wikipedia</a></li>
   <li><a href="https://en.wikipedia.org/wiki/Etaoin_shrdlu" target="_blank" rel="noopener">ETAOIN SHRDLU — Wikipedia</a></li>
 </ul>
-<hr>
-<blockquote>🤖 Documented with Claude otw-wargames skill</blockquote>
 
 </div>
 

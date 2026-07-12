@@ -147,8 +147,7 @@
 <h2 id="analysis">🧠 Analysis</h2>
 <p><strong>Step 1 — Column count confirmation</strong></p>
 <p>The category filter parameter was injected with a UNION SELECT payload to determine how many columns the original query returns. A single NULL returned a 500 error, indicating an incorrect column count. Adding a second NULL returned a 200 OK, confirming the query returns exactly two columns.</p>
-<pre><code class="language-javascript">' UNION SELECT NULL--
-' UNION SELECT NULL,NULL--</code></pre>
+<pre><code class="language-javascript">' UNION SELECT NULL--<br>' UNION SELECT NULL,NULL--</code></pre>
 <blockquote>  <figure><img src="images/lab-10-sql-injection-union-attack-retrieving-multiple-values-in-a-single-column/35eb75237172805ca487ca26d22d958b.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/lab-10-sql-injection-union-attack-retrieving-multiple-values-in-a-single-column/35eb7523717280588798e713d67b9b2b.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/lab-10-sql-injection-union-attack-retrieving-multiple-values-in-a-single-column/35eb7523717280e1b012d0674ddf6f7a.png" alt="screenshot" loading="lazy"></figure>
@@ -156,16 +155,14 @@
 <hr>
 <p><strong>Step 2 — String type confirmation</strong></p>
 <p>With two columns confirmed, each column was tested for string compatibility by substituting a string literal in place of NULL. Placing <code>'a'</code> in the first column position returned a 500 error, ruling it out. Placing <code>'a'</code> in the second column position returned a 200 OK, confirming only the second column accepts string data.</p>
-<pre><code class="language-javascript">' UNION SELECT 'a',NULL--
-' UNION SELECT NULL,'a'--</code></pre>
+<pre><code class="language-javascript">' UNION SELECT 'a',NULL--<br>' UNION SELECT NULL,'a'--</code></pre>
 <blockquote>  <figure><img src="images/lab-10-sql-injection-union-attack-retrieving-multiple-values-in-a-single-column/35eb75237172801b96e2c81c83e86a11.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/lab-10-sql-injection-union-attack-retrieving-multiple-values-in-a-single-column/35eb7523717280a1b940cf946c1306b0.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
 <p><strong>Step 3 — Database version confirmation</strong></p>
 <p>The database type was probed using <code>@@version</code> — a syntax specific to MSSQL and MySQL. This returned a 500 error, ruling out both database types. The PostgreSQL-specific <code>version()</code> function was then tried, which returned a 200 OK and rendered the version string in the browser, confirming the target runs PostgreSQL 12.22.</p>
-<pre><code class="language-javascript">' UNION SELECT NULL,@@version--
-' UNION SELECT NULL,version()--</code></pre>
+<pre><code class="language-javascript">' UNION SELECT NULL,@@version--<br>' UNION SELECT NULL,version()--</code></pre>
 <blockquote>  <figure><img src="images/lab-10-sql-injection-union-attack-retrieving-multiple-values-in-a-single-column/35eb75237172808b89dfcdb0eb41b455.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/lab-10-sql-injection-union-attack-retrieving-multiple-values-in-a-single-column/35eb7523717280aa8593fb922224e2f1.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/lab-10-sql-injection-union-attack-retrieving-multiple-values-in-a-single-column/35eb7523717280bfa388ef306b8ccb7b.png" alt="screenshot" loading="lazy"></figure>

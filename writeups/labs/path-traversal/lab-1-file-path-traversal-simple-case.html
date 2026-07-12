@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Remote Code Execution via Web Shell Upload — Mostafa Elwaseef's Portfolio</title>
+  <title>Lab 1 — File path traversal, simple case — Mostafa Elwaseef's Portfolio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
   <style>
@@ -101,11 +101,11 @@
 
 <div class="hero">
   <div class="hero-inner">
-    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#labs">Labs</a> / <a href="index.html">File Upload Vulnerabilities</a> / Remote Code Execution via Web Shell Upload</div>
-    <h1>Remote Code Execution via Web Shell Upload</h1>
+    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#labs">Labs</a> / <a href="index.html">Path Traversal</a> / Lab 1 — File path traversal, simple case</div>
+    <h1>Lab 1 — File path traversal, simple case</h1>
     <div class="meta-row">
       <span class="badge badge-os">⚪ 🔴 High</span>
-      <span class="badge badge-date">📅 2026-05-13</span>
+      <span class="badge badge-date">📅 2026-07-12</span>
     </div>
   </div>
 </div>
@@ -115,76 +115,53 @@
 <div class='table-wrap'><table>
   <tr><th>Field</th><th>Value</th></tr>
   <tr><td><strong>Type</strong></td><td>Web App</td></tr>
-  <tr><td><strong>Target</strong></td><td>PortSwigger Web Security Academy</td></tr>
   <tr><td><strong>Severity</strong></td><td>🔴 High</td></tr>
-  <tr><td><strong>CVE / CWE</strong></td><td>CWE-434: Unrestricted Upload of File with Dangerous Type</td></tr>
-  <tr><td><strong>Date</strong></td><td>2026-05-13</td></tr>
+  <tr><td><strong>CVE / CWE</strong></td><td>CWE-22: Improper Limitation of a Pathname to a Restricted Directory</td></tr>
+  <tr><td><strong>Date</strong></td><td>2026-07-12</td></tr>
 </table></div>
 <hr>
 <h2 id="description">🔍 Description</h2>
-<p>The application allows authenticated users to upload an avatar image to their profile. It performs no validation on the file type, extension, or content before storing it on the server's filesystem. As a result, an attacker can upload a PHP web shell disguised as an avatar, which the server then executes when the file is requested directly. This grants the attacker the ability to execute arbitrary server-side commands and read sensitive files.</p>
+<p>Path traversal (also known as directory traversal) allows an attacker to read arbitrary files on the server by manipulating file path parameters. In this lab, the application uses a <code>filename</code> parameter in the <code>/image</code> endpoint to load product images. No sanitization or restriction is applied to this parameter, allowing an attacker to supply traversal sequences (<code>../</code>) to walk up the directory tree and access sensitive files outside the web root.</p>
 <hr>
 <h2 id="end-goals">🎯 End Goals</h2>
 <ul>
-  <li>Upload a PHP web shell to the server via the avatar upload function</li>
-  <li>Use the web shell to exfiltrate the contents of <code>/home/carlos/secret</code></li>
-  <li>Submit the secret to solve the lab</li>
+  <li>Exploit the path traversal vulnerability in the product image endpoint</li>
+  <li>Retrieve the contents of <code>/etc/passwd</code> from the server</li>
 </ul>
 <hr>
 <h2 id="steps-to-reproduce">🪜 Steps to Reproduce</h2>
 <ol>
-  <li>Log in to the application using the provided credentials (<code>wiener:peter</code>)</li>
-  <li>Navigate to the account page and locate the avatar upload function</li>
-  <li>Upload a benign image file to confirm the upload works and observe where files are stored</li>
-  <li>Craft a PHP web shell file and upload it via the same avatar upload function</li>
-  <li>Send a GET request directly to the uploaded PHP file's path to trigger execution</li>
-  <li>Read the output of the web shell to retrieve the secret file contents</li>
-  <li>Submit the secret to solve the lab</li>
+  <li>Browse to any product page on the shop</li>
+  <li>Open browser DevTools and inspect the product image element to identify the vulnerable <code>filename</code> parameter</li>
+  <li>Modify the <code>filename</code> parameter value to a path traversal payload pointing to <code>/etc/passwd</code></li>
+  <li>Observe the server returns the file contents, solving the lab</li>
 </ol>
 <hr>
 <h2 id="analysis">🧠 Analysis</h2>
-<p><strong>Step 1 — Reconnaissance: Logging in and locating the upload function</strong></p>
-<p>Logged in as <code>wiener</code> using credentials <code>wiener:peter</code>. The account page revealed an avatar upload form accepting file uploads with a Browse and Upload button. No client-side restrictions were observed on accepted file types.</p>
-<blockquote>  <figure><img src="images/remote-code-execution-via-web-shell-upload/35fb7523717280f1805afb3a16aea308.png" alt="screenshot" loading="lazy"></figure>
+<p><strong>Step 1 — Browse the shop and identify the target product</strong></p>
+<p>Opened the lab environment and browsed to the product page for “Babbage Web Spray” at <code>/product?productId=1</code>. The page loaded normally with product images displayed.</p>
+<blockquote>  <figure><img src="images/lab-1-file-path-traversal-simple-case/39bb752371728053ac2affca766dbecb.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-1-file-path-traversal-simple-case/39bb75237172803dbc2fc633214b96c0.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 2 — Confirming image upload works</strong></p>
-<p>Uploaded a benign JPEG image (<code>images.jpeg</code>) to confirm the upload mechanism was functional. The server responded with: <code>The file avatars/images.jpeg has been uploaded.</code> The avatar was then rendered on the account page, confirming the file was stored and served from <code>avatars/</code>.</p>
-<blockquote>  <figure><img src="images/remote-code-execution-via-web-shell-upload/35fb752371728098972acedfa0c3d244.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/remote-code-execution-via-web-shell-upload/35fb75237172800fb808ca214880bb5c.png" alt="screenshot" loading="lazy"></figure>
-</blockquote>
+<p><strong>Step 2 — Identify the vulnerable filename parameter via DevTools</strong></p>
+<p>Opened browser DevTools and used the Inspector to examine the HTML source of the product page. The product image was found to load via the endpoint <code>/image?filename=22.jpg</code>, directly exposing a <code>filename</code> parameter with no apparent sanitization.</p>
+<blockquote></blockquote>
 <hr>
-<p><strong>Step 3 — Intercepting the upload request in Burp Suite</strong></p>
-<p>With Burp Suite proxy enabled, the POST request to <code>/my-account/avatar</code> was captured. The server returned HTTP 200 OK with the message <code>The file avatars/images.jpeg has been uploaded.</code> confirming the upload endpoint and storage path. No Content-Type or extension validation was observed in the response.</p>
-<blockquote>  <figure><img src="images/remote-code-execution-via-web-shell-upload/35fb7523717280c5b09ae3a6abd3d4b7.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/remote-code-execution-via-web-shell-upload/35fb7523717280a4b1e9e4aea8efb373.png" alt="screenshot" loading="lazy"></figure>
-</blockquote>
-<hr>
-<p><strong>Step 4 — Crafting and uploading the PHP web shell</strong></p>
-<p>Using a terminal in the <code>/port_swigger/file_upload</code> directory, the PHP web shell file <code>exploit.php</code> was created with the following payload:</p>
-<pre><code class="language-javascript">&lt;?php echo file_get_contents('/home/carlos/secret'); ?&gt;</code></pre>
-<p>The file was then uploaded via the avatar upload form. The server accepted it without any file type or extension validation and responded with: <code>The file avatars/exploit.php has been uploaded.</code> Burp Suite confirmed the POST request to <code>/my-account/avatar</code> returned HTTP 200 OK.</p>
-<blockquote>  <figure><img src="images/remote-code-execution-via-web-shell-upload/35fb75237172807d94c0eac9bc6515a7.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/remote-code-execution-via-web-shell-upload/35fb752371728012ba55efa6f642e3bd.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/remote-code-execution-via-web-shell-upload/35fb75237172803fb12cc32c1d45650d.png" alt="screenshot" loading="lazy"></figure>
-</blockquote>
-<hr>
-<p><strong>Step 5 — Triggering the web shell and retrieving the secret</strong></p>
-<p>Sent a GET request directly to <code>/files/avatars/exploit.php?cmd=cat+/home/carlos/secret</code>. The server executed the PHP file and returned the secret:</p>
-<pre><code class="language-javascript">edm25PakrRS04MID1gjwp2GV4ItcUstHP</code></pre>
-<p>The secret was submitted via the lab banner to confirm the lab was solved.</p>
-<blockquote>  <figure><img src="images/remote-code-execution-via-web-shell-upload/35fb75237172802d94ccd200f5737ec6.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/remote-code-execution-via-web-shell-upload/35fb7523717280b28629d04bc7ece6bf.png" alt="screenshot" loading="lazy"></figure>
+<p><strong>Step 3 — Inject traversal payload and solve the lab</strong></p>
+<p>Modified the <code>src</code> attribute of the image element in DevTools to <code>/image?filename=../../../etc/passwd</code>. The server processed the traversal sequence without restriction, walking three directory levels up from the images directory to the filesystem root and returning the contents of <code>/etc/passwd</code>. The lab banner confirmed success with “Congratulations, you solved the lab!”</p>
+<blockquote>  <figure><img src="images/lab-1-file-path-traversal-simple-case/39bb7523717280938ba5fdfe9f2fe31e.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-1-file-path-traversal-simple-case/39bb752371728055b52bed158966eb6c.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
 <h2 id="impact">🎯 Impact</h2>
-<p>An attacker can upload arbitrary server-side scripts and execute them remotely, achieving full Remote Code Execution (RCE) on the web server. This allows reading of sensitive files, lateral movement within the server environment, data exfiltration, and potentially full server compromise.</p>
+<p>An attacker can read arbitrary files from the server filesystem, including sensitive system files (<code>/etc/passwd</code>, <code>/etc/shadow</code>), application configuration files containing credentials, private keys, and source code. On Windows systems, equivalent payloads using <code>..\</code> can expose files such as <code>C:\Windows\win.ini</code>. This can lead to full server compromise if credentials or keys are exposed.</p>
 <hr>
 <h2 id="references">📚 References</h2>
 <ul>
-  <li><a href="https://portswigger.net/web-security/file-upload" target="_blank" rel="noopener">PortSwigger: File Upload Vulnerabilities</a></li>
-  <li><a href="https://portswigger.net/web-security/file-upload/lab-file-upload-remote-code-execution-via-web-shell-upload" target="_blank" rel="noopener">PortSwigger Lab: Remote code execution via web shell upload</a></li>
-  <li><a href="https://cwe.mitre.org/data/definitions/434.html" target="_blank" rel="noopener">CWE-434: Unrestricted Upload of File with Dangerous Type</a></li>
+  <li><a href="https://portswigger.net/web-security/file-path-traversal" target="_blank" rel="noopener">PortSwigger: Path traversal</a></li>
+  <li><a href="https://cwe.mitre.org/data/definitions/22.html" target="_blank" rel="noopener">CWE-22: Improper Limitation of a Pathname to a Restricted Directory</a></li>
+  <li><a href="https://owasp.org/www-community/attacks/Path_Traversal" target="_blank" rel="noopener">OWASP: Path Traversal</a></li>
 </ul>
 
 </div>

@@ -142,47 +142,38 @@
 </ol>
 <hr>
 <h2 id="analysis">🧠 Analysis</h2>
-<p><strong>Step 1 — Access the lab</strong>
-The lab environment loaded a blog application with a search field. The lab status showed “Not solved”.</p>
+<p><strong>Step 1 — Access the lab</strong><br>The lab environment loaded a blog application with a search field. The lab status showed “Not solved”.</p>
 <blockquote>  <figure><img src="images/lab-4-dom-xss-in-innerhtml-sink-using-source-location-search/366b75237172805ba4e7cdeb222c51ff.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 2 — Test with a benign search term</strong>
-The term <code>hello</code> was entered into the search box and submitted. The page reflected the input in the results heading, indicating the search query flows from <code>location.search</code> into the page output.</p>
+<p><strong>Step 2 — Test with a benign search term</strong><br>The term <code>hello</code> was entered into the search box and submitted. The page reflected the input in the results heading, indicating the search query flows from <code>location.search</code> into the page output.</p>
 <blockquote>  <figure><img src="images/lab-4-dom-xss-in-innerhtml-sink-using-source-location-search/366b752371728069bb05ed7b324ef1ef.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 3 — Inspect the page source</strong>
-DevTools was opened after the <code>hello</code> search. The <code>doSearchQuery()</code> function was found assigning <code>location.search</code> directly to <code>element.innerHTML</code> — specifically setting the inner HTML of the <code>#searchMessage</code> span element with the unsanitized query value, confirming both the source and the sink.</p>
+<p><strong>Step 3 — Inspect the page source</strong><br>DevTools was opened after the <code>hello</code> search. The <code>doSearchQuery()</code> function was found assigning <code>location.search</code> directly to <code>element.innerHTML</code> — specifically setting the inner HTML of the <code>#searchMessage</code> span element with the unsanitized query value, confirming both the source and the sink.</p>
 <blockquote>  <figure><img src="images/lab-4-dom-xss-in-innerhtml-sink-using-source-location-search/366b75237172804f9d40c1e621e33d58.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 4 — Inspect the DOM — innerHTML sink highlighted</strong>
-The Elements panel in DevTools showed the <code>&lt;span id="searchMessage"&gt;</code> element with the search term injected directly into its innerHTML content, visually confirming the vulnerable sink and the exact DOM node where injection occurs.</p>
+<p><strong>Step 4 — Inspect the DOM — innerHTML sink highlighted</strong><br>The Elements panel in DevTools showed the <code>&lt;span id="searchMessage"&gt;</code> element with the search term injected directly into its innerHTML content, visually confirming the vulnerable sink and the exact DOM node where injection occurs.</p>
 <blockquote>  <figure><img src="images/lab-4-dom-xss-in-innerhtml-sink-using-source-location-search/366b75237172809685f4c66f1938227b.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 5 — Attempt with </strong><strong><code>&lt;script&gt;</code></strong><strong> tag (no execution)</strong>
-The payload <code>&lt;Script&gt;alert('Hacked')&lt;/Script&gt;</code> was entered in the search field. The tag was injected into the DOM via <code>innerHTML</code> and was visible in the rendered search results, but the script did not execute. This is expected behavior — browsers do not execute <code>&lt;script&gt;</code> elements inserted via <code>innerHTML</code> as a security measure.</p>
+<p><strong>Step 5 — Attempt with </strong><strong><code>&lt;script&gt;</code></strong><strong> tag (no execution)</strong><br>The payload <code>&lt;Script&gt;alert('Hacked')&lt;/Script&gt;</code> was entered in the search field. The tag was injected into the DOM via <code>innerHTML</code> and was visible in the rendered search results, but the script did not execute. This is expected behavior — browsers do not execute <code>&lt;script&gt;</code> elements inserted via <code>innerHTML</code> as a security measure.</p>
 <blockquote>  <figure><img src="images/lab-4-dom-xss-in-innerhtml-sink-using-source-location-search/366b7523717280018044cee03aabe9c5.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 6 — Inspect source after script attempt</strong>
-DevTools confirmed the <code>&lt;script&gt;alert('Hacked')&lt;/script&gt;</code> tag was present in the DOM inside the <code>#searchMessage</code> span, but had not fired. This validated that a different injection vector was needed — one that uses an event handler rather than a script block.</p>
+<p><strong>Step 6 — Inspect source after script attempt</strong><br>DevTools confirmed the <code>&lt;script&gt;alert('Hacked')&lt;/script&gt;</code> tag was present in the DOM inside the <code>#searchMessage</code> span, but had not fired. This validated that a different injection vector was needed — one that uses an event handler rather than a script block.</p>
 <blockquote>  <figure><img src="images/lab-4-dom-xss-in-innerhtml-sink-using-source-location-search/366b7523717280c89bf5f3f51c31b3fb.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 7 — Craft working payload using </strong><strong><code>&lt;img onerror&gt;</code></strong>
-The payload <code>&lt;img src="x" onerror="alert('Hacked')"&gt;</code> was entered into the search field. This injects an image element with a deliberately invalid <code>src</code> attribute. When the browser fails to load the image, it fires the <code>onerror</code> event handler — which executes even when the element is inserted via <code>innerHTML</code>.</p>
+<p><strong>Step 7 — Craft working payload using </strong><strong><code>&lt;img onerror&gt;</code></strong><br>The payload <code>&lt;img src="x" onerror="alert('Hacked')"&gt;</code> was entered into the search field. This injects an image element with a deliberately invalid <code>src</code> attribute. When the browser fails to load the image, it fires the <code>onerror</code> event handler — which executes even when the element is inserted via <code>innerHTML</code>.</p>
 <blockquote></blockquote>
 <hr>
-<p><strong>Step 8 — alert() fires</strong>
-Upon page load, the browser attempted to load the image from <code>src="x"</code>, failed, and triggered the <code>onerror</code> handler. An alert dialog appeared with the text “Hacked”, confirming successful DOM XSS exploitation via the <code>innerHTML</code> sink.</p>
+<p><strong>Step 8 — alert() fires</strong><br>Upon page load, the browser attempted to load the image from <code>src="x"</code>, failed, and triggered the <code>onerror</code> handler. An alert dialog appeared with the text “Hacked”, confirming successful DOM XSS exploitation via the <code>innerHTML</code> sink.</p>
 <blockquote>  <figure><img src="images/lab-4-dom-xss-in-innerhtml-sink-using-source-location-search/366b752371728020ab01fe4addae3f9d.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 9 — Lab solved</strong>
-After dismissing the alert, the page displayed “Congratulations, you solved the lab!” and the lab status updated to Solved.</p>
+<p><strong>Step 9 — Lab solved</strong><br>After dismissing the alert, the page displayed “Congratulations, you solved the lab!” and the lab status updated to Solved.</p>
 <blockquote>  <figure><img src="images/lab-4-dom-xss-in-innerhtml-sink-using-source-location-search/366b75237172803e8431fa0a7954f5ea.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>

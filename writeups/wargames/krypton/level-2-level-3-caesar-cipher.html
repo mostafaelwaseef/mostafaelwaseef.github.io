@@ -142,37 +142,31 @@
 </ol>
 <hr>
 <h2 id="analysis">🧠 Analysis</h2>
-<p><strong>Step 1 — Read the level instructions</strong>
-Logged in as krypton2 and ran <code>cd /krypton/</code> then <code>ls</code> to confirm available level directories. Inside <code>/krypton/krypton2/</code>, ran <code>cat README</code> which explained that the level uses a Caesar cipher with a fixed rotation, the key is stored in <code>keyfile.dat</code>, and a working directory in <code>/tmp</code> is required to use the <code>encrypt</code> binary.</p>
+<p><strong>Step 1 — Read the level instructions</strong><br>Logged in as krypton2 and ran <code>cd /krypton/</code> then <code>ls</code> to confirm available level directories. Inside <code>/krypton/krypton2/</code>, ran <code>cat README</code> which explained that the level uses a Caesar cipher with a fixed rotation, the key is stored in <code>keyfile.dat</code>, and a working directory in <code>/tmp</code> is required to use the <code>encrypt</code> binary.</p>
 <blockquote>  <figure><img src="images/level-2-level-3-caesar-cipher/37fb752371728076b308c09e5e1a48bd.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/level-2-level-3-caesar-cipher/37fb75237172809ab52bf91e7cfb83c4.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 2 — Explore the level directory and inspect the encrypt binary</strong>
-Ran <code>cd /krypton/krypton2</code> and <code>ls</code>, then <code>ls -la</code> to inspect permissions. The <code>encrypt</code> binary has the setuid bit set (<code>-rwsr-x---</code>), meaning it runs as krypton2 and can read <code>keyfile.dat</code> even without direct access. Also present: <code>keyfile.dat</code> and <code>krypton3</code> (the encrypted password file).</p>
+<p><strong>Step 2 — Explore the level directory and inspect the encrypt binary</strong><br>Ran <code>cd /krypton/krypton2</code> and <code>ls</code>, then <code>ls -la</code> to inspect permissions. The <code>encrypt</code> binary has the setuid bit set (<code>-rwsr-x---</code>), meaning it runs as krypton2 and can read <code>keyfile.dat</code> even without direct access. Also present: <code>keyfile.dat</code> and <code>krypton3</code> (the encrypted password file).</p>
 <blockquote>  <figure><img src="images/level-2-level-3-caesar-cipher/37fb75237172800983aaf9977edfb54b.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 3 — Set up a working directory in /tmp</strong>
-Created a temporary working directory with <code>mkdir /tmp/&lt;dir&gt;</code>, changed into it, and created a symlink to the keyfile with <code>ln -s /krypton/krypton2/keyfile.dat</code>. Ran <code>ls</code> to confirm the symlink was in place.</p>
+<p><strong>Step 3 — Set up a working directory in /tmp</strong><br>Created a temporary working directory with <code>mkdir /tmp/&lt;dir&gt;</code>, changed into it, and created a symlink to the keyfile with <code>ln -s /krypton/krypton2/keyfile.dat</code>. Ran <code>ls</code> to confirm the symlink was in place.</p>
 <blockquote>  <figure><img src="images/level-2-level-3-caesar-cipher/37fb7523717280eeb12fc872e7294b54.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 4 — Test the encrypt binary to determine the cipher shift</strong>
-Ran <code>echo "a" &gt; test.txt</code> to create a known-plaintext input, then <code>chmod 777 .</code> to allow the setuid binary to write output to the current directory. Confirmed permissions with <code>ls -la</code>. Ran <code>/krypton/krypton2/encrypt test.txt</code> — the binary produced a <code>ciphertext</code> file. Opened it with <code>nano ciphertext</code> which showed <code>M</code>, meaning <code>a</code> (position 0) encrypts to <code>M</code> (position 12), confirming a shift of 12. The full password ciphertext <code>OMQEMDUEQMEK</code> is in <code>/krypton/krypton2/krypton3</code>.</p>
+<p><strong>Step 4 — Test the encrypt binary to determine the cipher shift</strong><br>Ran <code>echo "a" &gt; test.txt</code> to create a known-plaintext input, then <code>chmod 777 .</code> to allow the setuid binary to write output to the current directory. Confirmed permissions with <code>ls -la</code>. Ran <code>/krypton/krypton2/encrypt test.txt</code> — the binary produced a <code>ciphertext</code> file. Opened it with <code>nano ciphertext</code> which showed <code>M</code>, meaning <code>a</code> (position 0) encrypts to <code>M</code> (position 12), confirming a shift of 12. The full password ciphertext <code>OMQEMDUEQMEK</code> is in <code>/krypton/krypton2/krypton3</code>.</p>
 <blockquote>  <figure><img src="images/level-2-level-3-caesar-cipher/37fb75237172807a9f67f75cc28df316.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/level-2-level-3-caesar-cipher/37fb7523717280e79448c91256c40e16.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/level-2-level-3-caesar-cipher/37fb75237172801db361c8f905353959.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/level-2-level-3-caesar-cipher/37fb7523717280c58247fdbca9a0c597.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 5 — Decode the krypton3 password using cryptii</strong>
-Entered the ciphertext <code>OMQEMDUEQMEK</code> into cryptii.com’s Caesar cipher decoder. Using a shift of 14 (equivalent to reversing a shift of 12 in a 26-letter alphabet), the decoded plaintext was <strong><code>CAESARISEASY</code></strong>.</p>
+<p><strong>Step 5 — Decode the krypton3 password using cryptii</strong><br>Entered the ciphertext <code>OMQEMDUEQMEK</code> into cryptii.com’s Caesar cipher decoder. Using a shift of 14 (equivalent to reversing a shift of 12 in a 26-letter alphabet), the decoded plaintext was <strong><code>CAESARISEASY</code></strong>.</p>
 <blockquote>  <figure><img src="images/level-2-level-3-caesar-cipher/37fb7523717280f5bd1efa9ecbbe793b.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 6 — SSH into krypton3 with the decoded password</strong>
-Ran <code>ssh krypton3@krypton.labs.overthewire.org -p 2231</code> and authenticated with password <strong><code>CAESARISEASY</code></strong>. The OTW welcome banner confirmed a successful login to the krypton3 shell.</p>
+<p><strong>Step 6 — SSH into krypton3 with the decoded password</strong><br>Ran <code>ssh krypton3@krypton.labs.overthewire.org -p 2231</code> and authenticated with password <strong><code>CAESARISEASY</code></strong>. The OTW welcome banner confirmed a successful login to the krypton3 shell.</p>
 <blockquote>  <figure><img src="images/level-2-level-3-caesar-cipher/37fb7523717280729e63d116ca6c99f2.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/level-2-level-3-caesar-cipher/37fb752371728013a010e7e753225109.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
@@ -192,8 +186,6 @@ Ran <code>ssh krypton3@krypton.labs.overthewire.org -p 2231</code> and authentic
   <li><a href="https://en.wikipedia.org/wiki/Caesar_cipher" target="_blank" rel="noopener">Caesar cipher — Wikipedia</a></li>
   <li><a href="https://cryptii.com/pipes/caesar-cipher" target="_blank" rel="noopener">cryptii.com — Caesar cipher decoder</a></li>
 </ul>
-<hr>
-<blockquote>🤖 Documented with Claude otw-wargames skill</blockquote>
 
 </div>
 

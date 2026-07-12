@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Level 1 → Level 2 — ROT13 Cipher — Mostafa Elwaseef's Portfolio</title>
+  <title>Lab 1 — Remote Code Execution via Web Shell Upload — Mostafa Elwaseef's Portfolio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
   <style>
@@ -101,83 +101,90 @@
 
 <div class="hero">
   <div class="hero-inner">
-    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#wargames">Wargames</a> / <a href="index.html">Krypton</a> / Level 1 → Level 2 — ROT13 Cipher</div>
-    <h1>Level 1 → Level 2 — ROT13 Cipher</h1>
+    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#labs">Labs</a> / <a href="index.html">File Upload Vulnerabilities</a> / Lab 1 — Remote Code Execution via Web Shell Upload</div>
+    <h1>Lab 1 — Remote Code Execution via Web Shell Upload</h1>
     <div class="meta-row">
-      <span class="badge badge-os">⚪ 🔵 Easy</span>
-      <span class="badge badge-date">📅 2026-06-14</span>
-      <span class="badge badge-os">🧩 ROT13</span>
+      <span class="badge badge-os">⚪ 🔴 High</span>
+      <span class="badge badge-date">📅 2026-05-13</span>
     </div>
   </div>
 </div>
 
 <div class="content">
-<h2 id="level-summary">📋 Level Summary</h2>
+<h2 id="finding-summary">📋 Finding Summary</h2>
 <div class='table-wrap'><table>
   <tr><th>Field</th><th>Value</th></tr>
-  <tr><td><strong>Type</strong></td><td>Krypton</td></tr>
-  <tr><td><strong>Cipher / Technique</strong></td><td>ROT13</td></tr>
-  <tr><td><strong>Difficulty</strong></td><td>🔵 Easy</td></tr>
-  <tr><td><strong>Date</strong></td><td>2026-06-14</td></tr>
+  <tr><td><strong>Type</strong></td><td>Web App</td></tr>
+  <tr><td><strong>Target</strong></td><td>PortSwigger Web Security Academy</td></tr>
+  <tr><td><strong>Severity</strong></td><td>🔴 High</td></tr>
+  <tr><td><strong>CVE / CWE</strong></td><td>CWE-434: Unrestricted Upload of File with Dangerous Type</td></tr>
+  <tr><td><strong>Date</strong></td><td>2026-05-13</td></tr>
 </table></div>
 <hr>
 <h2 id="description">🔍 Description</h2>
-<p>ROT13 is a simple substitution cipher that rotates each letter 13 positions forward in the alphabet. Because the alphabet has 26 letters, applying ROT13 twice returns the original text — making it its own inverse. It provides no real security and is trivially reversible without a key. Krypton uses a non-standard ciphertext format where word boundaries are preserved rather than grouped into 5-letter clusters.</p>
+<p>The application allows authenticated users to upload an avatar image to their profile. It performs no validation on the file type, extension, or content before storing it on the server's filesystem. As a result, an attacker can upload a PHP web shell disguised as an avatar, which the server then executes when the file is requested directly. This grants the attacker the ability to execute arbitrary server-side commands and read sensitive files.</p>
 <hr>
 <h2 id="end-goals">🎯 End Goals</h2>
 <ul>
-  <li>Find the encrypted password file <code>krypton2</code> inside <code>/krypton/krypton1/</code></li>
-  <li>Decode the ROT13 ciphertext to obtain the plaintext password</li>
-  <li>Use the decoded password to SSH into krypton2</li>
+  <li>Upload a PHP web shell to the server via the avatar upload function</li>
+  <li>Use the web shell to exfiltrate the contents of <code>/home/carlos/secret</code></li>
+  <li>Submit the secret to solve the lab</li>
 </ul>
 <hr>
 <h2 id="steps-to-reproduce">🪜 Steps to Reproduce</h2>
 <ol>
-  <li>SSH into krypton1 and navigate to <code>/krypton/</code></li>
-  <li>Read the README file inside <code>/krypton/krypton1/</code> for level instructions</li>
-  <li>List files in <code>/krypton/krypton1/</code>, identify the file type of <code>krypton2</code>, and read its contents</li>
-  <li>Decode the ciphertext using ROT13</li>
-  <li>SSH into krypton2 using the decoded password</li>
+  <li>Log in to the application using the provided credentials (<code>wiener:peter</code>)</li>
+  <li>Navigate to the account page and locate the avatar upload function</li>
+  <li>Upload a benign image file to confirm the upload works and observe where files are stored</li>
+  <li>Craft a PHP web shell file and upload it via the same avatar upload function</li>
+  <li>Send a GET request directly to the uploaded PHP file's path to trigger execution</li>
+  <li>Read the output of the web shell to retrieve the secret file contents</li>
+  <li>Submit the secret to solve the lab</li>
 </ol>
 <hr>
 <h2 id="analysis">🧠 Analysis</h2>
-<p><strong>Step 1 — Navigate to the krypton directory</strong><br>After logging in as krypton1, ran <code>cd /krypton</code> to navigate to the wargame directory, then <code>ls</code> to list available level directories: <code>krypton1</code> through <code>krypton7</code>.</p>
-<blockquote>  <figure><img src="images/level-1-level-2-rot13-cipher/37fb7523717280afaf6ed24cf004daa1.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/level-1-level-2-rot13-cipher/37fb7523717280b6bf1df6af50ef0a65.png" alt="screenshot" loading="lazy"></figure>
+<p><strong>Step 1 — Reconnaissance: Logging in and locating the upload function</strong></p>
+<p>Logged in as <code>wiener</code> using credentials <code>wiener:peter</code>. The account page revealed an avatar upload form accepting file uploads with a Browse and Upload button. No client-side restrictions were observed on accepted file types.</p>
+<blockquote>  <figure><img src="images/lab-1-remote-code-execution-via-web-shell-upload/35fb7523717280f1805afb3a16aea308.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 2 — Read the level instructions (README)</strong><br>Inside <code>/krypton/krypton1/</code>, ran <code>cat README</code> which confirmed the password for Level 2 is in the file <code>krypton2</code>, encrypted with a simple rotation cipher called ROT13. The file preserves plain text word boundaries in the ciphertext.</p>
-<blockquote>  <figure><img src="images/level-1-level-2-rot13-cipher/37fb7523717280298e8aeb49993be0c0.png" alt="screenshot" loading="lazy"></figure>
+<p><strong>Step 2 — Confirming image upload works</strong></p>
+<p>Uploaded a benign JPEG image (<code>images.jpeg</code>) to confirm the upload mechanism was functional. The server responded with: <code>The file avatars/images.jpeg has been uploaded.</code> The avatar was then rendered on the account page, confirming the file was stored and served from <code>avatars/</code>.</p>
+<blockquote>  <figure><img src="images/lab-1-remote-code-execution-via-web-shell-upload/35fb752371728098972acedfa0c3d244.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-1-remote-code-execution-via-web-shell-upload/35fb75237172800fb808ca214880bb5c.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 3 — List files and identify krypton2 file type</strong><br>Ran <code>ls</code> inside <code>/krypton/krypton1/</code> revealing two files: <code>krypton2</code> and <code>README</code>. Ran <code>file krypton2</code> which confirmed it is <code>ASCII text</code>, then <code>cat krypton2</code> to read the ciphertext: <code>YRIRY GJB CNFFJBEQ EBGGRA</code>.</p>
-<blockquote>  <figure><img src="images/level-1-level-2-rot13-cipher/37fb7523717280d69f92d00105da72f5.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/level-1-level-2-rot13-cipher/37fb75237172808fbde1e89bb76e617d.png" alt="screenshot" loading="lazy"></figure>
+<p><strong>Step 3 — Intercepting the upload request in Burp Suite</strong></p>
+<p>With Burp Suite proxy enabled, the POST request to <code>/my-account/avatar</code> was captured. The server returned HTTP 200 OK with the message <code>The file avatars/images.jpeg has been uploaded.</code> confirming the upload endpoint and storage path. No Content-Type or extension validation was observed in the response.</p>
+<blockquote>  <figure><img src="images/lab-1-remote-code-execution-via-web-shell-upload/35fb7523717280c5b09ae3a6abd3d4b7.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-1-remote-code-execution-via-web-shell-upload/35fb7523717280a4b1e9e4aea8efb373.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 4 — Decode ROT13 using CyberChef</strong><br>Entered the ciphertext <code>YRIRY GJB CNFFJBEQ EBGGRA</code> into CyberChef with the ROT13 recipe (rotating upper and lower case chars by 13). The decoded output was <code>LEVEL TWO PASSWORD ROTTEN</code>, revealing the password <strong><code>ROTTEN</code></strong>.</p>
-<blockquote>  <figure><img src="images/level-1-level-2-rot13-cipher/37fb752371728030aa9ef59075b7abd9.png" alt="screenshot" loading="lazy"></figure>
+<p><strong>Step 4 — Crafting and uploading the PHP web shell</strong></p>
+<p>Using a terminal in the <code>/port_swigger/file_upload</code> directory, the PHP web shell file <code>exploit.php</code> was created with the following payload:</p>
+<pre><code class="language-javascript">&lt;?php echo file_get_contents('/home/carlos/secret'); ?&gt;</code></pre>
+<p>The file was then uploaded via the avatar upload form. The server accepted it without any file type or extension validation and responded with: <code>The file avatars/exploit.php has been uploaded.</code> Burp Suite confirmed the POST request to <code>/my-account/avatar</code> returned HTTP 200 OK.</p>
+<blockquote>  <figure><img src="images/lab-1-remote-code-execution-via-web-shell-upload/35fb75237172807d94c0eac9bc6515a7.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-1-remote-code-execution-via-web-shell-upload/35fb752371728012ba55efa6f642e3bd.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-1-remote-code-execution-via-web-shell-upload/35fb75237172803fb12cc32c1d45650d.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 5 — SSH into krypton2 with decoded password</strong><br>Ran <code>ssh krypton2@krypton.labs.overthewire.org -p 2231</code> and authenticated with password <strong><code>ROTTEN</code></strong>. The OTW welcome banner confirmed a successful login to the krypton2 shell.</p>
-<blockquote>  <figure><img src="images/level-1-level-2-rot13-cipher/37fb7523717280aea9dddb47964ad3f5.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/level-1-level-2-rot13-cipher/37fb7523717280148faee29d5d04cff7.png" alt="screenshot" loading="lazy"></figure>
+<p><strong>Step 5 — Triggering the web shell and retrieving the secret</strong></p>
+<p>Sent a GET request directly to <code>/files/avatars/exploit.php?cmd=cat+/home/carlos/secret</code>. The server executed the PHP file and returned the secret:</p>
+<pre><code class="language-javascript">edm25PakrRS04MID1gjwp2GV4ItcUstHP</code></pre>
+<p>The secret was submitted via the lab banner to confirm the lab was solved.</p>
+<blockquote>  <figure><img src="images/lab-1-remote-code-execution-via-web-shell-upload/35fb75237172802d94ccd200f5737ec6.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-1-remote-code-execution-via-web-shell-upload/35fb7523717280b28629d04bc7ece6bf.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<h2 id="key-concepts-learned">🔑 Key Concepts Learned</h2>
-<ul>
-  <li>ROT13 is a Caesar cipher with a fixed shift of 13 — it is not encryption and provides zero security</li>
-  <li>Because the English alphabet has 26 letters, ROT13 is self-inverse: applying it twice restores the original text</li>
-  <li>Standard ciphertext groups letters into 5-character clusters to hide word boundaries; Krypton Level 1 deliberately skips this to ease the introduction</li>
-  <li>CyberChef is a powerful browser-based tool for quickly applying and chaining encoding/decoding/cipher operations</li>
-  <li>Recognizing ROT13 visually: common giveaways are <code>YRIRY</code> (LEVEL), <code>CNFFJBEQ</code> (PASSWORD), or the <code>=</code> → <code>=</code> symmetry in Base64-adjacent contexts</li>
-</ul>
+<h2 id="impact">🎯 Impact</h2>
+<p>An attacker can upload arbitrary server-side scripts and execute them remotely, achieving full Remote Code Execution (RCE) on the web server. This allows reading of sensitive files, lateral movement within the server environment, data exfiltration, and potentially full server compromise.</p>
 <hr>
 <h2 id="references">📚 References</h2>
 <ul>
-  <li><a href="https://overthewire.org/wargames/krypton/krypton1.html" target="_blank" rel="noopener">OverTheWire: Krypton Level 1</a></li>
-  <li><a href="https://en.wikipedia.org/wiki/ROT13" target="_blank" rel="noopener">ROT13 — Wikipedia</a></li>
-  <li><a href="https://gchq.github.io/CyberChef/" target="_blank" rel="noopener">CyberChef</a></li>
+  <li><a href="https://portswigger.net/web-security/file-upload" target="_blank" rel="noopener">PortSwigger: File Upload Vulnerabilities</a></li>
+  <li><a href="https://portswigger.net/web-security/file-upload/lab-file-upload-remote-code-execution-via-web-shell-upload" target="_blank" rel="noopener">PortSwigger Lab: Remote code execution via web shell upload</a></li>
+  <li><a href="https://cwe.mitre.org/data/definitions/434.html" target="_blank" rel="noopener">CWE-434: Unrestricted Upload of File with Dangerous Type</a></li>
 </ul>
 
 </div>

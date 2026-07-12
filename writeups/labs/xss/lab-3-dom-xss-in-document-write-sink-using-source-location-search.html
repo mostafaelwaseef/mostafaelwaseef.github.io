@@ -141,33 +141,27 @@
 </ol>
 <hr>
 <h2 id="analysis">🧠 Analysis</h2>
-<p><strong>Step 1 — Access the lab</strong>
-The lab environment loaded a blog application with a search field. The lab status showed “Not solved”.</p>
+<p><strong>Step 1 — Access the lab</strong><br>The lab environment loaded a blog application with a search field. The lab status showed “Not solved”.</p>
 <blockquote>  <figure><img src="images/lab-3-dom-xss-in-document-write-sink-using-source-location-search/366b75237172807d9eeddc61f048ec23.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 2 — Test with a benign search term</strong>
-The term <code>hello</code> was entered into the search box and submitted. The page reflected the search term in the results heading, indicating the input flows from <code>location.search</code> into the page output.</p>
+<p><strong>Step 2 — Test with a benign search term</strong><br>The term <code>hello</code> was entered into the search box and submitted. The page reflected the search term in the results heading, indicating the input flows from <code>location.search</code> into the page output.</p>
 <blockquote>  <figure><img src="images/lab-3-dom-xss-in-document-write-sink-using-source-location-search/366b75237172808d8046d98f77359fcf.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 3 — Inspect the page source</strong>
-DevTools was opened to inspect the rendered HTML. The JavaScript <code>trackSearch()</code> function was found calling <code>document.write()</code> with data sourced directly from <code>location.search</code>. It writes an <code>&lt;img&gt;</code> tag with the search term placed unsanitized inside the <code>src</code> attribute — for example: <code>&lt;img src="/resources/images/tracker.gif?searchTerms=hello"&gt;</code>. This confirms <code>document.write</code> as the sink and <code>location.search</code> as the controllable source.</p>
+<p><strong>Step 3 — Inspect the page source</strong><br>DevTools was opened to inspect the rendered HTML. The JavaScript <code>trackSearch()</code> function was found calling <code>document.write()</code> with data sourced directly from <code>location.search</code>. It writes an <code>&lt;img&gt;</code> tag with the search term placed unsanitized inside the <code>src</code> attribute — for example: <code>&lt;img src="/resources/images/tracker.gif?searchTerms=hello"&gt;</code>. This confirms <code>document.write</code> as the sink and <code>location.search</code> as the controllable source.</p>
 <blockquote>  <figure><img src="images/lab-3-dom-xss-in-document-write-sink-using-source-location-search/366b7523717280239b7dfd50a930bfc3.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 4 — Craft the XSS payload</strong>
-The payload <code>hello" onload="alert('hacked')</code> was entered into the search field. This payload closes the <code>src</code> attribute of the <code>&lt;img&gt;</code> tag with a double quote, then injects an <code>onload</code> event handler. When <code>document.write</code> renders this into the DOM, the resulting tag becomes <code>&lt;img src="/resources/images/tracker.gif?searchTerms=hello" onload="alert('hacked')"&gt;</code>, which executes when the image loads.</p>
+<p><strong>Step 4 — Craft the XSS payload</strong><br>The payload <code>hello" onload="alert('hacked')</code> was entered into the search field. This payload closes the <code>src</code> attribute of the <code>&lt;img&gt;</code> tag with a double quote, then injects an <code>onload</code> event handler. When <code>document.write</code> renders this into the DOM, the resulting tag becomes <code>&lt;img src="/resources/images/tracker.gif?searchTerms=hello" onload="alert('hacked')"&gt;</code>, which executes when the image loads.</p>
 <blockquote>  <figure><img src="images/lab-3-dom-xss-in-document-write-sink-using-source-location-search/366b7523717280fd87eae249e27e973a.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 5 — alert() fires</strong>
-Upon page load, the injected <code>onload</code> handler executed and an alert dialog appeared with the text “hacked”, confirming successful DOM XSS exploitation via the <code>document.write</code> sink.</p>
+<p><strong>Step 5 — alert() fires</strong><br>Upon page load, the injected <code>onload</code> handler executed and an alert dialog appeared with the text “hacked”, confirming successful DOM XSS exploitation via the <code>document.write</code> sink.</p>
 <blockquote>  <figure><img src="images/lab-3-dom-xss-in-document-write-sink-using-source-location-search/366b752371728018aaf2ced0cf73a536.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 6 — Lab solved</strong>
-After dismissing the alert, the page displayed “Congratulations, you solved the lab!” and the lab status updated to Solved.</p>
+<p><strong>Step 6 — Lab solved</strong><br>After dismissing the alert, the page displayed “Congratulations, you solved the lab!” and the lab status updated to Solved.</p>
 <blockquote>  <figure><img src="images/lab-3-dom-xss-in-document-write-sink-using-source-location-search/366b752371728089bf3dd7ed53105b28.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
