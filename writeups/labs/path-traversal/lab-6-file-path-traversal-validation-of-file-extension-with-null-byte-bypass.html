@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lab 2 — File path traversal, traversal sequences blocked with absolute path bypass — Mostafa Elwaseef's Portfolio</title>
+  <title>Lab 6 — File path traversal, validation of file extension with null byte bypass — Mostafa Elwaseef's Portfolio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
   <style>
@@ -101,8 +101,8 @@
 
 <div class="hero">
   <div class="hero-inner">
-    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#labs">Labs</a> / <a href="index.html">Path Traversal</a> / Lab 2 — File path traversal, traversal sequences blocked with absolute path bypass</div>
-    <h1>Lab 2 — File path traversal, traversal sequences blocked with absolute path bypass</h1>
+    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#labs">Labs</a> / <a href="index.html">Path Traversal</a> / Lab 6 — File path traversal, validation of file extension with null byte bypass</div>
+    <h1>Lab 6 — File path traversal, validation of file extension with null byte bypass</h1>
     <div class="meta-row">
       <span class="badge badge-hard">🔴 High</span>
       <span class="badge badge-date">📅 2026-07-12</span>
@@ -121,42 +121,47 @@
 </table></div>
 <hr>
 <h2 id="description">🔍 Description</h2>
-<p>The application blocks traversal sequences such as <code>../</code> in the <code>filename</code> parameter used by the <code>/image</code> endpoint to load product images. However, the server treats the supplied filename as relative to a default working directory and fails to restrict absolute paths. By supplying an absolute filesystem path (e.g. <code>/etc/passwd</code>) directly as the <code>filename</code> value — without any traversal sequences — the block is bypassed entirely, and the server reads and returns the target file.</p>
+<p>The application validates that the user-supplied <code>filename</code> parameter in the <code>/image</code> endpoint ends with an expected file extension (e.g. <code>.png</code>). However, the extension check is performed on the raw string before the server processes path components, and the server does not strip or reject null byte characters (<code>%00</code>). By appending a null byte followed by a valid extension — for example, <code>../../../etc/passwd%00.png</code> — the extension check sees <code>.png</code> at the end and passes, while the underlying file-access layer treats the null byte as a string terminator, reading only <code>../../../etc/passwd</code> and returning the contents of that file.</p>
 <hr>
 <h2 id="end-goals">🎯 End Goals</h2>
 <ul>
   <li>Exploit the path traversal vulnerability in the product image endpoint</li>
-  <li>Bypass the traversal sequence block using an absolute path</li>
+  <li>Bypass the file extension validation using a null byte injection</li>
   <li>Retrieve the contents of <code>/etc/passwd</code> from the server</li>
 </ul>
 <hr>
 <h2 id="steps-to-reproduce">🪜 Steps to Reproduce</h2>
 <ol>
   <li>Browse to any product page on the shop to trigger product image requests</li>
-  <li>Intercept the image request in Burp Proxy and identify the <code>filename</code> parameter</li>
-  <li>Send the request to Repeater and modify the <code>filename</code> parameter to <code>/etc/passwd</code></li>
+  <li>Intercept an image request in Burp Proxy and identify the <code>filename</code> parameter</li>
+  <li>Send the request to Repeater and confirm that the server blocks traversal and extension-less payloads</li>
+  <li>Modify the <code>filename</code> parameter to <code>../../../etc/passwd%00.png</code> to satisfy the extension check while terminating the path at the null byte</li>
   <li>Send the request and observe a 200 OK response returning the contents of <code>/etc/passwd</code></li>
 </ol>
 <hr>
 <h2 id="analysis">🧠 Analysis</h2>
 <p><strong>Step 1 — Browse the shop</strong></p>
-<p>Opened the lab environment and browsed to the shop homepage. The lab banner confirmed the title “File path traversal, traversal sequences blocked with absolute path bypass” with status “Not solved”.</p>
+<p>Opened the lab environment and browsed to the shop homepage. The lab banner confirmed the title “File path traversal, validation of file extension with null byte bypass” with status “Not solved”.</p>
 <hr>
 <p><strong>Step 2 — Capture image request in Burp HTTP history</strong></p>
-<p>With Burp Proxy active, browsed the shop to trigger product image loads. The HTTP history showed GET requests to <code>/image?filename=38.jpg</code>, exposing the <code>filename</code> parameter used to serve product images.</p>
+<p>With Burp Proxy active, browsed the shop to trigger product image loads. The HTTP history showed GET requests to <code>/image?filename=26.jpg</code>, exposing the <code>filename</code> parameter used to serve product images.</p>
 <hr>
-<p><strong>Step 3 — Use absolute path </strong><strong><code>/etc/passwd</code></strong><strong> (200 OK)</strong></p>
-<p>Sent the image request to Repeater and modified the <code>filename</code> parameter to <code>/etc/passwd</code>. Rather than using <code>../</code> traversal sequences (which the application blocks), the absolute path was supplied directly. The server passed the value to a file-read operation without validating that it resolved within an allowed base directory, returning 200 OK with the full contents of <code>/etc/passwd</code> in the response body.</p>
+<p><strong>Step 3 — Test multiple payloads (all fail)</strong></p>
+<p>Sent the image request to Repeater and tested five payloads to probe the validation logic. <code>/etc/passwd</code> (absolute path) returned 400 “No such file”. <code>../../../etc/passwd</code> (plain traversal) also returned 400. <code>....//....//....//etc/passwd</code> (non-recursive bypass) returned 400. Single URL-encoded <code>%2e%2e%2f%2e%2e%2f%2e%2e%2f%65%74%63%2f%70%61%73%73%77%64</code> returned 400. A double URL-encoded variant also returned 400. All attempts failed — the server enforces an extension check that rejects paths not ending with the expected file extension.</p>
 <hr>
-<p><strong>Step 4 — Verify lab solved in browser</strong></p>
+<p><strong>Step 4 — Inject null byte bypass payload (200 OK)</strong></p>
+<p>Modified the <code>filename</code> parameter to <code>../../../etc/passwd%00.png</code>. The null byte (<code>%00</code>) acts as a string terminator at the OS level: the extension validator reads the full string and sees <code>.png</code> at the end, satisfying the check. When the server passes the path to the filesystem, the null byte terminates the string at <code>../../../etc/passwd</code>, causing the server to read and return the contents of <code>/etc/passwd</code>. The response returned 200 OK with Content-Type <code>image/png</code> and the full <code>/etc/passwd</code> contents in the response body.</p>
+<figure><img src="images/lab-6-file-path-traversal-validation-of-file-extension-with-null-byte-bypass/39bb752371728004b9cfccf86d93422e.png" alt="screenshot" loading="lazy"></figure>
+<hr>
+<p><strong>Step 5 — Verify lab solved in browser</strong></p>
 <p>Navigated back to the lab in the browser, which displayed the “Congratulations, you solved the lab!” banner confirming successful exploitation.</p>
 <hr>
 <h2 id="impact">🎯 Impact</h2>
-<p>An attacker can read arbitrary files from the server filesystem by bypassing naive traversal filters with absolute paths. Any defense that only strips or blocks <code>../</code> sequences without also enforcing that the resolved path falls within an allowed base directory is trivially circumvented. Sensitive files such as <code>/etc/passwd</code>, <code>/etc/shadow</code>, application configuration files, and private keys are all at risk.</p>
+<p>An attacker can bypass file extension validation by injecting a null byte before the required extension suffix. Any server that validates the extension on the raw input string without also sanitizing null bytes — and whose file-access layer respects null byte string termination — is vulnerable. Sensitive files such as <code>/etc/passwd</code>, <code>/etc/shadow</code>, application configuration files, private keys, and source code are all at risk of unauthorized disclosure.</p>
 <hr>
 <h2 id="references">📚 References</h2>
 <ul>
-  <li><a href="https://portswigger.net/web-security/file-path-traversal/lab-absolute-path-bypass" target="_blank" rel="noopener">PortSwigger: File path traversal, traversal sequences blocked with absolute path bypass</a></li>
+  <li><a href="https://portswigger.net/web-security/file-path-traversal/lab-validate-file-extension-null-byte-bypass" target="_blank" rel="noopener">PortSwigger: File path traversal, validation of file extension with null byte bypass</a></li>
   <li><a href="https://cwe.mitre.org/data/definitions/22.html" target="_blank" rel="noopener">CWE-22: Improper Limitation of a Pathname to a Restricted Directory</a></li>
   <li><a href="https://owasp.org/www-community/attacks/Path_Traversal" target="_blank" rel="noopener">OWASP: Path Traversal</a></li>
 </ul>

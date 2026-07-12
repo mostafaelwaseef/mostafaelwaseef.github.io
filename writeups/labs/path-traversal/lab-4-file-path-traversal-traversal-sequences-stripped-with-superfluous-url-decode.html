@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lab 2 — File path traversal, traversal sequences blocked with absolute path bypass — Mostafa Elwaseef's Portfolio</title>
+  <title>Lab 4 — File path traversal, traversal sequences stripped with superfluous URL-decode — Mostafa Elwaseef's Portfolio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
   <style>
@@ -101,8 +101,8 @@
 
 <div class="hero">
   <div class="hero-inner">
-    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#labs">Labs</a> / <a href="index.html">Path Traversal</a> / Lab 2 — File path traversal, traversal sequences blocked with absolute path bypass</div>
-    <h1>Lab 2 — File path traversal, traversal sequences blocked with absolute path bypass</h1>
+    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#labs">Labs</a> / <a href="index.html">Path Traversal</a> / Lab 4 — File path traversal, traversal sequences stripped with superfluous URL-decode</div>
+    <h1>Lab 4 — File path traversal, traversal sequences stripped with superfluous URL-decode</h1>
     <div class="meta-row">
       <span class="badge badge-hard">🔴 High</span>
       <span class="badge badge-date">📅 2026-07-12</span>
@@ -121,42 +121,54 @@
 </table></div>
 <hr>
 <h2 id="description">🔍 Description</h2>
-<p>The application blocks traversal sequences such as <code>../</code> in the <code>filename</code> parameter used by the <code>/image</code> endpoint to load product images. However, the server treats the supplied filename as relative to a default working directory and fails to restrict absolute paths. By supplying an absolute filesystem path (e.g. <code>/etc/passwd</code>) directly as the <code>filename</code> value — without any traversal sequences — the block is bypassed entirely, and the server reads and returns the target file.</p>
+<p>The application attempts to block path traversal attacks by stripping <code>../</code> sequences from the user-supplied <code>filename</code> parameter in the <code>/image</code> endpoint. However, the application also performs a superfluous URL-decode pass on the input before applying the filter. By double URL-encoding the traversal payload, an attacker can smuggle it past the strip: the first decode converts <code>%25</code> to <code>%</code>, revealing <code>%2e%2e%2f</code> rather than <code>../</code>, which does not match the filter pattern. The stripped-but-still-encoded value then undergoes a second decode by the server (or underlying file-access layer), resolving it to the original <code>../</code> traversal sequence and allowing the server to read arbitrary files.</p>
 <hr>
 <h2 id="end-goals">🎯 End Goals</h2>
 <ul>
   <li>Exploit the path traversal vulnerability in the product image endpoint</li>
-  <li>Bypass the traversal sequence block using an absolute path</li>
+  <li>Bypass the traversal filter by double URL-encoding the payload</li>
   <li>Retrieve the contents of <code>/etc/passwd</code> from the server</li>
 </ul>
 <hr>
 <h2 id="steps-to-reproduce">🪜 Steps to Reproduce</h2>
 <ol>
-  <li>Browse to any product page on the shop to trigger product image requests</li>
-  <li>Intercept the image request in Burp Proxy and identify the <code>filename</code> parameter</li>
-  <li>Send the request to Repeater and modify the <code>filename</code> parameter to <code>/etc/passwd</code></li>
-  <li>Send the request and observe a 200 OK response returning the contents of <code>/etc/passwd</code></li>
+  <li>Browse to any product page on the shop and intercept the image request in Burp Proxy</li>
+  <li>Send the <code>/image?filename=</code> request to Repeater</li>
+  <li>Test plain and absolute path traversal payloads to confirm the filter is active</li>
+  <li>Select the traversal payload <code>../../../etc/passwd</code> in Repeater, right-click, and use Convert selection → URL → URL-encode all characters to produce a single-encoded payload</li>
+  <li>Test the single-encoded payload to confirm the filter still blocks it</li>
+  <li>Apply URL-encode all characters a second time to the already-encoded payload to produce a double-encoded payload</li>
+  <li>Send the double-encoded payload and observe a 200 OK response returning <code>/etc/passwd</code></li>
 </ol>
 <hr>
 <h2 id="analysis">🧠 Analysis</h2>
-<p><strong>Step 1 — Browse the shop</strong></p>
-<p>Opened the lab environment and browsed to the shop homepage. The lab banner confirmed the title “File path traversal, traversal sequences blocked with absolute path bypass” with status “Not solved”.</p>
+<p><strong>Step 1 — Browse the shop and capture traffic in Burp</strong></p>
+<p>Opened the lab environment and browsed to the shop at <code>/product?productId=1</code>. Burp Proxy captured the HTTP history, including GET requests for product images via <code>/image?filename=</code>.</p>
 <hr>
-<p><strong>Step 2 — Capture image request in Burp HTTP history</strong></p>
-<p>With Burp Proxy active, browsed the shop to trigger product image loads. The HTTP history showed GET requests to <code>/image?filename=38.jpg</code>, exposing the <code>filename</code> parameter used to serve product images.</p>
+<p><strong>Step 2 — Send image request to Repeater</strong></p>
+<p>Selected the <code>GET /image?filename=1</code> request from Proxy history and sent it to Repeater to use as a baseline for payload testing.</p>
 <hr>
-<p><strong>Step 3 — Use absolute path </strong><strong><code>/etc/passwd</code></strong><strong> (200 OK)</strong></p>
-<p>Sent the image request to Repeater and modified the <code>filename</code> parameter to <code>/etc/passwd</code>. Rather than using <code>../</code> traversal sequences (which the application blocks), the absolute path was supplied directly. The server passed the value to a file-read operation without validating that it resolved within an allowed base directory, returning 200 OK with the full contents of <code>/etc/passwd</code> in the response body.</p>
+<p><strong>Step 3 — Test plain and absolute path traversal variants</strong></p>
+<p>Tested three payloads to confirm the traversal filter is active. <code>../../../etc/passwd</code> returned 400 “No such file”. <code>/etc/passwd</code> (absolute path) also returned 400 “No such file”. Increasing the depth to <code>../../../../etc/passwd</code> also failed. All plain traversal attempts were blocked, indicating the server strips <code>../</code> sequences.</p>
 <hr>
-<p><strong>Step 4 — Verify lab solved in browser</strong></p>
+<p><strong>Step 4 — URL-encode the payload using Burp’s context menu</strong></p>
+<p>Highlighted <code>../../../etc/passwd</code> in the Repeater request, right-clicked, and selected Convert selection → URL → URL-encode all characters. This produced the single-encoded payload <code>%2e%2e%2f%2e%2e%2f%2e%2e%2f%65%74%63%2f%70%61%73%73%77%64</code>, where every character is percent-encoded.</p>
+<hr>
+<p><strong>Step 5 — Test single URL-encoded payload (fails)</strong></p>
+<p>Sent the single-encoded payload. The server returned 400 “No such file”, indicating it URL-decodes the input before applying the strip, which converts <code>%2e%2e%2f</code> back to <code>../</code> — and then strips it. Single encoding is therefore insufficient to bypass the filter.</p>
+<hr>
+<p><strong>Step 6 — Double URL-encode and send (200 OK)</strong></p>
+<p>Applied URL-encode all characters a second time to the single-encoded payload, percent-encoding each <code>%</code> sign as <code>%25</code>. The resulting double-encoded payload begins <code>%25%32%65%25%32%65%25%32%66%25%32%65%25%32%65%25%32%66%25%32%65%25%32%65%25%32%66%25%36%35%25%37%34%25%36%33%25%32%66%25%37%30%25%36%31%25%37%33%25%37%33%25%37%37%25%36%34</code>. The server’s first decode converts this to <code>%2e%2e%2f%2e%2e%2f%2e%2e%2f%65%74%63%2f%70%61%73%73%77%64</code>, which does not match the <code>../</code> filter pattern and passes through. A second decode pass then resolves it to <code>../../../etc/passwd</code>, traversing three directory levels and returning the contents of <code>/etc/passwd</code> with HTTP 200 OK. The Inspector panel confirmed the two-level decode chain.</p>
+<hr>
+<p><strong>Step 7 — Verify lab solved in browser</strong></p>
 <p>Navigated back to the lab in the browser, which displayed the “Congratulations, you solved the lab!” banner confirming successful exploitation.</p>
 <hr>
 <h2 id="impact">🎯 Impact</h2>
-<p>An attacker can read arbitrary files from the server filesystem by bypassing naive traversal filters with absolute paths. Any defense that only strips or blocks <code>../</code> sequences without also enforcing that the resolved path falls within an allowed base directory is trivially circumvented. Sensitive files such as <code>/etc/passwd</code>, <code>/etc/shadow</code>, application configuration files, and private keys are all at risk.</p>
+<p>An attacker can bypass URL-decode-then-strip defenses by double-encoding the traversal payload. Any server that performs URL decoding before input sanitization — and then decodes again when accessing the filesystem — is vulnerable. Sensitive files such as <code>/etc/passwd</code>, <code>/etc/shadow</code>, application configuration files, private keys, and source code are all at risk of unauthorized disclosure.</p>
 <hr>
 <h2 id="references">📚 References</h2>
 <ul>
-  <li><a href="https://portswigger.net/web-security/file-path-traversal/lab-absolute-path-bypass" target="_blank" rel="noopener">PortSwigger: File path traversal, traversal sequences blocked with absolute path bypass</a></li>
+  <li><a href="https://portswigger.net/web-security/file-path-traversal/lab-superfluous-url-decode" target="_blank" rel="noopener">PortSwigger: File path traversal, traversal sequences stripped with superfluous URL-decode</a></li>
   <li><a href="https://cwe.mitre.org/data/definitions/22.html" target="_blank" rel="noopener">CWE-22: Improper Limitation of a Pathname to a Restricted Directory</a></li>
   <li><a href="https://owasp.org/www-community/attacks/Path_Traversal" target="_blank" rel="noopener">OWASP: Path Traversal</a></li>
 </ul>

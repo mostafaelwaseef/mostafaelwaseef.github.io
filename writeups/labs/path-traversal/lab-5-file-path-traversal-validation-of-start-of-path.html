@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lab 2 — File path traversal, traversal sequences blocked with absolute path bypass — Mostafa Elwaseef's Portfolio</title>
+  <title>Lab 5 — File path traversal, validation of start of path — Mostafa Elwaseef's Portfolio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
   <style>
@@ -101,8 +101,8 @@
 
 <div class="hero">
   <div class="hero-inner">
-    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#labs">Labs</a> / <a href="index.html">Path Traversal</a> / Lab 2 — File path traversal, traversal sequences blocked with absolute path bypass</div>
-    <h1>Lab 2 — File path traversal, traversal sequences blocked with absolute path bypass</h1>
+    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#labs">Labs</a> / <a href="index.html">Path Traversal</a> / Lab 5 — File path traversal, validation of start of path</div>
+    <h1>Lab 5 — File path traversal, validation of start of path</h1>
     <div class="meta-row">
       <span class="badge badge-hard">🔴 High</span>
       <span class="badge badge-date">📅 2026-07-12</span>
@@ -121,42 +121,46 @@
 </table></div>
 <hr>
 <h2 id="description">🔍 Description</h2>
-<p>The application blocks traversal sequences such as <code>../</code> in the <code>filename</code> parameter used by the <code>/image</code> endpoint to load product images. However, the server treats the supplied filename as relative to a default working directory and fails to restrict absolute paths. By supplying an absolute filesystem path (e.g. <code>/etc/passwd</code>) directly as the <code>filename</code> value — without any traversal sequences — the block is bypassed entirely, and the server reads and returns the target file.</p>
+<p>The application transmits the full file path via the <code>filename</code> request parameter in the <code>/image</code> endpoint and validates that the supplied path starts with the expected folder <code>/var/www/images/</code>. However, the validation only checks the prefix and does not further sanitize or canonicalize the path. By including the expected folder prefix followed by path traversal sequences, an attacker can satisfy the prefix check while still escaping the intended directory. The payload <code>/var/www/images/../../../etc/passwd</code> passes the start-of-path validation and traverses three levels up to the filesystem root, allowing arbitrary file reads.</p>
 <hr>
 <h2 id="end-goals">🎯 End Goals</h2>
 <ul>
   <li>Exploit the path traversal vulnerability in the product image endpoint</li>
-  <li>Bypass the traversal sequence block using an absolute path</li>
+  <li>Bypass the start-of-path validation check</li>
   <li>Retrieve the contents of <code>/etc/passwd</code> from the server</li>
 </ul>
 <hr>
 <h2 id="steps-to-reproduce">🪜 Steps to Reproduce</h2>
 <ol>
-  <li>Browse to any product page on the shop to trigger product image requests</li>
-  <li>Intercept the image request in Burp Proxy and identify the <code>filename</code> parameter</li>
-  <li>Send the request to Repeater and modify the <code>filename</code> parameter to <code>/etc/passwd</code></li>
+  <li>Browse to any product page on the shop to load the lab environment</li>
+  <li>Intercept the product image request in Burp Proxy and observe that the <code>filename</code> parameter contains the full server path (e.g. <code>/var/www/images/11.jpg</code>)</li>
+  <li>Send the request to Repeater and test a plain path traversal payload to confirm the validation is active</li>
+  <li>Modify the payload to begin with the expected folder prefix followed by traversal sequences: <code>/var/www/images/../../../etc/passwd</code></li>
   <li>Send the request and observe a 200 OK response returning the contents of <code>/etc/passwd</code></li>
 </ol>
 <hr>
 <h2 id="analysis">🧠 Analysis</h2>
 <p><strong>Step 1 — Browse the shop</strong></p>
-<p>Opened the lab environment and browsed to the shop homepage. The lab banner confirmed the title “File path traversal, traversal sequences blocked with absolute path bypass” with status “Not solved”.</p>
+<p>Opened the lab environment and browsed to the shop homepage. The lab banner confirmed the title “File path traversal, validation of start of path” with status “Not solved”.</p>
 <hr>
 <p><strong>Step 2 — Capture image request in Burp HTTP history</strong></p>
-<p>With Burp Proxy active, browsed the shop to trigger product image loads. The HTTP history showed GET requests to <code>/image?filename=38.jpg</code>, exposing the <code>filename</code> parameter used to serve product images.</p>
+<p>With Burp Proxy active, browsed the shop to trigger product image loads. The HTTP history revealed that image requests use the full server-side file path as the <code>filename</code> parameter — for example, <code>GET /image?filename=/var/www/images/11.jpg</code>. This exposed the expected folder prefix <code>/var/www/images/</code> that the server validates against.</p>
 <hr>
-<p><strong>Step 3 — Use absolute path </strong><strong><code>/etc/passwd</code></strong><strong> (200 OK)</strong></p>
-<p>Sent the image request to Repeater and modified the <code>filename</code> parameter to <code>/etc/passwd</code>. Rather than using <code>../</code> traversal sequences (which the application blocks), the absolute path was supplied directly. The server passed the value to a file-read operation without validating that it resolved within an allowed base directory, returning 200 OK with the full contents of <code>/etc/passwd</code> in the response body.</p>
+<p><strong>Step 3 — Test plain path traversal (fails)</strong></p>
+<p>Sent the image request to Repeater and modified the <code>filename</code> parameter to <code>/etc/passwd</code>, removing the expected prefix entirely. The server returned 400 Bad Request with the message <code>"Missing parameter 'filename'"</code>, indicating the path failed the start-of-path validation because it did not begin with the required folder.</p>
 <hr>
-<p><strong>Step 4 — Verify lab solved in browser</strong></p>
+<p><strong>Step 4 — Bypass using expected folder prefix and traversal sequences</strong></p>
+<p>Modified the payload to <code>/var/www/images/../../../etc/passwd</code>. This satisfies the prefix check — the path begins with <code>/var/www/images/</code> — while the three <code>../</code> sequences that follow traverse three directory levels up to the filesystem root. The server returned 200 OK with Content-Type <code>image/jpeg</code> and the full contents of <code>/etc/passwd</code> in the response body.</p>
+<hr>
+<p><strong>Step 5 — Verify lab solved in browser</strong></p>
 <p>Navigated back to the lab in the browser, which displayed the “Congratulations, you solved the lab!” banner confirming successful exploitation.</p>
 <hr>
 <h2 id="impact">🎯 Impact</h2>
-<p>An attacker can read arbitrary files from the server filesystem by bypassing naive traversal filters with absolute paths. Any defense that only strips or blocks <code>../</code> sequences without also enforcing that the resolved path falls within an allowed base directory is trivially circumvented. Sensitive files such as <code>/etc/passwd</code>, <code>/etc/shadow</code>, application configuration files, and private keys are all at risk.</p>
+<p>An attacker can bypass start-of-path validation by prepending the expected folder prefix to a traversal payload. Any server that validates only that a path begins with a trusted directory — without canonicalizing the path first (e.g. resolving <code>..</code> components) — is trivially circumvented. Sensitive files such as <code>/etc/passwd</code>, <code>/etc/shadow</code>, application configuration files, and private keys are all at risk of unauthorized disclosure.</p>
 <hr>
 <h2 id="references">📚 References</h2>
 <ul>
-  <li><a href="https://portswigger.net/web-security/file-path-traversal/lab-absolute-path-bypass" target="_blank" rel="noopener">PortSwigger: File path traversal, traversal sequences blocked with absolute path bypass</a></li>
+  <li><a href="https://portswigger.net/web-security/file-path-traversal/lab-validate-start-of-path" target="_blank" rel="noopener">PortSwigger: File path traversal, validation of start of path</a></li>
   <li><a href="https://cwe.mitre.org/data/definitions/22.html" target="_blank" rel="noopener">CWE-22: Improper Limitation of a Pathname to a Restricted Directory</a></li>
   <li><a href="https://owasp.org/www-community/attacks/Path_Traversal" target="_blank" rel="noopener">OWASP: Path Traversal</a></li>
 </ul>

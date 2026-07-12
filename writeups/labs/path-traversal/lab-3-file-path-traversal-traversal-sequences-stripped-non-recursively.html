@@ -132,21 +132,29 @@
 <hr>
 <h2 id="steps-to-reproduce">🪜 Steps to Reproduce</h2>
 <ol>
-  <li>Browse to any product page on the shop</li>
-  <li>Open browser DevTools and inspect the product image element to identify the <code>filename</code> parameter</li>
-  <li>Modify the <code>filename</code> parameter using nested traversal sequences that survive a single-pass strip</li>
-  <li>Observe the server returns the contents of <code>/etc/passwd</code>, solving the lab</li>
+  <li>Browse to any product page on the shop to trigger product image requests</li>
+  <li>Intercept the image request in Burp Proxy and identify the <code>filename</code> parameter</li>
+  <li>Send the request to Repeater and test absolute path and plain traversal payloads to confirm both are blocked</li>
+  <li>Modify the <code>filename</code> parameter using nested traversal sequences (<code>....//....//....//etc/passwd</code>) that survive a single-pass strip</li>
+  <li>Send the request and observe a 200 OK response returning the contents of <code>/etc/passwd</code></li>
 </ol>
 <hr>
 <h2 id="analysis">🧠 Analysis</h2>
-<p><strong>Step 1 — Browse the shop and navigate to a product page</strong></p>
-<p>Opened the lab environment and browsed to the product page for “Dancing In The Dark” at <code>/product?productId=1</code>. The page loaded normally with the product image displayed.</p>
+<p><strong>Step 1 — Browse the shop</strong></p>
+<p>Opened the lab environment and browsed to the shop homepage. The lab banner confirmed the title “File path traversal, traversal sequences stripped non-recursively” with status “Not solved”.</p>
 <hr>
-<p><strong>Step 2 — Identify the vulnerable filename parameter via DevTools</strong></p>
-<p>Opened browser DevTools and used the Inspector to examine the product page HTML. The product image was found to load via <code>/image?filename=60.jpg</code>, directly exposing the <code>filename</code> parameter. The application is documented to strip path traversal sequences, but the stripping is performed non-recursively — only a single pass is applied.</p>
+<p><strong>Step 2 — Capture image request in Burp HTTP history</strong></p>
+<p>With Burp Proxy active, browsed the shop to trigger product image loads. The HTTP history showed GET requests to <code>/image?filename=74.jpg</code>, exposing the <code>filename</code> parameter used to serve product images.</p>
 <hr>
-<p><strong>Step 3 — Inject nested traversal payload and solve the lab</strong></p>
-<p>Modified the <code>src</code> attribute in DevTools to <code>/image?filename=....//....//....//etc/passwd</code>. Each <code>....//</code> sequence is constructed so that after the application’s single-pass strip removes the inner <code>./</code>, the outer two dots and remaining slash reconstitute a valid <code>../</code>. Three nested sequences chain together to traverse three directory levels up to the filesystem root, and the server returned the contents of <code>/etc/passwd</code>. The lab was marked Solved with the “Congratulations, you solved the lab!” banner.</p>
+<p><strong>Step 3 — Test absolute path and plain traversal (both fail)</strong></p>
+<p>Sent the image request to Repeater and tested two payloads. First, <code>/etc/passwd</code> (absolute path) returned 400 Bad Request. Second, <code>../../../etc/passwd</code> (plain traversal) also returned 400 Bad Request — the server strips <code>../</code> sequences before processing the path.</p>
+<hr>
+<p><strong>Step 4 — Inject nested traversal payload (200 OK)</strong></p>
+<p>Modified the <code>filename</code> parameter to <code>....//....//....//etc/passwd</code>. Each <code>....//</code> sequence is constructed so that after the application’s single-pass strip removes the inner <code>./</code>, the outer two dots and remaining slash reconstitute a valid <code>../</code>. Three nested sequences chain together to traverse three directory levels up to the filesystem root. The server returned 200 OK with the full contents of <code>/etc/passwd</code> in the response body.</p>
+<figure><img src="images/lab-3-file-path-traversal-traversal-sequences-stripped-non-recursively/39bb752371728009a3fec1e9a5c8a56f.png" alt="screenshot" loading="lazy"></figure>
+<hr>
+<p><strong>Step 5 — Verify lab solved in browser</strong></p>
+<p>Navigated back to the lab in the browser, which displayed the “Congratulations, you solved the lab!” banner confirming successful exploitation.</p>
 <hr>
 <h2 id="impact">🎯 Impact</h2>
 <p>An attacker can bypass naive single-pass traversal filters by embedding traversal sequences within themselves. Any server-side defense that strips <code>../</code> only once — without iterating until the output stabilizes or using an allowlist-based path validation — is trivially circumvented. Sensitive files such as <code>/etc/passwd</code>, <code>/etc/shadow</code>, application configuration files, and private keys are all at risk of unauthorized disclosure.</p>

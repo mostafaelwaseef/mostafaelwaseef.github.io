@@ -121,7 +121,7 @@
 </table></div>
 <hr>
 <h2 id="description">🔍 Description</h2>
-<p>Path traversal (also known as directory traversal) allows an attacker to read arbitrary files on the server by manipulating file path parameters. In this lab, the application uses a <code>filename</code> parameter in the <code>/image</code> endpoint to load product images. No sanitization or restriction is applied to this parameter, allowing an attacker to supply traversal sequences (<code>../</code>) to walk up the directory tree and access sensitive files outside the web root.</p>
+<p>The application loads product images by passing a user-supplied <code>filename</code> parameter directly to a server-side file read in the <code>/image</code> endpoint, with no sanitization or validation of path traversal sequences. By replacing the legitimate filename with <code>../../../etc/passwd</code>, an attacker can traverse three directory levels above the web root and instruct the server to return the contents of arbitrary files. This is the simplest form of path traversal — no filter bypass is required.</p>
 <hr>
 <h2 id="end-goals">🎯 End Goals</h2>
 <ul>
@@ -131,35 +131,36 @@
 <hr>
 <h2 id="steps-to-reproduce">🪜 Steps to Reproduce</h2>
 <ol>
-  <li>Browse to any product page on the shop</li>
-  <li>Open browser DevTools and inspect the product image element to identify the vulnerable <code>filename</code> parameter</li>
-  <li>Modify the <code>filename</code> parameter value to a path traversal payload pointing to <code>/etc/passwd</code></li>
-  <li>Observe the server returns the file contents, solving the lab</li>
+  <li>Browse to any product page on the shop to trigger product image requests</li>
+  <li>Intercept the image request in Burp Proxy and identify the <code>filename</code> parameter</li>
+  <li>Send the request to Repeater and modify the <code>filename</code> parameter to <code>../../../etc/passwd</code></li>
+  <li>Send the request and observe a 200 OK response returning the contents of <code>/etc/passwd</code></li>
 </ol>
 <hr>
 <h2 id="analysis">🧠 Analysis</h2>
-<p><strong>Step 1 — Browse the shop and identify the target product</strong></p>
-<p>Opened the lab environment and browsed to the product page for “Babbage Web Spray” at <code>/product?productId=1</code>. The page loaded normally with product images displayed.</p>
-<blockquote>  <figure><img src="images/lab-1-file-path-traversal-simple-case/39bb752371728053ac2affca766dbecb.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/lab-1-file-path-traversal-simple-case/39bb75237172803dbc2fc633214b96c0.png" alt="screenshot" loading="lazy"></figure>
-</blockquote>
+<p><strong>Step 1 — Browse the shop</strong></p>
+<p>Opened the lab environment and browsed to the shop homepage. The lab banner confirmed the title “File path traversal, simple case” with status “Not solved”.</p>
+<figure><img src="images/lab-1-file-path-traversal-simple-case/39bb75237172809ebb74e619277b0332.png" alt="screenshot" loading="lazy"></figure>
 <hr>
-<p><strong>Step 2 — Identify the vulnerable filename parameter via DevTools</strong></p>
-<p>Opened browser DevTools and used the Inspector to examine the HTML source of the product page. The product image was found to load via the endpoint <code>/image?filename=22.jpg</code>, directly exposing a <code>filename</code> parameter with no apparent sanitization.</p>
-<blockquote></blockquote>
+<p><strong>Step 2 — Capture image request in Burp HTTP history</strong></p>
+<p>With Burp Proxy active, browsed the shop to trigger product image loads. The HTTP history showed GET requests to <code>/image?filename=36.jpg</code>, exposing the <code>filename</code> parameter used to serve product images.</p>
 <hr>
-<p><strong>Step 3 — Inject traversal payload and solve the lab</strong></p>
-<p>Modified the <code>src</code> attribute of the image element in DevTools to <code>/image?filename=../../../etc/passwd</code>. The server processed the traversal sequence without restriction, walking three directory levels up from the images directory to the filesystem root and returning the contents of <code>/etc/passwd</code>. The lab banner confirmed success with “Congratulations, you solved the lab!”</p>
-<blockquote>  <figure><img src="images/lab-1-file-path-traversal-simple-case/39bb7523717280938ba5fdfe9f2fe31e.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/lab-1-file-path-traversal-simple-case/39bb752371728055b52bed158966eb6c.png" alt="screenshot" loading="lazy"></figure>
-</blockquote>
+<p><strong>Step 3 — Test absolute path (fails)</strong></p>
+<p>Sent the image request to Repeater and modified the <code>filename</code> parameter to <code>/etc/passwd</code>. The server returned 400 Bad Request with <code>"No such file"</code>, indicating the absolute path attempt failed — the server resolves paths relative to its image directory.</p>
+<figure><img src="images/lab-1-file-path-traversal-simple-case/39bb752371728083b73ae346cc901759.png" alt="screenshot" loading="lazy"></figure>
+<hr>
+<p><strong>Step 4 — Inject path traversal payload (200 OK)</strong></p>
+<p>Modified the <code>filename</code> parameter to <code>../../../etc/passwd</code>. The three <code>../</code> sequences traverse three directory levels up from the images directory to the filesystem root, then descend into <code>/etc/passwd</code>. The server returned 200 OK with Content-Type <code>image/jpeg</code> and the full contents of <code>/etc/passwd</code> in the response body — confirming no sanitization is applied to the <code>filename</code> parameter.</p>
+<hr>
+<p><strong>Step 5 — Verify lab solved in browser</strong></p>
+<p>Navigated back to the lab in the browser, which displayed the “Congratulations, you solved the lab!” banner confirming successful exploitation.</p>
 <hr>
 <h2 id="impact">🎯 Impact</h2>
-<p>An attacker can read arbitrary files from the server filesystem, including sensitive system files (<code>/etc/passwd</code>, <code>/etc/shadow</code>), application configuration files containing credentials, private keys, and source code. On Windows systems, equivalent payloads using <code>..\</code> can expose files such as <code>C:\Windows\win.ini</code>. This can lead to full server compromise if credentials or keys are exposed.</p>
+<p>An attacker with access to the image endpoint can read any file on the server that the web process has permission to access. This includes sensitive system files such as <code>/etc/passwd</code>, <code>/etc/shadow</code>, application configuration files containing database credentials, private SSH keys, and source code. No authentication or special privileges are required — the endpoint is publicly accessible.</p>
 <hr>
 <h2 id="references">📚 References</h2>
 <ul>
-  <li><a href="https://portswigger.net/web-security/file-path-traversal" target="_blank" rel="noopener">PortSwigger: Path traversal</a></li>
+  <li><a href="https://portswigger.net/web-security/file-path-traversal/lab-simple-case" target="_blank" rel="noopener">PortSwigger: File path traversal, simple case</a></li>
   <li><a href="https://cwe.mitre.org/data/definitions/22.html" target="_blank" rel="noopener">CWE-22: Improper Limitation of a Pathname to a Restricted Directory</a></li>
   <li><a href="https://owasp.org/www-community/attacks/Path_Traversal" target="_blank" rel="noopener">OWASP: Path Traversal</a></li>
 </ul>

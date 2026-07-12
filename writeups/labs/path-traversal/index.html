@@ -112,7 +112,7 @@
     <a href="lab-1-file-path-traversal-simple-case.html" class="card">
       <div class="card-header"><span class="card-title">Lab 1 — File path traversal, simple case</span><span class="badge badge-hard">🔴 High</span></div>
       
-      <p class="card-desc">Path traversal (also known as directory traversal) allows an attacker to read arbitrary files on the server by manipulating file path parameters. In this lab,…</p>
+      <p class="card-desc">The application loads product images by passing a user-supplied filename parameter directly to a server-side file read in the /image endpoint, with no…</p>
     </a>
     <a href="lab-2-file-path-traversal-traversal-sequences-blocked-with-absolute-path-bypass.html" class="card">
       <div class="card-header"><span class="card-title">Lab 2 — File path traversal, traversal sequences blocked with absolute path bypass</span><span class="badge badge-hard">🔴 High</span></div>
@@ -123,6 +123,21 @@
       <div class="card-header"><span class="card-title">Lab 3 — File path traversal, traversal sequences stripped non-recursively</span><span class="badge badge-hard">🔴 High</span></div>
       
       <p class="card-desc">The application attempts to block path traversal attacks by stripping ../ sequences from the user-supplied filename parameter in the /image endpoint. However,…</p>
+    </a>
+    <a href="lab-4-file-path-traversal-traversal-sequences-stripped-with-superfluous-url-decode.html" class="card">
+      <div class="card-header"><span class="card-title">Lab 4 — File path traversal, traversal sequences stripped with superfluous URL-decode</span><span class="badge badge-hard">🔴 High</span></div>
+      
+      <p class="card-desc">The application attempts to block path traversal attacks by stripping ../ sequences from the user-supplied filename parameter in the /image endpoint. However,…</p>
+    </a>
+    <a href="lab-5-file-path-traversal-validation-of-start-of-path.html" class="card">
+      <div class="card-header"><span class="card-title">Lab 5 — File path traversal, validation of start of path</span><span class="badge badge-hard">🔴 High</span></div>
+      
+      <p class="card-desc">The application transmits the full file path via the filename request parameter in the /image endpoint and validates that the supplied path starts with the…</p>
+    </a>
+    <a href="lab-6-file-path-traversal-validation-of-file-extension-with-null-byte-bypass.html" class="card">
+      <div class="card-header"><span class="card-title">Lab 6 — File path traversal, validation of file extension with null byte bypass</span><span class="badge badge-hard">🔴 High</span></div>
+      
+      <p class="card-desc">The application validates that the user-supplied filename parameter in the /image endpoint ends with an expected file extension (e.g. .png). However, the…</p>
     </a>
 
   </div>
