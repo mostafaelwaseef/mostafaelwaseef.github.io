@@ -341,16 +341,24 @@ LEVEL_ICON = {
 def level_value(meta):
     return (meta.get("difficulty") or meta.get("severity") or "").strip()
 
+def level_key_and_label(level):
+    """Notion difficulty/severity cells sometimes already carry a leading
+    emoji (e.g. '🟡 Medium'). Strip it for both the color-class lookup and
+    the display label, so we don't mismatch on the emoji and don't end up
+    prepending a second, different icon on top of it."""
+    label = clean_segment(level) or level
+    return label.lower(), label
+
 def make_badges(meta):
     html = ""
     if meta.get("platform"):
         html += f'<span class="badge badge-platform">🖥 {esc(meta["platform"])}</span>\n      '
     level = level_value(meta)
     if level:
-        low = level.lower()
-        cls = LEVEL_CLASS.get(low, "badge-os")
-        icon = LEVEL_ICON.get(low, "⚪")
-        html += f'<span class="badge {cls}">{icon} {esc(level)}</span>\n      '
+        key, label = level_key_and_label(level)
+        cls = LEVEL_CLASS.get(key, "badge-os")
+        icon = LEVEL_ICON.get(key, "⚪")
+        html += f'<span class="badge {cls}">{icon} {esc(label)}</span>\n      '
     if meta.get("os"):
         html += f'<span class="badge badge-os">🐧 {esc(meta["os"])}</span>\n      '
     if meta.get("date"):
@@ -364,8 +372,10 @@ def card_badge(meta):
     level = level_value(meta)
     if not level:
         return ""
-    cls = LEVEL_CLASS.get(level.lower(), "badge-os")
-    return f'<span class="badge {cls}">{esc(level)}</span>'
+    key, label = level_key_and_label(level)
+    cls = LEVEL_CLASS.get(key, "badge-os")
+    icon = LEVEL_ICON.get(key, "⚪")
+    return f'<span class="badge {cls}">{icon} {esc(label)}</span>'
 
 # ── Shared CSS + templates (plain string, no .format -- avoids brace escaping) ──
 
