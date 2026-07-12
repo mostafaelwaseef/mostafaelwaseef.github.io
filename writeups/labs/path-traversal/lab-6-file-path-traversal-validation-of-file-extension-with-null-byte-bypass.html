@@ -142,12 +142,19 @@
 <h2 id="analysis">🧠 Analysis</h2>
 <p><strong>Step 1 — Browse the shop</strong></p>
 <p>Opened the lab environment and browsed to the shop homepage. The lab banner confirmed the title “File path traversal, validation of file extension with null byte bypass” with status “Not solved”.</p>
+<figure><img src="images/lab-6-file-path-traversal-validation-of-file-extension-with-null-byte-bypass/39bb75237172808e930de2afb6a75eaa.png" alt="screenshot" loading="lazy"></figure>
 <hr>
 <p><strong>Step 2 — Capture image request in Burp HTTP history</strong></p>
 <p>With Burp Proxy active, browsed the shop to trigger product image loads. The HTTP history showed GET requests to <code>/image?filename=26.jpg</code>, exposing the <code>filename</code> parameter used to serve product images.</p>
+<figure><img src="images/lab-6-file-path-traversal-validation-of-file-extension-with-null-byte-bypass/39bb75237172805797f2c96b0882ee83.png" alt="screenshot" loading="lazy"></figure>
 <hr>
 <p><strong>Step 3 — Test multiple payloads (all fail)</strong></p>
 <p>Sent the image request to Repeater and tested five payloads to probe the validation logic. <code>/etc/passwd</code> (absolute path) returned 400 “No such file”. <code>../../../etc/passwd</code> (plain traversal) also returned 400. <code>....//....//....//etc/passwd</code> (non-recursive bypass) returned 400. Single URL-encoded <code>%2e%2e%2f%2e%2e%2f%2e%2e%2f%65%74%63%2f%70%61%73%73%77%64</code> returned 400. A double URL-encoded variant also returned 400. All attempts failed — the server enforces an extension check that rejects paths not ending with the expected file extension.</p>
+<figure><img src="images/lab-6-file-path-traversal-validation-of-file-extension-with-null-byte-bypass/39bb752371728068993dfcd4060af9fd.png" alt="screenshot" loading="lazy"></figure>
+<figure><img src="images/lab-6-file-path-traversal-validation-of-file-extension-with-null-byte-bypass/39bb752371728032a506ea0fdcc55973.png" alt="screenshot" loading="lazy"></figure>
+<figure><img src="images/lab-6-file-path-traversal-validation-of-file-extension-with-null-byte-bypass/39bb7523717280e4a93bc5a9a10406a5.png" alt="screenshot" loading="lazy"></figure>
+<figure><img src="images/lab-6-file-path-traversal-validation-of-file-extension-with-null-byte-bypass/39bb752371728071ba21ff36044f1093.png" alt="screenshot" loading="lazy"></figure>
+<figure><img src="images/lab-6-file-path-traversal-validation-of-file-extension-with-null-byte-bypass/39bb7523717280978aeff08c4650fa77.png" alt="screenshot" loading="lazy"></figure>
 <hr>
 <p><strong>Step 4 — Inject null byte bypass payload (200 OK)</strong></p>
 <p>Modified the <code>filename</code> parameter to <code>../../../etc/passwd%00.png</code>. The null byte (<code>%00</code>) acts as a string terminator at the OS level: the extension validator reads the full string and sees <code>.png</code> at the end, satisfying the check. When the server passes the path to the filesystem, the null byte terminates the string at <code>../../../etc/passwd</code>, causing the server to read and return the contents of <code>/etc/passwd</code>. The response returned 200 OK with Content-Type <code>image/png</code> and the full <code>/etc/passwd</code> contents in the response body.</p>
@@ -155,6 +162,7 @@
 <hr>
 <p><strong>Step 5 — Verify lab solved in browser</strong></p>
 <p>Navigated back to the lab in the browser, which displayed the “Congratulations, you solved the lab!” banner confirming successful exploitation.</p>
+<figure><img src="images/lab-6-file-path-traversal-validation-of-file-extension-with-null-byte-bypass/39bb75237172800ea2b0cd34f74738a1.png" alt="screenshot" loading="lazy"></figure>
 <hr>
 <h2 id="impact">🎯 Impact</h2>
 <p>An attacker can bypass file extension validation by injecting a null byte before the required extension suffix. Any server that validates the extension on the raw input string without also sanitizing null bytes — and whose file-access layer respects null byte string termination — is vulnerable. Sensitive files such as <code>/etc/passwd</code>, <code>/etc/shadow</code>, application configuration files, private keys, and source code are all at risk of unauthorized disclosure.</p>

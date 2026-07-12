@@ -212,6 +212,9 @@
 <p>With root access, <code>/etc/shadow</code> was read to extract the root password hash. <code>passwd</code> was used directly from the root shell to set a known password. Output confirmed: <code>passwd: all authentication tokens updated successfully</code>.</p>
 <h3 id="persistent-access-via-ssh">Persistent Access via SSH</h3>
 <p>Root SSH access was established using the updated credentials. Due to the age of the target, legacy options are required: <code>ssh root@172.20.10.4 -oKexAlgorithms=+diffie-hellman-group1-sha1 -oHostKeyAlgorithms=+ssh-rsa -c aes128-cbc</code>. Login succeeded, landing at <code>[root@kioptrix root]#</code>.</p>
+<blockquote>  <figure><img src="images/kioptrix-level-1/395b75237172802e84fefcad2f2273be.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/kioptrix-level-1/395b75237172802a818ad1e9e1846053.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
 <hr>
 <h2 id="proof-of-root">Proof of Root</h2>
 <p>Logging into the machine via the VM console as root confirmed full system ownership. The root mailbox contained the machine’s completion message:</p>

@@ -134,6 +134,8 @@
 <h3 id="findings">Findings</h3>
 <p>Host discovery was performed using <code>arp-scan</code> on the local network, which identified the target at <code>172.20.10.4</code>. A subsequent Nmap scan with service version detection and OS fingerprinting revealed six open ports: SSH (22), HTTP (80), HTTPS (443), rpcbind (111), CUPS (631), and MySQL (3306). The web server was identified as Apache 2.0.52 running on CentOS. OS detection placed the kernel in the Linux 2.6.9–2.6.30 range. MySQL returned an “unauthorized” banner, indicating no anonymous access.</p>
 <p><strong>PoC:</strong><br>- <strong>Tools used</strong>: arp-scan, Nmap<br>- <strong>Commands</strong>:<br>- <code>arp-scan -l</code><br>- <code>nmap -sV -O 172.20.10.4</code><br>- <strong>Result</strong>: Target identified. Open ports: 22 (SSH 3.9p1), 80 (Apache 2.0.52), 111 (rpcbind), 443 (Apache 2.0.52), 631 (CUPS 1.1), 3306 (MySQL — unauthorized). OS: Linux 2.6.9–2.6.30.</p>
+<figure><img src="images/kioptrix-level-2/396b75237172808c95e0ed5803cd1ada.png" alt="screenshot" loading="lazy"></figure>
+<figure><img src="images/kioptrix-level-2/396b75237172809194b3d0699403a252.png" alt="screenshot" loading="lazy"></figure>
 <hr>
 <h2 id="enumeration">Enumeration</h2>
 <h3 id="objective">Objective</h3>
@@ -143,6 +145,20 @@
 <p><strong>SMB enumeration</strong> using enum4linux identified several usernames (<code>administrator</code>, <code>root</code>, <code>bin</code>, <code>guest</code>, <code>none</code>) but failed to establish a session, making SMB a dead end.</p>
 <p><strong>Service exploit research</strong> was conducted for each enumerated service. Searchsploit and Metasploit were used to query exploits for Apache 2.0.52, rpcbind, and CUPS 1.1. Apache results returned no reliable remote code execution modules. rpcbind results were limited to denial-of-service. CUPS 1.1 had searchsploit entries but no matching Metasploit modules and no exploitable remote vector. All three services were ruled out as initial access vectors.</p>
 <p><strong>PoC:</strong><br>- <strong>Tools used</strong>: Gobuster, enum4linux, searchsploit, Metasploit<br>- <strong>Commands</strong>:<br>- <code>gobuster dir -u http://172.20.10.4 -w &lt;wordlist&gt;</code><br>- <code>enum4linux 172.20.10.4</code><br>- <code>searchsploit apache 2.0.52</code><br>- <code>searchsploit rpcbind</code><br>- <code>searchsploit cups 1.1</code><br>- <code>msfconsole</code> → <code>search apache 2.0</code> / <code>search rpcbind</code> / <code>search cups 1.1</code><br>- <strong>Result</strong>: <code>index.php</code> discovered (HTTP 200). Usernames enumerated via SMB. No exploitable remote vulnerabilities found for Apache, rpcbind, or CUPS via searchsploit or Metasploit.</p>
+<figure><img src="images/kioptrix-level-2/396b752371728039bb87d9af6e36195c.png" alt="screenshot" loading="lazy"></figure>
+<figure><img src="images/kioptrix-level-2/396b752371728012a279fa19ccc3425f.png" alt="screenshot" loading="lazy"></figure>
+<figure><img src="images/kioptrix-level-2/396b7523717280cd88dec73857ce95a0.png" alt="screenshot" loading="lazy"></figure>
+<figure><img src="images/kioptrix-level-2/396b75237172807e8765c7b41f51fa93.png" alt="screenshot" loading="lazy"></figure>
+<figure><img src="images/kioptrix-level-2/396b75237172808791e8ff9b41147139.png" alt="screenshot" loading="lazy"></figure>
+<figure><img src="images/kioptrix-level-2/396b75237172802c8204c95aca3f7f57.png" alt="screenshot" loading="lazy"></figure>
+<figure><img src="images/kioptrix-level-2/396b75237172803e873cf1807efc9ddb.png" alt="screenshot" loading="lazy"></figure>
+<figure><img src="images/kioptrix-level-2/396b7523717280a4a3afe4273e793acc.png" alt="screenshot" loading="lazy"></figure>
+<figure><img src="images/kioptrix-level-2/396b7523717280b5b4abe2b73378abce.png" alt="screenshot" loading="lazy"></figure>
+<figure><img src="images/kioptrix-level-2/396b7523717280c5b997df978cf77502.png" alt="screenshot" loading="lazy"></figure>
+<figure><img src="images/kioptrix-level-2/396b752371728067abe3db85e5aaecbd.png" alt="screenshot" loading="lazy"></figure>
+<figure><img src="images/kioptrix-level-2/396b7523717280d080e2fa8bf9da6e49.png" alt="screenshot" loading="lazy"></figure>
+<figure><img src="images/kioptrix-level-2/396b752371728008a1f3f1c842a39796.png" alt="screenshot" loading="lazy"></figure>
+<figure><img src="images/kioptrix-level-2/396b752371728080b7c1e3c677386493.png" alt="screenshot" loading="lazy"></figure>
 <hr>
 <h2 id="exploitation-initial-foothold">Exploitation — Initial Foothold</h2>
 <h3 id="description">Description</h3>
@@ -190,6 +206,9 @@
 </ol>
 <h3 id="post-exploitation">Post-Exploitation</h3>
 <p>With root access, <code>/etc/passwd</code> and <code>/etc/shadow</code> were read to extract system user accounts and password hashes. The <code>unshadow</code> utility was used on the attacker machine to combine the files into a format suitable for offline cracking. The root account password was also reset via <code>passwd</code> to confirm persistent access. Root login was verified directly on the VMware console.</p>
+<figure><img src="images/kioptrix-level-2/396b7523717280a2abaef6ed0a62b02c.png" alt="screenshot" loading="lazy"></figure>
+<figure><img src="images/kioptrix-level-2/396b7523717280ebbac9eea81300f6a1.png" alt="screenshot" loading="lazy"></figure>
+<figure><img src="images/kioptrix-level-2/396b75237172801bbbb0e0fa8b6f0b49.png" alt="screenshot" loading="lazy"></figure>
 <hr>
 <h2 id="lessons-learned">Lessons Learned</h2>
 <p><strong>SQL injection remains a critical first target on web login forms.</strong> Even with SMB usernames available, credential attacks against the login form were unnecessary — the form itself was bypassed entirely with a classic <code>OR 1=1</code> payload. Checking for SQLi before attempting brute force saves significant time.</p>

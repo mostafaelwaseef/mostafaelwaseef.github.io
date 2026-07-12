@@ -144,6 +144,7 @@
 <hr>
 <p><strong>Step 2 — Capture image request in Burp HTTP history</strong></p>
 <p>With Burp Proxy active, browsed the shop to trigger product image loads. The HTTP history showed GET requests to <code>/image?filename=36.jpg</code>, exposing the <code>filename</code> parameter used to serve product images.</p>
+<figure><img src="images/lab-1-file-path-traversal-simple-case/39bb7523717280b8a1e2cd3956440d3d.png" alt="screenshot" loading="lazy"></figure>
 <hr>
 <p><strong>Step 3 — Test absolute path (fails)</strong></p>
 <p>Sent the image request to Repeater and modified the <code>filename</code> parameter to <code>/etc/passwd</code>. The server returned 400 Bad Request with <code>"No such file"</code>, indicating the absolute path attempt failed — the server resolves paths relative to its image directory.</p>
@@ -151,9 +152,11 @@
 <hr>
 <p><strong>Step 4 — Inject path traversal payload (200 OK)</strong></p>
 <p>Modified the <code>filename</code> parameter to <code>../../../etc/passwd</code>. The three <code>../</code> sequences traverse three directory levels up from the images directory to the filesystem root, then descend into <code>/etc/passwd</code>. The server returned 200 OK with Content-Type <code>image/jpeg</code> and the full contents of <code>/etc/passwd</code> in the response body — confirming no sanitization is applied to the <code>filename</code> parameter.</p>
+<figure><img src="images/lab-1-file-path-traversal-simple-case/39bb75237172800da42bdc9f0a0bf82c.png" alt="screenshot" loading="lazy"></figure>
 <hr>
 <p><strong>Step 5 — Verify lab solved in browser</strong></p>
 <p>Navigated back to the lab in the browser, which displayed the “Congratulations, you solved the lab!” banner confirming successful exploitation.</p>
+<figure><img src="images/lab-1-file-path-traversal-simple-case/39bb75237172807a8b48df4bc1d6fb53.png" alt="screenshot" loading="lazy"></figure>
 <hr>
 <h2 id="impact">🎯 Impact</h2>
 <p>An attacker with access to the image endpoint can read any file on the server that the web process has permission to access. This includes sensitive system files such as <code>/etc/passwd</code>, <code>/etc/shadow</code>, application configuration files containing database credentials, private SSH keys, and source code. No authentication or special privileges are required — the endpoint is publicly accessible.</p>
