@@ -186,6 +186,7 @@ def rt(rich_texts):
         ann  = t.get("annotations", {})
         href = (t.get("href") or "")
         text = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        text = text.replace("\n", "<br>")
         if ann.get("code"):          text = f"<code>{text}</code>"
         if ann.get("bold"):          text = f"<strong>{text}</strong>"
         if ann.get("italic"):        text = f"<em>{text}</em>"
