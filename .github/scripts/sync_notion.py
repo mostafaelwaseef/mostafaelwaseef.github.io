@@ -236,12 +236,20 @@ def render_blocks(blocks, ctx, depth=0):
         if btype == "paragraph":
             text = rt(data.get("rich_text", []))
             html += f"{indent}<p>{text}</p>\n" if text else f"{indent}<br>\n"
+            # Notion lets you indent a block (often an image) under the
+            # paragraph above it, which makes it a *child* of that paragraph
+            # rather than a sibling. Without this, indented images/blocks
+            # were silently dropped from the page.
+            if b.get("_children"):
+                html += render_blocks(b["_children"], ctx, depth)
 
         elif btype in ("heading_1", "heading_2", "heading_3"):
             n = btype[-1]
             text = rt(data.get("rich_text", []))
             slug_id = re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
             html += f'{indent}<h{n} id="{slug_id}">{text}</h{n}>\n'
+            if b.get("_children"):
+                html += render_blocks(b["_children"], ctx, depth)
 
         elif btype == "divider":
             html += f"{indent}<hr>\n"
@@ -260,7 +268,10 @@ def render_blocks(blocks, ctx, depth=0):
             icon = (data.get("icon") or {})
             emoji = icon.get("emoji", "ℹ️") if icon.get("type") == "emoji" else "ℹ️"
             text  = rt(data.get("rich_text", []))
-            html += f'{indent}<div class="callout"><span class="callout-icon">{emoji}</span><div>{text}</div></div>\n'
+            html += f'{indent}<div class="callout"><span class="callout-icon">{emoji}</span><div>{text}'
+            if b.get("_children"):
+                html += render_blocks(b["_children"], ctx, depth)
+            html += "</div></div>\n"
 
         elif btype == "image":
             src_type = data.get("type", "external")
@@ -307,6 +318,8 @@ def render_blocks(blocks, ctx, depth=0):
             text = rt(data.get("rich_text", []))
             if text:
                 html += f"{indent}<p>{text}</p>\n"
+            if b.get("_children"):
+                html += render_blocks(b["_children"], ctx, depth)
 
         i += 1
 
