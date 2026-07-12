@@ -35,7 +35,7 @@
     .hero p.desc { color: var(--muted); max-width: 640px; margin-top: .5rem; }
     .meta-row { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
     .badge { display: inline-flex; align-items: center; gap: .3rem; padding: .25rem .7rem;
-             border-radius: 20px; font-size: .75rem; font-weight: 500; }
+             border-radius: 20px; font-size: .75rem; font-weight: 500; white-space: nowrap; flex-shrink: 0; }
     .badge-platform { background: #1f3a5f; color: #58a6ff; border: 1px solid #1f4080; }
     .badge-easy { background: #1a3a2a; color: #3fb950; border: 1px solid #2ea043; }
     .badge-medium { background: #3a2a1a; color: #d29922; border: 1px solid #9e6a03; }
@@ -80,7 +80,7 @@
             transition: border-color .15s, transform .15s; display: block; }
     .card:hover { border-color: var(--accent); transform: translateY(-2px); text-decoration: none; }
     .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: .6rem; gap: .5rem; }
-    .card-title { font-size: 14px; font-weight: 600; color: var(--text); }
+    .card-title { font-size: 14px; font-weight: 600; color: var(--text); flex: 1 1 auto; min-width: 0; }
     .card-meta { font-size: 12px; color: var(--muted); margin-bottom: .4rem; }
     .card-desc { font-size: 13px; color: var(--muted); }
     footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--muted); font-size: .85rem; }
