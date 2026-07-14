@@ -621,7 +621,7 @@ def write_category_index(kind, cat_slug, label, icon, leaves):
     out_dir = WRITEUPS_DIR / kind / cat_slug
     depth = 3
     root_rel = "../" * depth
-    breadcrumb = f'<a href="{root_rel}index.html">Portfolio</a> / <a href="{root_rel}index.html#{kind}">{kind.title()}</a> / {esc(label)}'
+    breadcrumb = f'<a href="{root_rel}index.html">Portfolio</a> / <a href="{root_rel}index.html#{kind}">{KIND_LABELS.get(kind, kind.title())}</a> / {esc(label)}'
     noun = "labs" if kind == "labs" else "levels"
     description = f"All {esc(label)} {noun} completed, synced automatically from Notion."
     cards = "".join(leaf_card_html(e) for e in leaves)
