@@ -41,6 +41,7 @@
     .badge-medium { background: #3a2a1a; color: #d29922; border: 1px solid #9e6a03; }
     .badge-hard { background: #3a1a1a; color: #f85149; border: 1px solid #da3633; }
     .badge-beginner { background: #1a3a2a; color: #56d364; border: 1px solid #2ea043; }
+    .badge-impossible { background: #2f1f47; color: #bc8cff; border: 1px solid #6e40c9; }
     .badge-os { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
     .badge-date { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
     .content { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
@@ -155,7 +156,7 @@
 </blockquote>
 <hr>
 <p><strong>Step 3 — Change method to GET, confirm 405, then bypass with </strong><strong><code>_method=POST</code></strong></p>
-<p>Right-clicked the POST in Burp Repeater → Change request method, converting it to <code>GET /my-account/change-email?email=...</code>. The server returned <code>HTTP/2 405 Method Not Allowed</code>, confirming the endpoint normally rejects GET requests. The <code>_method=POST</code> parameter was then appended to the query string. The GET was resent — the server returned <code>HTTP/2 302 Found</code> and redirected to <code>/my-account?id=wiener</code>. The My Account page confirmed the email had been updated to <code>test3@test.com</code>. This proved the server honours the <code>_method</code> override, treating the GET as a POST internally, while SameSite Lax permits the GET because browsers allow top-level cross-site GET navigations to carry Lax cookies.</p>
+<p>Right-clicked the POST in Burp Repeater → Change request method, converting it to <code>GET /my-account/change-email?email=...</code>. The server returned <code>HTTP/2 405 Method Not Allowed</code>, confirming the endpoint normally rejects GET requests. The <code>_method=POST</code> parameter was then appended to the query string. The GET was resent — the server returned <code>HTTP/2 302 Found</code> and redirected to <code>/my-account?id=wiener</code>. The My Account page confirmed the email had been updated to <code>test3@test.com</code>. This proved the server honors the <code>_method</code> override, treating the GET as a POST internally, while SameSite Lax permits the GET because browsers allow top-level cross-site GET navigations to carry Lax cookies.</p>
 <blockquote>  <figure><img src="images/lab-7-csrf-with-samesite-lax-bypass-via-method-override/38ab7523717280ea81fac61d516e64f5.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/lab-7-csrf-with-samesite-lax-bypass-via-method-override/38ab752371728055a864e6b158ba332f.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/lab-7-csrf-with-samesite-lax-bypass-via-method-override/38ab7523717280019258e3753adeb469.png" alt="screenshot" loading="lazy"></figure>

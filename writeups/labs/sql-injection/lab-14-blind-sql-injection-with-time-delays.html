@@ -41,6 +41,7 @@
     .badge-medium { background: #3a2a1a; color: #d29922; border: 1px solid #9e6a03; }
     .badge-hard { background: #3a1a1a; color: #f85149; border: 1px solid #da3633; }
     .badge-beginner { background: #1a3a2a; color: #56d364; border: 1px solid #2ea043; }
+    .badge-impossible { background: #2f1f47; color: #bc8cff; border: 1px solid #6e40c9; }
     .badge-os { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
     .badge-date { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
     .content { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
@@ -154,7 +155,7 @@
 </blockquote>
 <hr>
 <p><strong>Step 3 — Trigger a 10-second time delay</strong></p>
-<p>A PostgreSQL time-delay payload was injected using string concatenation: <code>TrackingId=gQaU3nQt7jSCSbfs'||(SELECT pg_sleep(10))||'</code>. The server took 10 seconds to respond — confirmed by Burp Repeater showing the request in flight with the Send button greyed out. This proved the <code>TrackingId</code> value is embedded directly into a SQL query executed by a PostgreSQL database, and that the injection point is viable for time-based blind exploitation.</p>
+<p>A PostgreSQL time-delay payload was injected using string concatenation: <code>TrackingId=gQaU3nQt7jSCSbfs'||(SELECT pg_sleep(10))||'</code>. The server took 10 seconds to respond — confirmed by Burp Repeater showing the request in flight with the Send button grayed out. This proved the <code>TrackingId</code> value is embedded directly into a SQL query executed by a PostgreSQL database, and that the injection point is viable for time-based blind exploitation.</p>
 <blockquote>  <figure><img src="images/lab-14-blind-sql-injection-with-time-delays/365b75237172801e8152d6711a65ca78.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/lab-14-blind-sql-injection-with-time-delays/365b75237172801a984accf5a3e8a3b7.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>

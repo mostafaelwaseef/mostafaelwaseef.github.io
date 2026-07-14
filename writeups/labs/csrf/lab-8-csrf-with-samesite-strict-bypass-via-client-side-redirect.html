@@ -41,6 +41,7 @@
     .badge-medium { background: #3a2a1a; color: #d29922; border: 1px solid #9e6a03; }
     .badge-hard { background: #3a1a1a; color: #f85149; border: 1px solid #da3633; }
     .badge-beginner { background: #1a3a2a; color: #56d364; border: 1px solid #2ea043; }
+    .badge-impossible { background: #2f1f47; color: #bc8cff; border: 1px solid #6e40c9; }
     .badge-os { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
     .badge-date { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
     .content { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
@@ -162,7 +163,7 @@
 </blockquote>
 <hr>
 <p><strong>Step 4 — Inspect the redirect script and confirm </strong><strong><code>postId</code></strong><strong> injection</strong></p>
-<p>Captured the <code>POST /post/comment</code> in Burp Repeater and followed the chain through to the confirmation page. Inspected the confirmation page source — the <code>redirectOnConfirmation</code> JavaScript function reads <code>postId</code> directly from <code>URLSearchParams</code> and constructs the redirect target as <code>window.location = blogPath + '/' + postId</code> after a 3-second timeout. No sanitisation is applied to <code>postId</code>, meaning a value like <code>/../my-account/change-email%3Femail%3D...%26submit%3D1</code> will resolve to a same-origin email change URL. Because the redirect stays on the same origin, the browser treats the navigation as same-site and includes the SameSite=Strict session cookie.</p>
+<p>Captured the <code>POST /post/comment</code> in Burp Repeater and followed the chain through to the confirmation page. Inspected the confirmation page source — the <code>redirectOnConfirmation</code> JavaScript function reads <code>postId</code> directly from <code>URLSearchParams</code> and constructs the redirect target as <code>window.location = blogPath + '/' + postId</code> after a 3-second timeout. No sanitization is applied to <code>postId</code>, meaning a value like <code>/../my-account/change-email%3Femail%3D...%26submit%3D1</code> will resolve to a same-origin email change URL. Because the redirect stays on the same origin, the browser treats the navigation as same-site and includes the SameSite=Strict session cookie.</p>
 <blockquote>  <figure><img src="images/lab-8-csrf-with-samesite-strict-bypass-via-client-side-redirect/38ab7523717280e88766d0deb3458772.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/lab-8-csrf-with-samesite-strict-bypass-via-client-side-redirect/38ab752371728007863fc620f89c4e38.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/lab-8-csrf-with-samesite-strict-bypass-via-client-side-redirect/38ab7523717280219cebe0745312840f.png" alt="screenshot" loading="lazy"></figure>
