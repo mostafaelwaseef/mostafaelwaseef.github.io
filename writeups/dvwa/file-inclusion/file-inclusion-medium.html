@@ -129,7 +129,7 @@
 <h3 id="findings">Findings</h3>
 <p>The File Inclusion lab page at Medium security presented the same three links — <code>file1.php</code>, <code>file2.php</code>, and <code>file3.php</code>. Clicking through each link confirmed that the <code>page</code> GET parameter continued to change with every selection, cycling through <code>?page=file1.php</code>, <code>?page=file2.php</code>, and <code>?page=file3.php</code>. This indicated the parameter still controls server-side file inclusion, suggesting that any filtering applied at this level may not cover all input vectors.</p>
 <p><strong>PoC:</strong><br>- <strong>Tools used</strong>: Browser<br>- <strong>Commands</strong>: Observed URL changing to <code>?page=file1.php</code>, <code>?page=file2.php</code>, <code>?page=file3.php</code> by clicking each link<br>- <strong>Result</strong>: <code>page</code> parameter confirmed to still control server-side file inclusion at Medium security</p>
-<blockquote><strong>Evidence:</strong> Images 001.png – 004.png  <figure><img src="images/file-inclusion-medium/39db7523717280d3887dc0cfd0e9c5df.png" alt="screenshot" loading="lazy"></figure>
+<blockquote>  <figure><img src="images/file-inclusion-medium/39db7523717280d3887dc0cfd0e9c5df.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/file-inclusion-medium/39db7523717280e591abc2cbbcf0eeca.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/file-inclusion-medium/39db75237172809a82b5e42c9725c4dc.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/file-inclusion-medium/39db7523717280489281fb1c6c2c10c9.png" alt="screenshot" loading="lazy"></figure>
@@ -143,7 +143,7 @@
   <li>With the <code>page</code> parameter identified as the inclusion vector, replace its value with an absolute path to a sensitive system file, bypassing the <code>../</code> filter entirely: <code>?page=/etc/passwd</code></li>
   <li>The server’s <code>str_replace()</code> filter finds nothing to strip in an absolute path and passes the value directly to <code>include()</code>, rendering the full contents of <code>/etc/passwd</code> in the browser</li>
 </ol>
-<blockquote><strong>Evidence:</strong> 005.png  <figure><img src="images/file-inclusion-medium/39db7523717280198cedc25cdae1896f.png" alt="screenshot" loading="lazy"></figure>
+<blockquote>  <figure><img src="images/file-inclusion-medium/39db7523717280198cedc25cdae1896f.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
 <h2 id="lessons-learned">Lessons Learned</h2>

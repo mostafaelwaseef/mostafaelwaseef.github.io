@@ -129,7 +129,7 @@
 <h3 id="findings">Findings</h3>
 <p>The File Inclusion lab page at High security presented the same three links — <code>file1.php</code>, <code>file2.php</code>, and <code>file3.php</code>. Clicking through each link confirmed that the <code>page</code> GET parameter continued to cycle through <code>?page=file1.php</code>, <code>?page=file2.php</code>, and <code>?page=file3.php</code>. This indicated the parameter still controls server-side file inclusion, but that the High security level applies stricter filtering than previous levels.</p>
 <p><strong>PoC:</strong><br>- <strong>Tools used</strong>: Browser<br>- <strong>Commands</strong>: Observed URL changing to <code>?page=file1.php</code>, <code>?page=file2.php</code>, <code>?page=file3.php</code> by clicking each link<br>- <strong>Result</strong>: <code>page</code> parameter confirmed to still control server-side file inclusion at High security</p>
-<blockquote><strong>Evidence:</strong> Images 001.png – 004.png  <figure><img src="images/file-inclusion-high/39db75237172801da94ada5c7537d122.png" alt="screenshot" loading="lazy"></figure>
+<blockquote>  <figure><img src="images/file-inclusion-high/39db75237172801da94ada5c7537d122.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/file-inclusion-high/39db752371728072a2a9dafb4cb602b0.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/file-inclusion-high/39db7523717280958425f9981286e550.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/file-inclusion-high/39db75237172805e8235da7b78f5028a.png" alt="screenshot" loading="lazy"></figure>
@@ -147,7 +147,7 @@
   <li>Bypass the <code>fnmatch("file*", ...)</code> filter using the PHP <code>file://</code> stream wrapper, which satisfies the prefix check while still resolving to an arbitrary local path: <code>?page=file:///etc/passwd</code></li>
   <li>The server passes the value to <code>include()</code>, which resolves the <code>file://</code> URI and renders the full contents of <code>/etc/passwd</code> in the browser</li>
 </ol>
-<blockquote><strong>Evidence:</strong> Images 005.png – 010.png  <figure><img src="images/file-inclusion-high/39db7523717280048cd5fffd496122f7.png" alt="screenshot" loading="lazy"></figure>
+<blockquote>  <figure><img src="images/file-inclusion-high/39db7523717280048cd5fffd496122f7.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/file-inclusion-high/39db75237172808689d2c4e287bc195d.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/file-inclusion-high/39db75237172806d94d2c3c858b8dfb7.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/file-inclusion-high/39db75237172804a8511df6dabe20bb4.png" alt="screenshot" loading="lazy"></figure>
