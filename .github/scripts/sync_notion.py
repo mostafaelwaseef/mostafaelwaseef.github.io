@@ -144,6 +144,15 @@ def classify_kind(heading_text):
         return "wargames"
     return "labs"
 
+# Display label used in breadcrumbs / nav-anchor text for each kind.
+# Plain kind.title() would render "dvwa" as "Dvwa" -- this keeps it as "DVWA".
+KIND_LABELS = {
+    "machines": "Machines",
+    "labs": "Labs",
+    "wargames": "Wargames",
+    "dvwa": "DVWA",
+}
+
 def get_excerpt(blocks, limit=160):
     for b in blocks:
         if b["type"] == "paragraph":
@@ -345,14 +354,19 @@ LEVEL_CLASS = {
     "easy": "badge-easy", "beginner": "badge-beginner", "low": "badge-easy",
     "medium": "badge-medium", "hard": "badge-hard", "high": "badge-hard",
     "critical": "badge-hard", "info": "badge-beginner",
+    "impossible": "badge-impossible",
 }
 LEVEL_ICON = {
     "easy": "🟢", "beginner": "🟢", "low": "🟢", "medium": "🟡",
     "hard": "🔴", "high": "🔴", "critical": "🔴", "info": "⚪",
+    "impossible": "🟣",
 }
 
 def level_value(meta):
-    return (meta.get("difficulty") or meta.get("severity") or "").strip()
+    # DVWA write-ups use a "Security Level" field (Low/Medium/High/Impossible)
+    # instead of Difficulty/Severity -- check it as a fallback so those labs
+    # still get a colored badge.
+    return (meta.get("difficulty") or meta.get("severity") or meta.get("security level") or "").strip()
 
 def level_key_and_label(level):
     """Notion difficulty/severity cells sometimes already carry a leading
@@ -427,6 +441,7 @@ STYLE_BLOCK = """
     .badge-medium { background: #3a2a1a; color: #d29922; border: 1px solid #9e6a03; }
     .badge-hard { background: #3a1a1a; color: #f85149; border: 1px solid #da3633; }
     .badge-beginner { background: #1a3a2a; color: #56d364; border: 1px solid #2ea043; }
+    .badge-impossible { background: #2f1f47; color: #bc8cff; border: 1px solid #6e40c9; }
     .badge-os { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
     .badge-date { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
     .content { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
@@ -585,7 +600,7 @@ def sync_leaf(leaf_id, fallback_title, kind, cat_slug=None, cat_label=None):
         depth = 3
         root_rel = "../" * depth
         breadcrumb = (f'<a href="{root_rel}index.html">Portfolio</a> / '
-                      f'<a href="{root_rel}index.html#{kind}">{kind.title()}</a> / '
+                      f'<a href="{root_rel}index.html#{kind}">{KIND_LABELS.get(kind, kind.title())}</a> / '
                       f'<a href="index.html">{esc(cat_label)}</a> / {esc(title)}')
         href_from_root = f"writeups/{kind}/{cat_slug}/{slug}.html"
 
@@ -669,6 +684,30 @@ def category_group_order(slug):
         return ("client", CLIENT_SIDE_ORDER.index(slug))
     return ("server", 999)
 
+# DVWA's own menu / tracker-table order. Unmatched categories (a new vuln
+# type added later in Notion) fall back to the end, sorted alphabetically
+# among themselves so nothing is silently dropped from the page.
+DVWA_ORDER = [
+    "brute-force", "command-injection", "csrf", "file-inclusion",
+    "file-upload", "insecure-captcha", "sql-injection", "sql-injection-blind",
+    "weak-session-ids", "xss-dom", "xss-reflected", "xss-stored",
+    "csp-bypass", "javascript-attacks", "authorisation-bypass",
+    "open-http-redirect", "cryptography", "api",
+]
+
+def dvwa_group_order(slug):
+    if slug in DVWA_ORDER:
+        return (0, DVWA_ORDER.index(slug))
+    return (1, slug)
+
+def render_dvwa_group(dvwa_buckets):
+    items = sorted(dvwa_buckets.items(), key=lambda kv: dvwa_group_order(kv[0]))
+    if not items:
+        return "      <p style=\"color:var(--muted);\">No DVWA labs synced yet.</p>\n"
+    tiles = "".join(category_tile_html(slug, b["label"], b["icon"], b["href"], len(b["leaves"]), "dvwa")
+                     for slug, b in items)
+    return f'      <div class="labs-grid">\n{tiles}      </div>\n'
+
 def render_labs_groups(labs_buckets):
     server, client = [], []
     for slug, b in labs_buckets.items():
@@ -690,7 +729,7 @@ def render_labs_groups(labs_buckets):
     html = group_block("Server-Side", server) + group_block("Client-Side", client)
     return html or "      <p style=\"color:var(--muted);\">No labs synced yet.</p>\n"
 
-def update_index_html(machines, labs_buckets, wargames_buckets):
+def update_index_html(machines, labs_buckets, wargames_buckets, dvwa_buckets):
     text = INDEX_HTML.read_text(encoding="utf-8")
 
     machines_html = "".join(machine_card_html(e) for e in machines) or "      <p style=\"color:var(--muted);\">No machines synced yet.</p>\n"
@@ -698,6 +737,9 @@ def update_index_html(machines, labs_buckets, wargames_buckets):
 
     labs_html = render_labs_groups(labs_buckets)
     text = replace_between(text, "LABS", labs_html)
+
+    dvwa_html = render_dvwa_group(dvwa_buckets)
+    text = replace_between(text, "DVWA", dvwa_html)
 
     wargames_html = "".join(
         category_tile_html(slug, b["label"], b["icon"], b["href"], len(b["leaves"]), "wargames")
@@ -749,7 +791,10 @@ def main():
         leaves = [(b["id"], b["child_page"]["title"]) for b in flat if b["type"] == "child_page"]
         if not leaves:
             continue
-        kind = classify_kind(heading)
+        # DVWA is its own platform/kind, detected by title rather than the
+        # heading text (its heading is the same generic "Labs Index" text
+        # used by every PortSwigger category root).
+        kind = "dvwa" if "dvwa" in title.lower() else classify_kind(heading)
         roots.append({"title": title, "kind": kind, "leaves": leaves})
         print(f'  Root page: "{title}" -> {kind} ({len(leaves)} sub-page(s))')
 
@@ -758,7 +803,7 @@ def main():
         sys.exit(1)
 
     machines_data = []
-    labs_data, wargames_data = {}, {}
+    labs_data, wargames_data, dvwa_data = {}, {}, {}
 
     for root in roots:
         if root["kind"] == "machines":
@@ -768,6 +813,33 @@ def main():
                     print(f"    synced: {leaf_title}")
                 except Exception as e:
                     print(f"    ERROR syncing {leaf_title!r}: {e}", file=sys.stderr)
+            continue
+
+        if root["kind"] == "dvwa":
+            # DVWA is one level deeper than labs/wargames: the hub's direct
+            # children are vuln-type category pages (e.g. "File Inclusion"),
+            # not write-ups themselves -- the actual write-ups are each
+            # category page's own children (e.g. "File Inclusion - Low").
+            for cat_id, cat_title in root["leaves"]:
+                cat_slug = slugify(cat_title)
+                label = cat_title
+                icon = "🧪"
+                dvwa_data.setdefault(cat_slug, {"label": label, "icon": icon, "leaves": [], "href": ""})
+                try:
+                    cat_children = get_block_children(cat_id)
+                except Exception as e:
+                    print(f"    WARNING: could not read DVWA category {cat_title!r}: {e}")
+                    continue
+                sub_leaves = [(b["id"], b["child_page"]["title"]) for b in cat_children if b["type"] == "child_page"]
+                for leaf_id, leaf_title in sub_leaves:
+                    try:
+                        entry = sync_leaf(leaf_id, leaf_title, "dvwa", cat_slug=cat_slug, cat_label=label)
+                        dvwa_data[cat_slug]["leaves"].append(entry)
+                        print(f"    synced: {leaf_title}")
+                    except Exception as e:
+                        print(f"    ERROR syncing {leaf_title!r}: {e}", file=sys.stderr)
+                href = write_category_index("dvwa", cat_slug, label, icon, dvwa_data[cat_slug]["leaves"])
+                dvwa_data[cat_slug]["href"] = href
             continue
 
         cat_slug = slugify(split_title(root["title"])[0]) or slugify(root["title"])
@@ -788,7 +860,7 @@ def main():
         bucket[cat_slug]["href"] = href
 
     print("Regenerating index.html…")
-    update_index_html(machines_data, labs_data, wargames_data)
+    update_index_html(machines_data, labs_data, wargames_data, dvwa_data)
 
     print("Pruning orphaned files…")
     prune_orphans()
@@ -797,6 +869,7 @@ def main():
     print(f"   Machines: {len(machines_data)}")
     print(f"   Labs categories: {len(labs_data)} ({sum(len(b['leaves']) for b in labs_data.values())} labs)")
     print(f"   Wargames categories: {len(wargames_data)} ({sum(len(b['leaves']) for b in wargames_data.values())} levels)")
+    print(f"   DVWA categories: {len(dvwa_data)} ({sum(len(b['leaves']) for b in dvwa_data.values())} labs)")
 
 
 if __name__ == "__main__":
