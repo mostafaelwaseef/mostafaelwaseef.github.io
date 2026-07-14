@@ -457,7 +457,9 @@ STYLE_BLOCK = """
     pre { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
           padding: 1rem 1.25rem; overflow-x: auto; margin: .75rem 0; }
     code { font-family: 'Fira Code', monospace; font-size: .85rem; color: #e6edf3; }
-    p code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; color: var(--accent); font-size: .82rem; }
+    p code, li code, td code, h1 code, h2 code, h3 code, blockquote code {
+      background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; color: var(--accent); font-size: .82rem;
+    }
     strong code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; }
     figure { margin: 1.25rem 0; }
     img { max-width: 100%; border-radius: var(--radius); border: 1px solid var(--border);
