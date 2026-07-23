@@ -796,7 +796,18 @@ def main():
         # DVWA is its own platform/kind, detected by title rather than the
         # heading text (its heading is the same generic "Labs Index" text
         # used by every PortSwigger category root).
-        kind = "dvwa" if "dvwa" in title.lower() else classify_kind(heading)
+        if "dvwa" in title.lower():
+            kind = "dvwa"
+        elif "custom lab" in title.lower():
+            # This root's title follows "{Lab Name} — Custom Lab" -- the
+            # generic "{Topic} — Platform" split would otherwise grab the
+            # full lab name as the label instead of "Custom Lab". Its
+            # "Levels Index" heading also contains "level", which would
+            # misclassify it as wargames under classify_kind() -- force it
+            # into labs instead, same override pattern as DVWA above.
+            kind = "labs"
+        else:
+            kind = classify_kind(heading)
         roots.append({"title": title, "kind": kind, "leaves": leaves})
         print(f'  Root page: "{title}" -> {kind} ({len(leaves)} sub-page(s))')
 
@@ -844,9 +855,17 @@ def main():
                 dvwa_data[cat_slug]["href"] = href
             continue
 
-        cat_slug = slugify(split_title(root["title"])[0]) or slugify(root["title"])
-        label = clean_segment(split_title(root["title"])[0]) or root["title"]
-        icon = extract_icon(root["title"])
+        if "custom lab" in root["title"].lower():
+            # Overrides the generic "{Topic} — Platform" split: here the
+            # part after the em dash ("Custom Lab") IS the desired tile
+            # label, not a platform name to discard.
+            cat_slug = "custom-lab"
+            label = "Custom Lab"
+            icon = "📂"
+        else:
+            cat_slug = slugify(split_title(root["title"])[0]) or slugify(root["title"])
+            label = clean_segment(split_title(root["title"])[0]) or root["title"]
+            icon = extract_icon(root["title"])
         bucket = labs_data if root["kind"] == "labs" else wargames_data
         bucket.setdefault(cat_slug, {"label": label, "icon": icon, "leaves": [], "href": ""})
 
