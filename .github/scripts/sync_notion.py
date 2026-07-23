@@ -151,6 +151,7 @@ KIND_LABELS = {
     "labs": "Labs",
     "wargames": "Wargames",
     "dvwa": "DVWA",
+    "customlab": "Custom Lab",
 }
 
 def get_excerpt(blocks, limit=160):
@@ -596,6 +597,19 @@ def sync_leaf(leaf_id, fallback_title, kind, cat_slug=None, cat_label=None):
         root_rel = "../" * depth
         breadcrumb = f'<a href="{root_rel}index.html">Portfolio</a> / <a href="{root_rel}index.html#machines">Machines</a> / {esc(title)}'
         href_from_root = f"writeups/machines/{slug}.html"
+    elif kind == "customlab":
+        # Flat 2-level hierarchy like machines -- no intermediate category
+        # page, and no split_title() here: unlike "{Topic} — Platform"
+        # titles, these level titles use the em dash as part of the title
+        # itself (e.g. "Level 1 — Baseline LFI"), so splitting would wrongly
+        # chop it in half.
+        slug = slugify(title)
+        out_dir = WRITEUPS_DIR / "customlab"
+        depth = 2
+        root_rel = "../" * depth
+        breadcrumb = (f'<a href="{root_rel}index.html">Portfolio</a> / '
+                      f'<a href="{root_rel}index.html#customlab">{KIND_LABELS.get(kind, kind.title())}</a> / {esc(title)}')
+        href_from_root = f"writeups/customlab/{slug}.html"
     else:
         slug = slugify(title)
         out_dir = WRITEUPS_DIR / kind / cat_slug
@@ -731,7 +745,7 @@ def render_labs_groups(labs_buckets):
     html = group_block("Server-Side", server) + group_block("Client-Side", client)
     return html or "      <p style=\"color:var(--muted);\">No labs synced yet.</p>\n"
 
-def update_index_html(machines, labs_buckets, wargames_buckets, dvwa_buckets):
+def update_index_html(machines, labs_buckets, wargames_buckets, dvwa_buckets, customlab):
     text = INDEX_HTML.read_text(encoding="utf-8")
 
     machines_html = "".join(machine_card_html(e) for e in machines) or "      <p style=\"color:var(--muted);\">No machines synced yet.</p>\n"
@@ -739,6 +753,9 @@ def update_index_html(machines, labs_buckets, wargames_buckets, dvwa_buckets):
 
     labs_html = render_labs_groups(labs_buckets)
     text = replace_between(text, "LABS", labs_html)
+
+    customlab_html = "".join(machine_card_html(e) for e in customlab) or "      <p style=\"color:var(--muted);\">No Custom Lab levels synced yet.</p>\n"
+    text = replace_between(text, "CUSTOMLAB", customlab_html)
 
     dvwa_html = render_dvwa_group(dvwa_buckets)
     text = replace_between(text, "DVWA", dvwa_html)
@@ -799,13 +816,13 @@ def main():
         if "dvwa" in title.lower():
             kind = "dvwa"
         elif "custom lab" in title.lower():
-            # This root's title follows "{Lab Name} — Custom Lab" -- the
-            # generic "{Topic} — Platform" split would otherwise grab the
-            # full lab name as the label instead of "Custom Lab". Its
-            # "Levels Index" heading also contains "level", which would
-            # misclassify it as wargames under classify_kind() -- force it
-            # into labs instead, same override pattern as DVWA above.
-            kind = "labs"
+            # This is its own top-level section, not a PortSwigger labs
+            # tile -- it's a self-built Docker lab, not part of the Web
+            # Security Academy set. Its "Levels Index" heading also
+            # contains "level", which would misclassify it as wargames
+            # under classify_kind() -- force it into its own kind instead,
+            # same override pattern as DVWA above.
+            kind = "customlab"
         else:
             kind = classify_kind(heading)
         roots.append({"title": title, "kind": kind, "leaves": leaves})
@@ -817,12 +834,24 @@ def main():
 
     machines_data = []
     labs_data, wargames_data, dvwa_data = {}, {}, {}
+    customlab_data = []
 
     for root in roots:
         if root["kind"] == "machines":
             for leaf_id, leaf_title in root["leaves"]:
                 try:
                     machines_data.append(sync_leaf(leaf_id, leaf_title, "machines"))
+                    print(f"    synced: {leaf_title}")
+                except Exception as e:
+                    print(f"    ERROR syncing {leaf_title!r}: {e}", file=sys.stderr)
+            continue
+
+        if root["kind"] == "customlab":
+            # Flat 2-level hierarchy like machines -- the root's direct
+            # children ARE the write-ups, no intermediate category page.
+            for leaf_id, leaf_title in root["leaves"]:
+                try:
+                    customlab_data.append(sync_leaf(leaf_id, leaf_title, "customlab"))
                     print(f"    synced: {leaf_title}")
                 except Exception as e:
                     print(f"    ERROR syncing {leaf_title!r}: {e}", file=sys.stderr)
@@ -855,17 +884,9 @@ def main():
                 dvwa_data[cat_slug]["href"] = href
             continue
 
-        if "custom lab" in root["title"].lower():
-            # Overrides the generic "{Topic} — Platform" split: here the
-            # part after the em dash ("Custom Lab") IS the desired tile
-            # label, not a platform name to discard.
-            cat_slug = "custom-lab"
-            label = "Custom Lab"
-            icon = "📂"
-        else:
-            cat_slug = slugify(split_title(root["title"])[0]) or slugify(root["title"])
-            label = clean_segment(split_title(root["title"])[0]) or root["title"]
-            icon = extract_icon(root["title"])
+        cat_slug = slugify(split_title(root["title"])[0]) or slugify(root["title"])
+        label = clean_segment(split_title(root["title"])[0]) or root["title"]
+        icon = extract_icon(root["title"])
         bucket = labs_data if root["kind"] == "labs" else wargames_data
         bucket.setdefault(cat_slug, {"label": label, "icon": icon, "leaves": [], "href": ""})
 
@@ -881,7 +902,7 @@ def main():
         bucket[cat_slug]["href"] = href
 
     print("Regenerating index.html…")
-    update_index_html(machines_data, labs_data, wargames_data, dvwa_data)
+    update_index_html(machines_data, labs_data, wargames_data, dvwa_data, customlab_data)
 
     print("Pruning orphaned files…")
     prune_orphans()
@@ -891,6 +912,7 @@ def main():
     print(f"   Labs categories: {len(labs_data)} ({sum(len(b['leaves']) for b in labs_data.values())} labs)")
     print(f"   Wargames categories: {len(wargames_data)} ({sum(len(b['leaves']) for b in wargames_data.values())} levels)")
     print(f"   DVWA categories: {len(dvwa_data)} ({sum(len(b['leaves']) for b in dvwa_data.values())} labs)")
+    print(f"   Custom Lab levels: {len(customlab_data)}")
 
 
 if __name__ == "__main__":
