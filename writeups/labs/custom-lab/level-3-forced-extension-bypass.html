@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Level 3 — Forced Extension Bypass — Mostafa Elwaseef's Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --bg2: #161b22; --bg3: #21262d;
+      --border: #30363d; --text: #e6edf3; --muted: #8b949e;
+      --accent: #58a6ff; --accent2: #3fb950; --red: #f85149;
+      --orange: #d29922; --radius: 8px;
+      --c-red: #f85149; --c-blue: #58a6ff; --c-green: #3fb950;
+      --c-yellow: #d29922; --c-purple: #bc8cff; --c-pink: #ff7b72;
+      --c-gray: #8b949e;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.7; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    nav { position: sticky; top: 0; z-index: 100; background: rgba(13,17,23,.9); backdrop-filter: blur(12px);
+          border-bottom: 1px solid var(--border); padding: .75rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { font-weight: 600; font-size: 1rem; color: var(--text); }
+    .nav-back { font-size: .85rem; color: var(--muted); display: flex; align-items: center; gap: .4rem; }
+    .nav-back:hover { color: var(--accent); text-decoration: none; }
+    .hero { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 3rem 2rem 2.5rem; }
+    .hero-inner { max-width: 860px; margin: 0 auto; }
+    .breadcrumb { font-size: .8rem; color: var(--muted); margin-bottom: 1rem; }
+    .breadcrumb a { color: var(--muted); }
+    .breadcrumb a:hover { color: var(--accent); }
+    .hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
+    .hero p.desc { color: var(--muted); max-width: 640px; margin-top: .5rem; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+    .badge { display: inline-flex; align-items: center; gap: .3rem; padding: .25rem .7rem;
+             border-radius: 20px; font-size: .75rem; font-weight: 500; white-space: nowrap; flex-shrink: 0; }
+    .badge-platform { background: #1f3a5f; color: #58a6ff; border: 1px solid #1f4080; }
+    .badge-easy { background: #1a3a2a; color: #3fb950; border: 1px solid #2ea043; }
+    .badge-medium { background: #3a2a1a; color: #d29922; border: 1px solid #9e6a03; }
+    .badge-hard { background: #3a1a1a; color: #f85149; border: 1px solid #da3633; }
+    .badge-beginner { background: #1a3a2a; color: #56d364; border: 1px solid #2ea043; }
+    .badge-impossible { background: #2f1f47; color: #bc8cff; border: 1px solid #6e40c9; }
+    .badge-os { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .badge-date { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .content { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+    h1, h2, h3 { color: var(--text); font-weight: 600; margin: 2rem 0 .75rem; }
+    h2 { font-size: 1.35rem; padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 1.1rem; color: var(--accent); }
+    p { margin: .6rem 0; color: #c9d1d9; }
+    ul, ol { margin: .5rem 0 .5rem 1.5rem; }
+    li { margin: .3rem 0; color: #c9d1d9; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    blockquote { border-left: 3px solid var(--accent); padding: .5rem 1rem; margin: .75rem 0;
+                 background: var(--bg2); border-radius: 0 var(--radius) var(--radius) 0; color: var(--muted); }
+    pre { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+          padding: 1rem 1.25rem; overflow-x: auto; margin: .75rem 0; }
+    code { font-family: 'Fira Code', monospace; font-size: .85rem; color: #e6edf3; }
+    p code, li code, td code, h1 code, h2 code, h3 code, blockquote code {
+      background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; color: var(--accent); font-size: .82rem;
+    }
+    strong code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; }
+    figure { margin: 1.25rem 0; }
+    img { max-width: 100%; border-radius: var(--radius); border: 1px solid var(--border);
+          display: block; margin: 0 auto; }
+    figcaption { text-align: center; font-size: .8rem; color: var(--muted); margin-top: .4rem; }
+    .callout { display: flex; gap: .75rem; align-items: flex-start; background: var(--bg2);
+               border: 1px solid var(--border); border-radius: var(--radius); padding: .9rem 1rem; margin: .75rem 0; }
+    .callout-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: .1rem; }
+    details { border: 1px solid var(--border); border-radius: var(--radius); margin: .5rem 0; }
+    summary { padding: .6rem 1rem; cursor: pointer; font-weight: 500; background: var(--bg2); border-radius: var(--radius); }
+    details[open] summary { border-radius: var(--radius) var(--radius) 0 0; border-bottom: 1px solid var(--border); }
+    details > *:not(summary) { padding: .75rem 1rem; }
+    .table-wrap { overflow-x: auto; margin: .75rem 0; }
+    table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+    th, td { padding: .6rem .9rem; border: 1px solid var(--border); text-align: left; }
+    th { background: var(--bg3); font-weight: 600; }
+    tr:nth-child(even) { background: rgba(33,38,45,.5); }
+    .columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin: .75rem 0; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem;
+            transition: border-color .15s, transform .15s; display: block; }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); text-decoration: none; }
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: .6rem; gap: .5rem; }
+    .card-title { font-size: 14px; font-weight: 600; color: var(--text); flex: 1 1 auto; min-width: 0; }
+    .card-meta { font-size: 12px; color: var(--muted); margin-bottom: .4rem; }
+    .card-desc { font-size: 13px; color: var(--muted); }
+    footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 620px) {
+      nav { padding: .65rem 1.25rem; }
+      .hero { padding: 2rem 1.25rem 1.75rem; }
+      .hero h1 { font-size: 1.5rem; }
+      .content { padding: 2rem 1.25rem 3rem; }
+      .cards { grid-template-columns: 1fr; }
+    }
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-logo">Waseef</span>
+  <a href="../../../index.html" class="nav-back">← Back to Portfolio</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#labs">Labs</a> / <a href="index.html">Custom Lab</a> / Level 3 — Forced Extension Bypass</div>
+    <h1>Level 3 — Forced Extension Bypass</h1>
+    <div class="meta-row">
+      <span class="badge badge-hard">🔴 High</span>
+      <span class="badge badge-date">📅 2026-07-21</span>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+<h2 id="finding-summary">📋 Finding Summary</h2>
+<div class='table-wrap'><table>
+  <tr><th>Field</th><th>Value</th></tr>
+  <tr><td><strong>Type</strong></td><td>Web App</td></tr>
+  <tr><td><strong>Severity</strong></td><td>🔴 High</td></tr>
+  <tr><td><strong>CVE / CWE</strong></td><td>CWE-98, CWE-22, CWE-209</td></tr>
+  <tr><td><strong>Date</strong></td><td>2026-07-21</td></tr>
+</table></div>
+<hr>
+<h2 id="description">🔍 Description</h2>
+<p>The application appends a hardcoded <code>.php</code> extension to every value supplied via the <code>page</code> parameter before passing it to PHP’s <code>include()</code>. The intent is to prevent inclusion of arbitrary file types — an attacker submitting <code>../../../../etc/passwd</code> receives <code>includes/../../../../etc/passwd.php</code>, which does not exist. However, this defense backfires when the target file itself has a <code>.php</code> extension: the forced suffix becomes a match rather than a blocker. The flag was stored as <code>flag3.php</code>, so the payload <code>../flags/flag3</code> resolves to <code>../flags/flag3.php</code> and is included successfully. Additionally, the application leaks its full server path through PHP error messages, giving an attacker precise information about the web root before any bypass attempt.</p>
+<hr>
+<h2 id="end-goals">🎯 End Goals</h2>
+<ul>
+  <li>Identify that <code>.php</code> is always appended to the user-supplied filename</li>
+  <li>Confirm the application leaks its server path through error disclosure</li>
+  <li>Recognize that the forced extension becomes an advantage when the target file is itself a <code>.php</code> file</li>
+  <li>Include <code>flags/flag3.php</code> via <code>../flags/flag3</code> to capture the flag</li>
+</ul>
+<hr>
+<h2 id="steps-to-reproduce">🪜 Steps to Reproduce</h2>
+<ol>
+  <li>Navigate to the target and observe the <code>page</code> parameter and <code>Loading:</code> path in the response</li>
+  <li>Submit an absolute path probe to trigger a PHP error and confirm the web root and forced <code>.php</code> extension</li>
+  <li>Verify LFI works on <code>.php</code> targets by self-including the level page</li>
+  <li>Apply the insight to <code>../flags/flag3</code> — the app appends <code>.php</code>, which resolves <code>flag3.php</code> and returns the flag</li>
+</ol>
+<hr>
+<h2 id="analysis">🧠 Analysis</h2>
+<p><strong>Step 1 — Observe the application</strong></p>
+<p>Navigating to <code>http://localhost:8080/level3.php</code> shows the familiar page-navigation interface. The default <code>page=welcome</code> loads with <code>Loading: includes/welcome.php</code> visible in the response — the application is explicitly appending <code>.php</code> to every parameter value. A hint in the page notes that null-byte truncation (<code>%00</code>) was patched in PHP 5.3.4 and will not work here.</p>
+<blockquote>  <figure><img src="images/level-3-forced-extension-bypass/3a4b752371728087a089d5eaed8f7ced.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 2 — Error disclosure confirms web root and forced extension</strong></p>
+<p>Submitting <code>page=/etc/passwd</code> triggered a PHP <code>include()</code> error. The <code>Loading:</code> line showed <code>includes//etc/passwd.php</code> — the <code>.php</code> suffix appended to <code>/etc/passwd</code> confirms the forced-extension behavior. More importantly, the PHP error message disclosed the full server path: <code>/var/www/html/level3.php</code>, establishing the web root as <code>/var/www/html/</code>. An attacker now knows both the directory layout and exactly why standard traversal to arbitrary file types will fail.</p>
+<blockquote>  <figure><img src="images/level-3-forced-extension-bypass/3a4b7523717280f2afbefa8e355a5224.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 3 — Self-inclusion confirms LFI works on </strong><strong><code>.php</code></strong><strong> files</strong></p>
+<p>To verify that the forced extension is an advantage rather than a blocker when the target is a PHP file, the payload <code>../level3</code> was submitted. The app appended <code>.php</code>, producing <code>Loading: includes/../level3.php</code>, which resolves to <code>level3.php</code> itself. The page rendered recursively — Level 3 including itself — confirming that LFI is fully functional as long as the target file carries a <code>.php</code> extension.</p>
+<blockquote>  <figure><img src="images/level-3-forced-extension-bypass/3a4b752371728020a70be9f175825c6b.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 4 — Retrieve the flag</strong></p>
+<p>With the mechanism understood, the payload <code>../flags/flag3</code> was submitted. The application appended <code>.php</code>, resolving to <code>Loading: includes/../flags/flag3.php</code> — pointing to <code>/var/www/html/flags/flag3.php</code>. The file was included and the flag returned: <strong><code>FLAG{lvl3_wrapper_bypass_forced_extension}</code></strong></p>
+<blockquote>  <figure><img src="images/level-3-forced-extension-bypass/3a4b75237172803d9456ef4716d30a92.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<h2 id="impact">🎯 Impact</h2>
+<p>The forced-extension defense creates a false sense of security. It prevents reading non-PHP files (configuration files, <code>/etc/passwd</code>, text files) but leaves any <code>.php</code> file on the server fully readable via LFI. In a real application this means source code disclosure, exposure of files containing credentials or business logic, and potential for chained attacks. Combined with the PHP error-disclosure that leaks the web root, an attacker can enumerate the directory structure and target PHP files with high precision before making a single exploit attempt.</p>
+<hr>
+<h2 id="references">📚 References</h2>
+<ul>
+  <li><a href="https://cwe.mitre.org/data/definitions/98.html" target="_blank" rel="noopener">CWE-98: Improper Control of Filename for Include/Require Statement in PHP</a></li>
+  <li><a href="https://cwe.mitre.org/data/definitions/22.html" target="_blank" rel="noopener">CWE-22: Improper Limitation of a Pathname to a Restricted Directory</a></li>
+  <li><a href="https://cwe.mitre.org/data/definitions/209.html" target="_blank" rel="noopener">CWE-209: Generation of Error Message Containing Sensitive Information</a></li>
+  <li><a href="https://owasp.org/www-project-web-security-testing-guide/v42/4-Web_Application_Security_Testing/07-Input_Validation_Testing/11.1-Testing_for_Local_File_Inclusion" target="_blank" rel="noopener">OWASP Testing Guide — Local File Inclusion</a></li>
+</ul>
+<hr>
+
+</div>
+
+<footer>Built by Waseef · <a href="../../../index.html">Back to Portfolio</a></footer>
+</body>
+</html>

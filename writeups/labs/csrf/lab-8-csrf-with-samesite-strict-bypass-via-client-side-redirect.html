@@ -138,7 +138,7 @@
 <ol>
   <li>Log in as <code>wiener</code> — note the session cookie has <code>SameSite=Strict</code>.</li>
   <li>Submit a comment on a blog post and observe the confirmation page redirects via JavaScript using the <code>postId</code> URL parameter.</li>
-  <li>Inspect the redirect script — confirm <code>postId</code> is used unsanitised in <code>window.location</code>.</li>
+  <li>Inspect the redirect script — confirm <code>postId</code> is used unsanitized in <code>window.location</code>.</li>
   <li>Test a crafted <code>postId</code> path-traversal value that points to <code>/my-account/change-email?email=...&amp;submit=1</code>.</li>
   <li>Confirm the GET-based email change endpoint accepts the request when triggered by same-site redirect.</li>
   <li>Build an exploit page using <code>document.location</code> pointing to the crafted confirmation URL and deliver it via the exploit server.</li>

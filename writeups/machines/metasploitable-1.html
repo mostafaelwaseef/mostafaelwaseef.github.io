@@ -195,7 +195,7 @@
 <hr>
 <h3 id="exploitation">Exploitation</h3>
 <p>Description</p>
-<p>TWiki 20030201 contains a remote code execution vulnerability in the <code>search</code> functionality. The <code>642.pl</code> exploit script sends a crafted request to the TWiki CGI endpoint that passes user-supplied input unsanitised to a shell command, resulting in arbitrary command execution as the web server user (<code>www-data</code>).</p>
+<p>TWiki 20030201 contains a remote code execution vulnerability in the <code>search</code> functionality. The <code>642.pl</code> exploit script sends a crafted request to the TWiki CGI endpoint that passes user-supplied input unsanitized to a shell command, resulting in arbitrary command execution as the web server user (<code>www-data</code>).</p>
 <p>PoC — Steps to Reproduce</p>
 <ol>
   <li>Copy the exploit: <code>searchsploit -m exploits/cgi-bin/642.pl</code></li>
