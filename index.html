@@ -172,7 +172,6 @@
       <a href="writeups/labs/path-traversal/index.html" class="lab-card" style="text-decoration:none;color:inherit;"><div class="lab-icon">📂</div><div class="lab-info"><div class="lab-name">Path Traversal</div><div class="lab-count">6 labs completed</div></div></a>
       <a href="writeups/labs/file-upload-vulnerabilities/index.html" class="lab-card" style="text-decoration:none;color:inherit;"><div class="lab-icon">📁</div><div class="lab-info"><div class="lab-name">File Upload Vulnerabilities</div><div class="lab-count">2 labs completed</div></div></a>
       <a href="writeups/labs/ssrf/index.html" class="lab-card" style="text-decoration:none;color:inherit;"><div class="lab-icon">🌐</div><div class="lab-info"><div class="lab-name">SSRF</div><div class="lab-count">5 labs completed</div></div></a>
-      <a href="writeups/labs/custom-lab/index.html" class="lab-card" style="text-decoration:none;color:inherit;"><div class="lab-icon">📂</div><div class="lab-info"><div class="lab-name">Custom Lab</div><div class="lab-count">6 labs completed</div></div></a>
       </div>
     </div>
     <div class="labs-group">
@@ -192,6 +191,36 @@
     <p style="color:var(--muted);font-size:14px;margin-bottom:1.5rem;">A self-contained Docker lab with 6 progressive levels covering Local File Inclusion, Remote File Inclusion, and Path Traversal techniques — from raw directory traversal up to full RCE via log poisoning and PHP wrappers.</p>
     <div class="cards">
 <!-- AUTO:CUSTOMLAB:START -->
+      <a href="writeups/customlab/level-1-baseline-lfi.html" class="card" style="text-decoration:none;">
+        <div class="card-header"><span class="card-title">Level 1 — Baseline LFI</span><span class="badge badge-hard">🔴 High</span></div>
+        
+        <p style="font-size:13px;color:var(--muted);">The application passes user-supplied input directly to PHP’s include() function without any path validation or sanitization. The function prepends a fixed…</p>
+      </a>
+      <a href="writeups/customlab/level-2-blacklist-filter-bypass.html" class="card" style="text-decoration:none;">
+        <div class="card-header"><span class="card-title">Level 2 — Blacklist Filter Bypass</span><span class="badge badge-hard">🔴 High</span></div>
+        
+        <p style="font-size:13px;color:var(--muted);">The application strips ../ from user input before passing it to PHP’s include() function, but the filter performs only a single, non-recursive pass. An…</p>
+      </a>
+      <a href="writeups/customlab/level-3-forced-extension-bypass.html" class="card" style="text-decoration:none;">
+        <div class="card-header"><span class="card-title">Level 3 — Forced Extension Bypass</span><span class="badge badge-hard">🔴 High</span></div>
+        
+        <p style="font-size:13px;color:var(--muted);">The application appends a hardcoded .php extension to every value supplied via the page parameter before passing it to PHP’s include(). The intent is to…</p>
+      </a>
+      <a href="writeups/customlab/lab-4-lfi-to-rce-via-log-poisoning.html" class="card" style="text-decoration:none;">
+        <div class="card-header"><span class="card-title">Lab 4 — LFI to RCE via Log Poisoning</span><span class="badge badge-hard">🔴 Critical</span></div>
+        
+        <p style="font-size:13px;color:var(--muted);">Level 4 presents a PHP application that passes user-supplied input directly into an include() statement without any filtering or sanitization. The page…</p>
+      </a>
+      <a href="writeups/customlab/lab-5-real-rfi.html" class="card" style="text-decoration:none;">
+        <div class="card-header"><span class="card-title">Lab 5 — Real RFI</span><span class="badge badge-hard">🔴 Critical</span></div>
+        
+        <p style="font-size:13px;color:var(--muted);">Level 5 presents a PHP application that passes user-supplied input directly into an include() statement without any filtering or sanitization. Unlike Local…</p>
+      </a>
+      <a href="writeups/customlab/level-6-php-wrapper-source-disclosure.html" class="card" style="text-decoration:none;">
+        <div class="card-header"><span class="card-title">Level 6 — PHP Wrapper Source Disclosure</span><span class="badge badge-hard">🔴 High</span></div>
+        
+        <p style="font-size:13px;color:var(--muted);">Level 6 presents a PHP application that passes user-supplied input directly into an include() statement. The application attempts to block direct PHP file…</p>
+      </a>
 
       <!-- AUTO:CUSTOMLAB:END -->
     </div>

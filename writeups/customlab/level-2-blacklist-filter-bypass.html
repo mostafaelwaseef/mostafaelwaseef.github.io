@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Level 1 — Baseline LFI — Mostafa Elwaseef's Portfolio</title>
+  <title>Level 2 — Blacklist Filter Bypass — Mostafa Elwaseef's Portfolio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
   <style>
@@ -99,13 +99,13 @@
 <body>
 <nav>
   <span class="nav-logo">Waseef</span>
-  <a href="../../../index.html" class="nav-back">← Back to Portfolio</a>
+  <a href="../../index.html" class="nav-back">← Back to Portfolio</a>
 </nav>
 
 <div class="hero">
   <div class="hero-inner">
-    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#labs">Labs</a> / <a href="index.html">Custom Lab</a> / Level 1 — Baseline LFI</div>
-    <h1>Level 1 — Baseline LFI</h1>
+    <div class="breadcrumb"><a href="../../index.html">Portfolio</a> / <a href="../../index.html#customlab">Custom Lab</a> / Level 2 — Blacklist Filter Bypass</div>
+    <h1>Level 2 — Blacklist Filter Bypass</h1>
     <div class="meta-row">
       <span class="badge badge-hard">🔴 High</span>
       <span class="badge badge-date">📅 2026-07-21</span>
@@ -119,75 +119,75 @@
   <tr><th>Field</th><th>Value</th></tr>
   <tr><td><strong>Type</strong></td><td>Web App</td></tr>
   <tr><td><strong>Severity</strong></td><td>🔴 High</td></tr>
-  <tr><td><strong>CVE / CWE</strong></td><td>CWE-98, CWE-22</td></tr>
+  <tr><td><strong>CVE / CWE</strong></td><td>CWE-22, CWE-184</td></tr>
   <tr><td><strong>Date</strong></td><td>2026-07-21</td></tr>
 </table></div>
 <hr>
 <h2 id="description">🔍 Description</h2>
-<p>The application passes user-supplied input directly to PHP’s <code>include()</code> function without any path validation or sanitization. The function prepends a fixed <code>includes/</code> directory prefix to the user input, but no restriction prevents directory traversal sequences (<code>../</code>) from escaping this prefix. An attacker can supply a crafted <code>page</code> parameter containing traversal sequences to read arbitrary files from the server filesystem. This is a textbook baseline LFI — zero filtering, zero allowlisting.</p>
+<p>The application strips <code>../</code> from user input before passing it to PHP’s <code>include()</code> function, but the filter performs only a single, non-recursive pass. An attacker can embed <code>../</code> inside a longer sequence — <code>....//</code> — so that when the filter removes the inner <code>../</code>, the surrounding characters collapse back into a valid traversal step. This is a textbook non-recursive blacklist bypass: the defense is defeated by crafting input that only becomes dangerous after the filter acts on it.</p>
 <hr>
 <h2 id="end-goals">🎯 End Goals</h2>
 <ul>
-  <li>Confirm the LFI vulnerability by reading a known system file (<code>/etc/passwd</code>)</li>
-  <li>Discover the traversal depth required to reach the flags directory</li>
-  <li>Read <code>flags/flag1.txt</code> to capture the flag</li>
+  <li>Confirm that the blacklist strips <code>../</code> and blocks standard traversal</li>
+  <li>Identify and exploit the <code>....//</code> bypass technique</li>
+  <li>Read <code>flags/flag2.txt</code> to capture the flag</li>
 </ul>
 <hr>
 <h2 id="steps-to-reproduce">🪜 Steps to Reproduce</h2>
 <ol>
-  <li>Navigate to the target and observe that the <code>page</code> parameter controls which file the application includes</li>
-  <li>Test an absolute path to understand how the application prepends the include directory</li>
-  <li>Use directory traversal sequences with increasing depth to read <code>/etc/passwd</code> and establish the correct traversal depth from the web root</li>
-  <li>Automate depth discovery to locate the flags directory</li>
-  <li>Read <code>flags/flag1.txt</code> with the correct traversal depth to capture the flag</li>
+  <li>Navigate to the target and observe that the <code>page</code> parameter controls which file is included</li>
+  <li>Submit a standard <code>../</code> traversal payload and confirm the blacklist strips it</li>
+  <li>Craft the <code>....//</code> bypass so the filter reconstructs <code>../</code> after acting on the input</li>
+  <li>Confirm the correct traversal depth using the bypass against a known file</li>
+  <li>Apply the bypass to <code>flags/flag2.txt</code> to retrieve the flag</li>
 </ol>
 <hr>
 <h2 id="analysis">🧠 Analysis</h2>
 <p><strong>Step 1 — Observe the application</strong></p>
-<p>Navigating to <code>http://localhost:8080/level1.php</code> reveals a simple page-navigation interface. The URL’s <code>page</code> parameter controls which file the application loads — a strong signal that the backend passes this value directly into an <code>include()</code> call. No authentication, no obvious input restrictions, and no client-side validation are present.</p>
-<blockquote>  <figure><img src="images/level-1-baseline-lfi/3a4b752371728022aaa2e0044fa593c9.png" alt="screenshot" loading="lazy"></figure>
+<p>Navigating to <code>http://localhost:8080/level2.php</code> reveals the same page-navigation interface as Level 1. The title reads “Level 2 - Blacklist Filter (bypassable)”, hinting that some form of input filtering is in place. The default <code>page=welcome.txt</code> loads normally, confirming the parameter is still active.</p>
+<blockquote>  <figure><img src="images/level-2-blacklist-filter-bypass/3a4b7523717280c183dfc3a3bcbf4d3a.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 2 — Test an absolute path</strong></p>
-<p>An absolute path was supplied as the <code>page</code> parameter: <code>page=/etc/passwd</code>. The application prepended <code>includes/</code> to the input, producing <code>includes//etc/passwd</code>, which failed with a PHP warning. Two key facts were extracted from this single error: the application does not resolve absolute paths so traversal must be relative, and the warning leaked the full server path — <code>/var/www/html/level1.php</code> — disclosing the web root as <code>/var/www/html/</code>. From this, the traversal depth could be calculated directly: <code>includes/</code> sits at <code>/var/www/html/includes/</code>, so 4 <code>../</code> steps are needed to reach the filesystem root at <code>/</code>.</p>
-<blockquote>  <figure><img src="images/level-1-baseline-lfi/3a4b7523717280cc86c8f23d6ecbefaf.png" alt="screenshot" loading="lazy"></figure>
+<p><strong>Step 2 — Confirm the blacklist strips </strong><strong><code>../</code></strong></p>
+<p>The standard four-level payload <code>../../../../etc/passwd</code> was submitted. Instead of resolving the traversal, the application showed <code>Loading: includes/etc/passwd</code> — all four <code>../</code> sequences had been silently removed, leaving just <code>etc/passwd</code> appended to the <code>includes/</code> prefix. The resulting path failed to open, confirming the blacklist is active and performing a naive string strip of <code>../</code>.</p>
+<blockquote>  <figure><img src="images/level-2-blacklist-filter-bypass/3a4b752371728015a017e48d8c266fa7.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 3 — Confirm traversal depth with </strong><strong><code>/etc/passwd</code></strong></p>
-<p>With the traversal depth already calculated from the path disclosure in Step 2, the payload <code>../../../../etc/passwd</code> was submitted to confirm that LFI was working correctly. The file contents loaded successfully, validating the depth and proving that arbitrary file reads were possible.</p>
-<blockquote>  <figure><img src="images/level-1-baseline-lfi/3a4b752371728070b07ff5cb536ffaf3.png" alt="screenshot" loading="lazy"></figure>
+<p><strong>Step 3 — Bypass the filter with </strong><strong><code>....//</code></strong></p>
+<p>The bypass payload <code>....//....//....//....//etc/passwd</code> was submitted. The blacklist scans the input for <code>../</code> and finds it embedded within each <code>....//</code> sequence at positions 2–4 (<code>.</code> <code>.</code> <code>/</code>). After removing that substring, the remaining characters (<code>.</code> <code>.</code> <code>/</code>) reconstruct a valid <code>../</code> step. Four <code>....//</code> sequences therefore produce four <code>../</code> steps after filtering. The application showed <code>Loading: includes/../../../../etc/passwd</code> and returned the full contents of <code>/etc/passwd</code>, confirming the bypass worked.</p>
+<blockquote>  <figure><img src="images/level-2-blacklist-filter-bypass/3a4b752371728005b70af430b999877a.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 4 — Attempt to reach the flags directory at root depth</strong></p>
-<p>Applying the same 4-level depth to the flags directory — <code>../../../../flags/flag1.txt</code> — produced an error: <code>failed to open stream: No such file or directory</code>. This confirmed that the flags directory is not located at the filesystem root (<code>/flags/</code>) and a shallower traversal depth is required.</p>
-<blockquote>  <figure><img src="images/level-1-baseline-lfi/3a4b752371728002bb60c1fc51db077b.png" alt="screenshot" loading="lazy"></figure>
+<p><strong>Step 4 — Attempt to reach the flags directory with standard </strong><strong><code>../</code></strong></p>
+<p>Before applying the bypass to the flags directory, a standard payload <code>../../../../flags/flag2.txt</code> was submitted. As expected, the blacklist stripped all <code>../</code> sequences, producing <code>Loading: includes/flags/flag2.txt</code>, which failed to open. This confirmed that the bypass is required for every traversal attempt against this application, not just for <code>/etc/passwd</code>.</p>
+<blockquote>  <figure><img src="images/level-2-blacklist-filter-bypass/3a4b75237172806cb53ad36e5f25e7cf.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 5 — Automate traversal depth discovery</strong></p>
-<p>Rather than continuing to guess manually, a bash for loop automated the depth discovery by testing 1 through 4 levels against <code>flags/flag1.txt</code> and filtering out PHP warning and error lines:</p>
-<pre><code class="language-python">for i in 1 2 3 4; do<br>  DOTS=$(python3 -c "print('../'*$i)")<br>  echo "--- $i levels ---"<br>  curl -s "http://localhost:8080/level1.php?page=${DOTS}flags/flag1.txt" | grep -v "Warning\|failed"<br>done</code></pre>
-<p>Level 1 returned <code>FLAG{lvl1_baseline_lfi_no_filter}</code>, revealing that the flags directory is located at <code>/var/www/html/flags/</code> — one level above <code>includes/</code> within the web root.</p>
-<blockquote>  <figure><img src="images/level-1-baseline-lfi/3a4b75237172800e9d74cc2643d030ba.png" alt="screenshot" loading="lazy"></figure>
+<p><strong>Step 5 — Confirm traversal depth for the flags directory</strong></p>
+<p>The same for loop from Level 1 was re-used, this time replacing <code>../</code> with <code>....//</code> as the traversal unit and targeting <code>flags/flag1.txt</code> as a known reference point:</p>
+<pre><code class="language-python">for i in 1 2 3 4; do<br>  DOTS=$(python3 -c "print('..../'*$i)")<br>  echo "--- $i levels ---"<br>  curl -s "http://localhost:8080/level2.php?page=${DOTS}flags/flag1.txt" | grep -v "Warning\|failed"<br>done</code></pre>
+<p>At 1 level, <code>....//flags/flag1.txt</code> resolved correctly and returned <code>FLAG{lvl1_baseline_lfi_no_filter}</code>, confirming that the flags directory is one level above <code>includes/</code> — the same layout as Level 1.</p>
+<blockquote>  <figure><img src="images/level-2-blacklist-filter-bypass/3a4b7523717280e9b6eed763f07067e7.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
 <p><strong>Step 6 — Retrieve the flag in the browser</strong></p>
-<p>With the correct depth confirmed, the payload <code>page=../flags/flag1.txt</code> was submitted in the browser. The application resolved the path to <code>/var/www/html/flags/flag1.txt</code> and returned the flag: <strong><code>FLAG{lvl1_baseline_lfi_no_filter}</code></strong></p>
-<blockquote>  <figure><img src="images/level-1-baseline-lfi/3a4b7523717280b3a7adc7f3d4529c06.png" alt="screenshot" loading="lazy"></figure>
+<p>With the correct depth confirmed, the payload <code>....//flags/flag2.txt</code> was submitted in the browser. After the filter stripped the inner <code>../</code> from <code>....//</code>, the path resolved to <code>includes/../flags/flag2.txt</code>, which points to <code>/var/www/html/flags/flag2.txt</code>. The flag was returned: <strong><code>FLAG{lvl2_blacklist_bypass_dotdotslash}</code></strong></p>
+<blockquote>  <figure><img src="images/level-2-blacklist-filter-bypass/3a4b7523717280829e5dd824449778f1.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
 <h2 id="impact">🎯 Impact</h2>
-<p>An unauthenticated attacker can read any file accessible to the web server process. This includes application source code, configuration files containing database credentials or API keys, SSH private keys, and system files such as <code>/etc/passwd</code> and <code>/etc/shadow</code>. With zero filtering in place, the vulnerability requires no obfuscation or encoding to exploit and is trivially repeatable by any attacker with a browser.</p>
+<p>The blacklist provides no real security because it makes only a single pass over the input. Any payload that embeds <code>../</code> inside a longer string — <code>....//</code>, <code>..././</code>, URL-encoded variants, or Unicode equivalents — trivially reconstructs the traversal sequence after the filter runs. An unauthenticated attacker retains the full ability to read arbitrary files from the web server with minimal additional effort.</p>
 <hr>
 <h2 id="references">📚 References</h2>
 <ul>
-  <li><a href="https://cwe.mitre.org/data/definitions/98.html" target="_blank" rel="noopener">CWE-98: Improper Control of Filename for Include/Require Statement in PHP</a></li>
   <li><a href="https://cwe.mitre.org/data/definitions/22.html" target="_blank" rel="noopener">CWE-22: Improper Limitation of a Pathname to a Restricted Directory</a></li>
+  <li><a href="https://cwe.mitre.org/data/definitions/184.html" target="_blank" rel="noopener">CWE-184: Incomplete List of Disallowed Inputs</a></li>
   <li><a href="https://owasp.org/www-project-web-security-testing-guide/v42/4-Web_Application_Security_Testing/07-Input_Validation_Testing/11.1-Testing_for_Local_File_Inclusion" target="_blank" rel="noopener">OWASP Testing Guide — Local File Inclusion</a></li>
 </ul>
 <hr>
 
 </div>
 
-<footer>Built by Waseef · <a href="../../../index.html">Back to Portfolio</a></footer>
+<footer>Built by Waseef · <a href="../../index.html">Back to Portfolio</a></footer>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Level 3 — Forced Extension Bypass — Mostafa Elwaseef's Portfolio</title>
+  <title>Level 1 — Baseline LFI — Mostafa Elwaseef's Portfolio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
   <style>
@@ -99,13 +99,13 @@
 <body>
 <nav>
   <span class="nav-logo">Waseef</span>
-  <a href="../../../index.html" class="nav-back">← Back to Portfolio</a>
+  <a href="../../index.html" class="nav-back">← Back to Portfolio</a>
 </nav>
 
 <div class="hero">
   <div class="hero-inner">
-    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#labs">Labs</a> / <a href="index.html">Custom Lab</a> / Level 3 — Forced Extension Bypass</div>
-    <h1>Level 3 — Forced Extension Bypass</h1>
+    <div class="breadcrumb"><a href="../../index.html">Portfolio</a> / <a href="../../index.html#customlab">Custom Lab</a> / Level 1 — Baseline LFI</div>
+    <h1>Level 1 — Baseline LFI</h1>
     <div class="meta-row">
       <span class="badge badge-hard">🔴 High</span>
       <span class="badge badge-date">📅 2026-07-21</span>
@@ -119,64 +119,75 @@
   <tr><th>Field</th><th>Value</th></tr>
   <tr><td><strong>Type</strong></td><td>Web App</td></tr>
   <tr><td><strong>Severity</strong></td><td>🔴 High</td></tr>
-  <tr><td><strong>CVE / CWE</strong></td><td>CWE-98, CWE-22, CWE-209</td></tr>
+  <tr><td><strong>CVE / CWE</strong></td><td>CWE-98, CWE-22</td></tr>
   <tr><td><strong>Date</strong></td><td>2026-07-21</td></tr>
 </table></div>
 <hr>
 <h2 id="description">🔍 Description</h2>
-<p>The application appends a hardcoded <code>.php</code> extension to every value supplied via the <code>page</code> parameter before passing it to PHP’s <code>include()</code>. The intent is to prevent inclusion of arbitrary file types — an attacker submitting <code>../../../../etc/passwd</code> receives <code>includes/../../../../etc/passwd.php</code>, which does not exist. However, this defense backfires when the target file itself has a <code>.php</code> extension: the forced suffix becomes a match rather than a blocker. The flag was stored as <code>flag3.php</code>, so the payload <code>../flags/flag3</code> resolves to <code>../flags/flag3.php</code> and is included successfully. Additionally, the application leaks its full server path through PHP error messages, giving an attacker precise information about the web root before any bypass attempt.</p>
+<p>The application passes user-supplied input directly to PHP’s <code>include()</code> function without any path validation or sanitization. The function prepends a fixed <code>includes/</code> directory prefix to the user input, but no restriction prevents directory traversal sequences (<code>../</code>) from escaping this prefix. An attacker can supply a crafted <code>page</code> parameter containing traversal sequences to read arbitrary files from the server filesystem. This is a textbook baseline LFI — zero filtering, zero allowlisting.</p>
 <hr>
 <h2 id="end-goals">🎯 End Goals</h2>
 <ul>
-  <li>Identify that <code>.php</code> is always appended to the user-supplied filename</li>
-  <li>Confirm the application leaks its server path through error disclosure</li>
-  <li>Recognize that the forced extension becomes an advantage when the target file is itself a <code>.php</code> file</li>
-  <li>Include <code>flags/flag3.php</code> via <code>../flags/flag3</code> to capture the flag</li>
+  <li>Confirm the LFI vulnerability by reading a known system file (<code>/etc/passwd</code>)</li>
+  <li>Discover the traversal depth required to reach the flags directory</li>
+  <li>Read <code>flags/flag1.txt</code> to capture the flag</li>
 </ul>
 <hr>
 <h2 id="steps-to-reproduce">🪜 Steps to Reproduce</h2>
 <ol>
-  <li>Navigate to the target and observe the <code>page</code> parameter and <code>Loading:</code> path in the response</li>
-  <li>Submit an absolute path probe to trigger a PHP error and confirm the web root and forced <code>.php</code> extension</li>
-  <li>Verify LFI works on <code>.php</code> targets by self-including the level page</li>
-  <li>Apply the insight to <code>../flags/flag3</code> — the app appends <code>.php</code>, which resolves <code>flag3.php</code> and returns the flag</li>
+  <li>Navigate to the target and observe that the <code>page</code> parameter controls which file the application includes</li>
+  <li>Test an absolute path to understand how the application prepends the include directory</li>
+  <li>Use directory traversal sequences with increasing depth to read <code>/etc/passwd</code> and establish the correct traversal depth from the web root</li>
+  <li>Automate depth discovery to locate the flags directory</li>
+  <li>Read <code>flags/flag1.txt</code> with the correct traversal depth to capture the flag</li>
 </ol>
 <hr>
 <h2 id="analysis">🧠 Analysis</h2>
 <p><strong>Step 1 — Observe the application</strong></p>
-<p>Navigating to <code>http://localhost:8080/level3.php</code> shows the familiar page-navigation interface. The default <code>page=welcome</code> loads with <code>Loading: includes/welcome.php</code> visible in the response — the application is explicitly appending <code>.php</code> to every parameter value. A hint in the page notes that null-byte truncation (<code>%00</code>) was patched in PHP 5.3.4 and will not work here.</p>
-<blockquote>  <figure><img src="images/level-3-forced-extension-bypass/3a4b752371728087a089d5eaed8f7ced.png" alt="screenshot" loading="lazy"></figure>
+<p>Navigating to <code>http://localhost:8080/level1.php</code> reveals a simple page-navigation interface. The URL’s <code>page</code> parameter controls which file the application loads — a strong signal that the backend passes this value directly into an <code>include()</code> call. No authentication, no obvious input restrictions, and no client-side validation are present.</p>
+<blockquote>  <figure><img src="images/level-1-baseline-lfi/3a4b752371728022aaa2e0044fa593c9.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 2 — Error disclosure confirms web root and forced extension</strong></p>
-<p>Submitting <code>page=/etc/passwd</code> triggered a PHP <code>include()</code> error. The <code>Loading:</code> line showed <code>includes//etc/passwd.php</code> — the <code>.php</code> suffix appended to <code>/etc/passwd</code> confirms the forced-extension behavior. More importantly, the PHP error message disclosed the full server path: <code>/var/www/html/level3.php</code>, establishing the web root as <code>/var/www/html/</code>. An attacker now knows both the directory layout and exactly why standard traversal to arbitrary file types will fail.</p>
-<blockquote>  <figure><img src="images/level-3-forced-extension-bypass/3a4b7523717280f2afbefa8e355a5224.png" alt="screenshot" loading="lazy"></figure>
+<p><strong>Step 2 — Test an absolute path</strong></p>
+<p>An absolute path was supplied as the <code>page</code> parameter: <code>page=/etc/passwd</code>. The application prepended <code>includes/</code> to the input, producing <code>includes//etc/passwd</code>, which failed with a PHP warning. Two key facts were extracted from this single error: the application does not resolve absolute paths so traversal must be relative, and the warning leaked the full server path — <code>/var/www/html/level1.php</code> — disclosing the web root as <code>/var/www/html/</code>. From this, the traversal depth could be calculated directly: <code>includes/</code> sits at <code>/var/www/html/includes/</code>, so 4 <code>../</code> steps are needed to reach the filesystem root at <code>/</code>.</p>
+<blockquote>  <figure><img src="images/level-1-baseline-lfi/3a4b7523717280cc86c8f23d6ecbefaf.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 3 — Self-inclusion confirms LFI works on </strong><strong><code>.php</code></strong><strong> files</strong></p>
-<p>To verify that the forced extension is an advantage rather than a blocker when the target is a PHP file, the payload <code>../level3</code> was submitted. The app appended <code>.php</code>, producing <code>Loading: includes/../level3.php</code>, which resolves to <code>level3.php</code> itself. The page rendered recursively — Level 3 including itself — confirming that LFI is fully functional as long as the target file carries a <code>.php</code> extension.</p>
-<blockquote>  <figure><img src="images/level-3-forced-extension-bypass/3a4b752371728020a70be9f175825c6b.png" alt="screenshot" loading="lazy"></figure>
+<p><strong>Step 3 — Confirm traversal depth with </strong><strong><code>/etc/passwd</code></strong></p>
+<p>With the traversal depth already calculated from the path disclosure in Step 2, the payload <code>../../../../etc/passwd</code> was submitted to confirm that LFI was working correctly. The file contents loaded successfully, validating the depth and proving that arbitrary file reads were possible.</p>
+<blockquote>  <figure><img src="images/level-1-baseline-lfi/3a4b752371728070b07ff5cb536ffaf3.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
-<p><strong>Step 4 — Retrieve the flag</strong></p>
-<p>With the mechanism understood, the payload <code>../flags/flag3</code> was submitted. The application appended <code>.php</code>, resolving to <code>Loading: includes/../flags/flag3.php</code> — pointing to <code>/var/www/html/flags/flag3.php</code>. The file was included and the flag returned: <strong><code>FLAG{lvl3_wrapper_bypass_forced_extension}</code></strong></p>
-<blockquote>  <figure><img src="images/level-3-forced-extension-bypass/3a4b75237172803d9456ef4716d30a92.png" alt="screenshot" loading="lazy"></figure>
+<p><strong>Step 4 — Attempt to reach the flags directory at root depth</strong></p>
+<p>Applying the same 4-level depth to the flags directory — <code>../../../../flags/flag1.txt</code> — produced an error: <code>failed to open stream: No such file or directory</code>. This confirmed that the flags directory is not located at the filesystem root (<code>/flags/</code>) and a shallower traversal depth is required.</p>
+<blockquote>  <figure><img src="images/level-1-baseline-lfi/3a4b752371728002bb60c1fc51db077b.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 5 — Automate traversal depth discovery</strong></p>
+<p>Rather than continuing to guess manually, a bash for loop automated the depth discovery by testing 1 through 4 levels against <code>flags/flag1.txt</code> and filtering out PHP warning and error lines:</p>
+<pre><code class="language-python">for i in 1 2 3 4; do<br>  DOTS=$(python3 -c "print('../'*$i)")<br>  echo "--- $i levels ---"<br>  curl -s "http://localhost:8080/level1.php?page=${DOTS}flags/flag1.txt" | grep -v "Warning\|failed"<br>done</code></pre>
+<p>Level 1 returned <code>FLAG{lvl1_baseline_lfi_no_filter}</code>, revealing that the flags directory is located at <code>/var/www/html/flags/</code> — one level above <code>includes/</code> within the web root.</p>
+<blockquote>  <figure><img src="images/level-1-baseline-lfi/3a4b75237172800e9d74cc2643d030ba.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 6 — Retrieve the flag in the browser</strong></p>
+<p>With the correct depth confirmed, the payload <code>page=../flags/flag1.txt</code> was submitted in the browser. The application resolved the path to <code>/var/www/html/flags/flag1.txt</code> and returned the flag: <strong><code>FLAG{lvl1_baseline_lfi_no_filter}</code></strong></p>
+<blockquote>  <figure><img src="images/level-1-baseline-lfi/3a4b7523717280b3a7adc7f3d4529c06.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
 <h2 id="impact">🎯 Impact</h2>
-<p>The forced-extension defense creates a false sense of security. It prevents reading non-PHP files (configuration files, <code>/etc/passwd</code>, text files) but leaves any <code>.php</code> file on the server fully readable via LFI. In a real application this means source code disclosure, exposure of files containing credentials or business logic, and potential for chained attacks. Combined with the PHP error-disclosure that leaks the web root, an attacker can enumerate the directory structure and target PHP files with high precision before making a single exploit attempt.</p>
+<p>An unauthenticated attacker can read any file accessible to the web server process. This includes application source code, configuration files containing database credentials or API keys, SSH private keys, and system files such as <code>/etc/passwd</code> and <code>/etc/shadow</code>. With zero filtering in place, the vulnerability requires no obfuscation or encoding to exploit and is trivially repeatable by any attacker with a browser.</p>
 <hr>
 <h2 id="references">📚 References</h2>
 <ul>
   <li><a href="https://cwe.mitre.org/data/definitions/98.html" target="_blank" rel="noopener">CWE-98: Improper Control of Filename for Include/Require Statement in PHP</a></li>
   <li><a href="https://cwe.mitre.org/data/definitions/22.html" target="_blank" rel="noopener">CWE-22: Improper Limitation of a Pathname to a Restricted Directory</a></li>
-  <li><a href="https://cwe.mitre.org/data/definitions/209.html" target="_blank" rel="noopener">CWE-209: Generation of Error Message Containing Sensitive Information</a></li>
   <li><a href="https://owasp.org/www-project-web-security-testing-guide/v42/4-Web_Application_Security_Testing/07-Input_Validation_Testing/11.1-Testing_for_Local_File_Inclusion" target="_blank" rel="noopener">OWASP Testing Guide — Local File Inclusion</a></li>
 </ul>
 <hr>
 
 </div>
 
-<footer>Built by Waseef · <a href="../../../index.html">Back to Portfolio</a></footer>
+<footer>Built by Waseef · <a href="../../index.html">Back to Portfolio</a></footer>
 </body>
 </html>
