@@ -118,9 +118,8 @@
 <div class='table-wrap'><table>
   <tr><th>Field</th><th>Value</th></tr>
   <tr><td><strong>Type</strong></td><td>Web App</td></tr>
-  <tr><td><strong>Target</strong></td><td>PortSwigger Web Security Academy</td></tr>
   <tr><td><strong>Severity</strong></td><td>🔴 High</td></tr>
-  <tr><td><strong>CVE / CWE</strong></td><td>CWE-434: Unrestricted Upload of File with Dangerous Type</td></tr>
+  <tr><td><strong>CVE / CWE</strong></td><td>CWE-434</td></tr>
   <tr><td><strong>Date</strong></td><td>2026-05-13</td></tr>
 </table></div>
 <hr>
@@ -160,9 +159,7 @@
 </blockquote>
 <hr>
 <p><strong>Step 3 — Crafting the payload and attempting to upload the PHP web shell directly</strong></p>
-<p>The PHP web shell <code>exploit.php</code> was created using nano with the following payload:</p>
-<pre><code class="language-javascript">&lt;?php echo file_get_contents('/home/carlos/secret'); ?&gt;</code></pre>
-<p>The file was then uploaded directly without modification. The server rejected it with the error: <code>Sorry, file type application/x-php is not allowed. Only image/jpeg and image/png are allowed.</code> Burp confirmed the POST returned HTTP 403 Forbidden, revealing the server validates only the <code>Content-Type</code> header.</p>
+<p>The PHP web shell <code>exploit.php</code> was created using nano with the payload <code>&lt;?php echo file_get_contents('/home/carlos/secret'); ?&gt;</code>. The file was then uploaded directly without modification. The server rejected it with the error: <code>Sorry, file type application/x-php is not allowed. Only image/jpeg and image/png are allowed.</code> Burp confirmed the POST returned HTTP 403 Forbidden, revealing the server validates only the <code>Content-Type</code> header.</p>
 <blockquote>  <figure><img src="images/lab-2-web-shell-upload-via-content-type-restriction-bypass/35fb75237172809f906efaa9b56ff47c.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/lab-2-web-shell-upload-via-content-type-restriction-bypass/35fb75237172809bb2eef251676fda3e.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/lab-2-web-shell-upload-via-content-type-restriction-bypass/35fb7523717280b295cee4f643ce88d7.png" alt="screenshot" loading="lazy"></figure>
@@ -176,9 +173,7 @@
 </blockquote>
 <hr>
 <p><strong>Step 5 — Triggering the web shell and retrieving the secret</strong></p>
-<p>A GET request was sent directly to <code>/files/avatars/exploit.php</code>. The server executed the PHP file and returned the secret:</p>
-<pre><code class="language-javascript">kFOZfjRYDMFRmMNmuDmS0wn6sVJXVl2</code></pre>
-<p>The secret was submitted via the lab banner to confirm the lab was solved.</p>
+<p>A GET request was sent directly to <code>/files/avatars/exploit.php</code>. The server executed the PHP file and returned the secret: <strong><code>kFOZfjRYDMFRmMNmuDmS0wn6sVJXVl2</code></strong>. The secret was submitted via the lab banner to confirm the lab was solved.</p>
 <blockquote>  <figure><img src="images/lab-2-web-shell-upload-via-content-type-restriction-bypass/35fb752371728023a355df8b640f31b7.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/lab-2-web-shell-upload-via-content-type-restriction-bypass/35fb7523717280dcae5dc7a283cb9108.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/lab-2-web-shell-upload-via-content-type-restriction-bypass/35fb75237172808fb404ccf7ef4ce46d.png" alt="screenshot" loading="lazy"></figure>
@@ -193,6 +188,7 @@
   <li><a href="https://portswigger.net/web-security/file-upload/lab-file-upload-web-shell-upload-via-content-type-restriction-bypass" target="_blank" rel="noopener">PortSwigger Lab: Web shell upload via Content-Type restriction bypass</a></li>
   <li><a href="https://cwe.mitre.org/data/definitions/434.html" target="_blank" rel="noopener">CWE-434: Unrestricted Upload of File with Dangerous Type</a></li>
 </ul>
+<hr>
 
 </div>
 

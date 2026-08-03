@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 3 — Web Shell Upload via Path Traversal — Mostafa Elwaseef's Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --bg2: #161b22; --bg3: #21262d;
+      --border: #30363d; --text: #e6edf3; --muted: #8b949e;
+      --accent: #58a6ff; --accent2: #3fb950; --red: #f85149;
+      --orange: #d29922; --radius: 8px;
+      --c-red: #f85149; --c-blue: #58a6ff; --c-green: #3fb950;
+      --c-yellow: #d29922; --c-purple: #bc8cff; --c-pink: #ff7b72;
+      --c-gray: #8b949e;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.7; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    nav { position: sticky; top: 0; z-index: 100; background: rgba(13,17,23,.9); backdrop-filter: blur(12px);
+          border-bottom: 1px solid var(--border); padding: .75rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { font-weight: 600; font-size: 1rem; color: var(--text); }
+    .nav-back { font-size: .85rem; color: var(--muted); display: flex; align-items: center; gap: .4rem; }
+    .nav-back:hover { color: var(--accent); text-decoration: none; }
+    .hero { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 3rem 2rem 2.5rem; }
+    .hero-inner { max-width: 860px; margin: 0 auto; }
+    .breadcrumb { font-size: .8rem; color: var(--muted); margin-bottom: 1rem; }
+    .breadcrumb a { color: var(--muted); }
+    .breadcrumb a:hover { color: var(--accent); }
+    .hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
+    .hero p.desc { color: var(--muted); max-width: 640px; margin-top: .5rem; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+    .badge { display: inline-flex; align-items: center; gap: .3rem; padding: .25rem .7rem;
+             border-radius: 20px; font-size: .75rem; font-weight: 500; white-space: nowrap; flex-shrink: 0; }
+    .badge-platform { background: #1f3a5f; color: #58a6ff; border: 1px solid #1f4080; }
+    .badge-easy { background: #1a3a2a; color: #3fb950; border: 1px solid #2ea043; }
+    .badge-medium { background: #3a2a1a; color: #d29922; border: 1px solid #9e6a03; }
+    .badge-hard { background: #3a1a1a; color: #f85149; border: 1px solid #da3633; }
+    .badge-beginner { background: #1a3a2a; color: #56d364; border: 1px solid #2ea043; }
+    .badge-impossible { background: #2f1f47; color: #bc8cff; border: 1px solid #6e40c9; }
+    .badge-os { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .badge-date { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .content { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+    h1, h2, h3 { color: var(--text); font-weight: 600; margin: 2rem 0 .75rem; }
+    h2 { font-size: 1.35rem; padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 1.1rem; color: var(--accent); }
+    p { margin: .6rem 0; color: #c9d1d9; }
+    ul, ol { margin: .5rem 0 .5rem 1.5rem; }
+    li { margin: .3rem 0; color: #c9d1d9; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    blockquote { border-left: 3px solid var(--accent); padding: .5rem 1rem; margin: .75rem 0;
+                 background: var(--bg2); border-radius: 0 var(--radius) var(--radius) 0; color: var(--muted); }
+    pre { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+          padding: 1rem 1.25rem; overflow-x: auto; margin: .75rem 0; }
+    code { font-family: 'Fira Code', monospace; font-size: .85rem; color: #e6edf3; }
+    p code, li code, td code, h1 code, h2 code, h3 code, blockquote code {
+      background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; color: var(--accent); font-size: .82rem;
+    }
+    strong code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; }
+    figure { margin: 1.25rem 0; }
+    img { max-width: 100%; border-radius: var(--radius); border: 1px solid var(--border);
+          display: block; margin: 0 auto; }
+    figcaption { text-align: center; font-size: .8rem; color: var(--muted); margin-top: .4rem; }
+    .callout { display: flex; gap: .75rem; align-items: flex-start; background: var(--bg2);
+               border: 1px solid var(--border); border-radius: var(--radius); padding: .9rem 1rem; margin: .75rem 0; }
+    .callout-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: .1rem; }
+    details { border: 1px solid var(--border); border-radius: var(--radius); margin: .5rem 0; }
+    summary { padding: .6rem 1rem; cursor: pointer; font-weight: 500; background: var(--bg2); border-radius: var(--radius); }
+    details[open] summary { border-radius: var(--radius) var(--radius) 0 0; border-bottom: 1px solid var(--border); }
+    details > *:not(summary) { padding: .75rem 1rem; }
+    .table-wrap { overflow-x: auto; margin: .75rem 0; }
+    table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+    th, td { padding: .6rem .9rem; border: 1px solid var(--border); text-align: left; }
+    th { background: var(--bg3); font-weight: 600; }
+    tr:nth-child(even) { background: rgba(33,38,45,.5); }
+    .columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin: .75rem 0; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem;
+            transition: border-color .15s, transform .15s; display: block; }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); text-decoration: none; }
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: .6rem; gap: .5rem; }
+    .card-title { font-size: 14px; font-weight: 600; color: var(--text); flex: 1 1 auto; min-width: 0; }
+    .card-meta { font-size: 12px; color: var(--muted); margin-bottom: .4rem; }
+    .card-desc { font-size: 13px; color: var(--muted); }
+    footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 620px) {
+      nav { padding: .65rem 1.25rem; }
+      .hero { padding: 2rem 1.25rem 1.75rem; }
+      .hero h1 { font-size: 1.5rem; }
+      .content { padding: 2rem 1.25rem 3rem; }
+      .cards { grid-template-columns: 1fr; }
+    }
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-logo">Waseef</span>
+  <a href="../../../index.html" class="nav-back">← Back to Portfolio</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#labs">Labs</a> / <a href="index.html">File Upload Vulnerabilities</a> / Lab 3 — Web Shell Upload via Path Traversal</div>
+    <h1>Lab 3 — Web Shell Upload via Path Traversal</h1>
+    <div class="meta-row">
+      <span class="badge badge-hard">🔴 Critical</span>
+      <span class="badge badge-date">📅 2026-08-03</span>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+<h2 id="finding-summary">📋 Finding Summary</h2>
+<div class='table-wrap'><table>
+  <tr><th>Field</th><th>Value</th></tr>
+  <tr><td><strong>Type</strong></td><td>Web App</td></tr>
+  <tr><td><strong>Severity</strong></td><td>🟣 Critical</td></tr>
+  <tr><td><strong>CVE / CWE</strong></td><td>CWE-22, CWE-434</td></tr>
+  <tr><td><strong>Date</strong></td><td>2026-08-03</td></tr>
+</table></div>
+<hr>
+<h2 id="description">🔍 Description</h2>
+<p>The avatar upload functionality on the My Account page restricts uploaded files to an <code>avatars/</code> subdirectory, which is configured to serve files statically without executing PHP. However, the server only strips literal path traversal sequences (<code>../</code>) from the filename while failing to decode URL-encoded variants. By submitting <code>..%2fexploit.php</code> as the filename in the multipart upload request, an attacker can traverse one directory level up and land a PHP web shell in the <code>/files/</code> directory, where PHP execution is enabled. A subsequent GET request to <code>/files/exploit.php</code> triggers the PHP engine and returns the output of arbitrary code.</p>
+<hr>
+<h2 id="end-goals">🎯 End Goals</h2>
+<ul>
+  <li>Upload a PHP web shell that the server will execute rather than serve as static content.</li>
+  <li>Exploit the URL-encoded path traversal bypass to land the shell outside the <code>avatars/</code> directory.</li>
+  <li>Use the web shell to read <code>/home/carlos/secret</code> and submit it to solve the lab.</li>
+</ul>
+<hr>
+<h2 id="steps-to-reproduce">🪜 Steps to Reproduce</h2>
+<ol>
+  <li>Log in as <code>wiener</code> and navigate to the My Account page.</li>
+  <li>Upload a benign image to confirm the upload mechanism and identify the file-serving path.</li>
+  <li>Create a PHP web shell that reads <code>/home/carlos/secret</code>.</li>
+  <li>Upload the PHP file directly to establish that the <code>avatars/</code> directory does not execute PHP.</li>
+  <li>Intercept the upload request in Burp Suite and change the <code>filename</code> parameter to use a URL-encoded path traversal sequence (<code>..%2fexploit.php</code>).</li>
+  <li>Confirm the server preserves the traversal and places the file one level above <code>avatars/</code>.</li>
+  <li>Issue a GET request to <code>/files/exploit.php</code> to trigger execution and retrieve the secret.</li>
+  <li>Submit the secret to solve the lab.</li>
+</ol>
+<hr>
+<h2 id="analysis">🧠 Analysis</h2>
+<p><strong>Step 1 — Lab setup — logging in and locating the avatar upload form</strong></p>
+<p>Navigated to the lab and logged in with the provided credentials (<code>wiener</code>). The My Account page at <code>/my-account</code> presents an avatar upload form that posts files to <code>/my-account/avatar</code> as a multipart request.</p>
+<blockquote>  <figure><img src="images/lab-3-web-shell-upload-via-path-traversal/3b1b7523717280a79ed7f66f08f2c863.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-3-web-shell-upload-via-path-traversal/3b1b75237172809e8911caa3f057be68.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 2 — Upload a benign image to map the upload directory</strong></p>
+<p>Selected <code>image.jpeg</code> and clicked Upload. The server responded with “The file avatars/image.jpeg has been uploaded,” confirming files land in an <code>avatars/</code> subdirectory. The account page then rendered the image as the current avatar.</p>
+<blockquote>  <figure><img src="images/lab-3-web-shell-upload-via-path-traversal/3b1b75237172806e85c5dd90721ae222.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-3-web-shell-upload-via-path-traversal/3b1b75237172804eabc7cbc9dcde1700.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-3-web-shell-upload-via-path-traversal/3b1b75237172804da604d2fe102edf67.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 3 — Inspect HTTP traffic to discover upload and file-serving paths</strong></p>
+<p>In Burp Proxy HTTP history, the POST to <code>/my-account/avatar</code> confirmed the <code>Content-Disposition</code> filename parameter and the <code>avatars/</code> upload path in the server’s confirmation message. Inspecting the subsequent GET <code>/my-account</code> response body revealed <code>&lt;img src="/files/avatars/image.jpeg"&gt;</code>, showing that uploaded avatars are served from the <code>/files/avatars/</code> URL path.</p>
+<blockquote>  <figure><img src="images/lab-3-web-shell-upload-via-path-traversal/3b1b7523717280649009deebc2eb26a7.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-3-web-shell-upload-via-path-traversal/3b1b7523717280cb9490c69411238053.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 4 — Create the PHP web shell</strong></p>
+<p>Created <code>exploit.php</code> in the Kali working directory containing <code>&lt;?php echo file_get_contents('/home/carlos/secret'); ?&gt;</code> to read the target file upon execution.</p>
+<blockquote>  <figure><img src="images/lab-3-web-shell-upload-via-path-traversal/3b1b7523717280d3bca2dc7029a798a1.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 5 — Upload the PHP web shell directly</strong></p>
+<p>Selected <code>exploit.php</code> and submitted the upload form. The server accepted the file without restriction and responded “The file avatars/exploit.php has been uploaded.” The account page displayed a broken image placeholder where the avatar should appear, as the browser attempted to render the PHP file as an image.</p>
+<blockquote>  <figure><img src="images/lab-3-web-shell-upload-via-path-traversal/3b1b7523717280d69384efaff7423c72.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-3-web-shell-upload-via-path-traversal/3b1b7523717280d49528dd26c1d505c0.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-3-web-shell-upload-via-path-traversal/3b1b7523717280958aaeec5ef31aed88.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 6 — Confirm the web shell is served as static text, not executed</strong></p>
+<p>In Burp HTTP history, the GET request to <code>/files/avatars/exploit.php</code> returned HTTP 200 with MIME type <code>text</code> and the raw PHP source code in the response body rather than any output. This confirmed that the <code>avatars/</code> directory is configured to serve <code>.php</code> files as static content only, and the shell must be placed elsewhere for execution.</p>
+<blockquote>  <figure><img src="images/lab-3-web-shell-upload-via-path-traversal/3b1b7523717280cf8aebeee3dbfebabc.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-3-web-shell-upload-via-path-traversal/3b1b7523717280709a6ed69beb427fc2.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-3-web-shell-upload-via-path-traversal/3b1b752371728091abafecb372a61f50.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 7 — Attempt plain path traversal in the filename — blocked</strong></p>
+<p>Sent the upload request to Burp Repeater and modified the <code>filename</code> parameter to <code>../exploit.php</code>. The server responded “The file avatars/exploit.php has been uploaded” — the literal <code>../</code> sequence was stripped server-side and the file landed in <code>avatars/</code> as before.</p>
+<blockquote>  <figure><img src="images/lab-3-web-shell-upload-via-path-traversal/3b1b752371728095a3d8f25f9f7c6b2b.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 8 — Bypass the traversal strip with a URL-encoded slash</strong></p>
+<p>Changed the filename to <code>..%2fexploit.php</code>, URL-encoding the <code>/</code> as <code>%2f</code> to prevent the server’s string-matching strip from recognizing the traversal sequence. The server responded “The file avatars/../exploit.php has been uploaded,” confirming the encoded traversal was preserved and the file was placed one level above <code>avatars/</code> — in the <code>/files/</code> directory where PHP execution is enabled.</p>
+<blockquote>  <figure><img src="images/lab-3-web-shell-upload-via-path-traversal/3b1b7523717280d98583d05a25aaa83e.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-3-web-shell-upload-via-path-traversal/3b1b75237172803d95e0f62249f57e2f.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 9 — Execute the web shell and retrieve the secret</strong></p>
+<p>Opened a second Repeater tab and issued a GET request to <code>/files/exploit.php</code>. The server executed the PHP and returned the contents of <code>/home/carlos/secret</code>: <strong><code>ZU6hGJ8MOgh07Nr9xVUvn9c3pjTlsv1h</code></strong></p>
+<blockquote>  <figure><img src="images/lab-3-web-shell-upload-via-path-traversal/3b1b75237172807cbaf6c182249230ad.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 10 — Submit the secret and solve the lab</strong></p>
+<p>Submitted <strong><code>ZU6hGJ8MOgh07Nr9xVUvn9c3pjTlsv1h</code></strong> via the lab’s Submit solution button. The lab confirmed the value was correct and marked the lab as Solved.</p>
+<blockquote>  <figure><img src="images/lab-3-web-shell-upload-via-path-traversal/3b1b75237172801da13ae868ef58a417.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<h2 id="impact">🎯 Impact</h2>
+<p>An attacker with access to the avatar upload endpoint can upload arbitrary PHP files and, by exploiting the URL-encoded path traversal bypass, execute them in a directory where the PHP engine is active. This achieves server-side code execution under the web server’s process context, enabling arbitrary file read (demonstrated here with <code>/home/carlos/secret</code>), potential traversal across the file system, and — depending on server configuration — full remote code execution. No privilege escalation or additional access beyond a standard user account is required.</p>
+<hr>
+<h2 id="references">📚 References</h2>
+<ul>
+  <li><a href="https://portswigger.net/web-security/file-upload" target="_blank" rel="noopener">PortSwigger: File Upload Vulnerabilities</a></li>
+  <li><a href="https://portswigger.net/web-security/file-path-traversal" target="_blank" rel="noopener">PortSwigger: Path Traversal</a></li>
+  <li><a href="https://cwe.mitre.org/data/definitions/22.html" target="_blank" rel="noopener">CWE-22: Improper Limitation of a Pathname to a Restricted Directory</a></li>
+  <li><a href="https://cwe.mitre.org/data/definitions/434.html" target="_blank" rel="noopener">CWE-434: Unrestricted Upload of File with Dangerous Type</a></li>
+</ul>
+<hr>
+
+</div>
+
+<footer>Built by Waseef · <a href="../../../index.html">Back to Portfolio</a></footer>
+</body>
+</html>

