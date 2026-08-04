@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 6 — Remote Code Execution via Polyglot Web Shell Upload — MOSTAFA ELWASEEF's Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --bg2: #161b22; --bg3: #21262d;
+      --border: #30363d; --text: #e6edf3; --muted: #8b949e;
+      --accent: #58a6ff; --accent2: #3fb950; --red: #f85149;
+      --orange: #d29922; --radius: 8px;
+      --c-red: #f85149; --c-blue: #58a6ff; --c-green: #3fb950;
+      --c-yellow: #d29922; --c-purple: #bc8cff; --c-pink: #ff7b72;
+      --c-gray: #8b949e;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.7; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    nav { position: sticky; top: 0; z-index: 100; background: rgba(13,17,23,.9); backdrop-filter: blur(12px);
+          border-bottom: 1px solid var(--border); padding: .75rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { font-weight: 600; font-size: 1rem; color: var(--text); }
+    .nav-back { font-size: .85rem; color: var(--muted); display: flex; align-items: center; gap: .4rem; }
+    .nav-back:hover { color: var(--accent); text-decoration: none; }
+    .hero { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 3rem 2rem 2.5rem; }
+    .hero-inner { max-width: 860px; margin: 0 auto; }
+    .breadcrumb { font-size: .8rem; color: var(--muted); margin-bottom: 1rem; }
+    .breadcrumb a { color: var(--muted); }
+    .breadcrumb a:hover { color: var(--accent); }
+    .hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
+    .hero p.desc { color: var(--muted); max-width: 640px; margin-top: .5rem; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+    .badge { display: inline-flex; align-items: center; gap: .3rem; padding: .25rem .7rem;
+             border-radius: 20px; font-size: .75rem; font-weight: 500; white-space: nowrap; flex-shrink: 0; }
+    .badge-platform { background: #1f3a5f; color: #58a6ff; border: 1px solid #1f4080; }
+    .badge-easy { background: #1a3a2a; color: #3fb950; border: 1px solid #2ea043; }
+    .badge-medium { background: #3a2a1a; color: #d29922; border: 1px solid #9e6a03; }
+    .badge-hard { background: #3a1a1a; color: #f85149; border: 1px solid #da3633; }
+    .badge-beginner { background: #1a3a2a; color: #56d364; border: 1px solid #2ea043; }
+    .badge-critical { background: #2f1f47; color: #bc8cff; border: 1px solid #6e40c9; }
+    .badge-impossible { background: #2f1f47; color: #bc8cff; border: 1px solid #6e40c9; }
+    .badge-os { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .badge-date { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .content { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+    h1, h2, h3 { color: var(--text); font-weight: 600; margin: 2rem 0 .75rem; }
+    h2 { font-size: 1.35rem; padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 1.1rem; color: var(--accent); }
+    p { margin: .6rem 0; color: #c9d1d9; }
+    ul, ol { margin: .5rem 0 .5rem 1.5rem; }
+    li { margin: .3rem 0; color: #c9d1d9; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    blockquote { border-left: 3px solid var(--accent); padding: .5rem 1rem; margin: .75rem 0;
+                 background: var(--bg2); border-radius: 0 var(--radius) var(--radius) 0; color: var(--muted); }
+    pre { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+          padding: 1rem 1.25rem; overflow-x: auto; margin: .75rem 0; }
+    code { font-family: 'Fira Code', monospace; font-size: .85rem; color: #e6edf3; }
+    p code, li code, td code, h1 code, h2 code, h3 code, blockquote code {
+      background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; color: var(--accent); font-size: .82rem;
+    }
+    strong code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; }
+    figure { margin: 1.25rem 0; }
+    img { max-width: 100%; border-radius: var(--radius); border: 1px solid var(--border);
+          display: block; margin: 0 auto; }
+    figcaption { text-align: center; font-size: .8rem; color: var(--muted); margin-top: .4rem; }
+    .callout { display: flex; gap: .75rem; align-items: flex-start; background: var(--bg2);
+               border: 1px solid var(--border); border-radius: var(--radius); padding: .9rem 1rem; margin: .75rem 0; }
+    .callout-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: .1rem; }
+    details { border: 1px solid var(--border); border-radius: var(--radius); margin: .5rem 0; }
+    summary { padding: .6rem 1rem; cursor: pointer; font-weight: 500; background: var(--bg2); border-radius: var(--radius); }
+    details[open] summary { border-radius: var(--radius) var(--radius) 0 0; border-bottom: 1px solid var(--border); }
+    details > *:not(summary) { padding: .75rem 1rem; }
+    .table-wrap { overflow-x: auto; margin: .75rem 0; }
+    table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+    th, td { padding: .6rem .9rem; border: 1px solid var(--border); text-align: left; }
+    th { background: var(--bg3); font-weight: 600; }
+    tr:nth-child(even) { background: rgba(33,38,45,.5); }
+    .columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin: .75rem 0; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem;
+            transition: border-color .15s, transform .15s; display: block; }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); text-decoration: none; }
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: .6rem; gap: .5rem; }
+    .card-title { font-size: 14px; font-weight: 600; color: var(--text); flex: 1 1 auto; min-width: 0; }
+    .card-meta { font-size: 12px; color: var(--muted); margin-bottom: .4rem; }
+    .card-desc { font-size: 13px; color: var(--muted); }
+    footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 620px) {
+      nav { padding: .65rem 1.25rem; }
+      .hero { padding: 2rem 1.25rem 1.75rem; }
+      .hero h1 { font-size: 1.5rem; }
+      .content { padding: 2rem 1.25rem 3rem; }
+      .cards { grid-template-columns: 1fr; }
+    }
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-logo">Waseef</span>
+  <a href="../../../index.html" class="nav-back">← Back to Portfolio</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#labs">Labs</a> / <a href="index.html">File Upload Vulnerabilities</a> / Lab 6 — Remote Code Execution via Polyglot Web Shell Upload</div>
+    <h1>Lab 6 — Remote Code Execution via Polyglot Web Shell Upload</h1>
+    <div class="meta-row">
+      <span class="badge badge-critical">🟣 Critical</span>
+      <span class="badge badge-date">📅 2026-08-04</span>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+<h2 id="finding-summary">📋 Finding Summary</h2>
+<div class='table-wrap'><table>
+  <tr><th>Field</th><th>Value</th></tr>
+  <tr><td><strong>Type</strong></td><td>Remote Code Execution via Polyglot Web Shell Upload</td></tr>
+  <tr><td><strong>Severity</strong></td><td>🟣 Critical</td></tr>
+  <tr><td><strong>CVE / CWE</strong></td><td>CWE-434</td></tr>
+  <tr><td><strong>Date</strong></td><td>2026-08-04</td></tr>
+</table></div>
+<hr>
+<h2 id="description">🔍 Description</h2>
+<p>The application validates uploaded files by reading their binary content — using functions such as <code>exif_imagetype()</code> or <code>getimagesize()</code> to check for a valid image signature — rather than trusting the <code>Content-Type</code> header alone. However, when a stored file is later requested, the server determines how to process it based solely on its file extension. A polyglot file exploits the gap between these two independent checks: by embedding a PHP payload inside the EXIF Comment field of a genuine JPEG, the file retains intact magic bytes and passes content-based validation at upload time, yet executes as PHP when the server maps the <code>.php</code> extension to the PHP interpreter at request time. The two checks never communicate, so a file can satisfy both simultaneously.</p>
+<hr>
+<h2 id="end-goals">🎯 End Goals</h2>
+<ul>
+  <li>Upload a polyglot <code>.php</code> file that passes the server’s content-based image validation</li>
+  <li>Cause the server to execute the embedded PHP payload when the file is requested</li>
+  <li>Read the contents of <code>/home/carlos/secret</code> and submit the value to solve the lab</li>
+</ul>
+<hr>
+<h2 id="steps-to-reproduce">🪜 Steps to Reproduce</h2>
+<ol>
+  <li>Log in and locate the avatar upload form on the account page.</li>
+  <li>Upload a legitimate JPEG to confirm the upload works and identify the file storage path.</li>
+  <li>Attempt to upload a plain PHP web shell to confirm the server performs content-based validation.</li>
+  <li>Use <code>exiftool</code> to embed a PHP payload inside a genuine JPEG’s EXIF Comment field, producing a polyglot file saved with a <code>.php</code> extension.</li>
+  <li>Upload the polyglot — the content validation passes on the intact JPEG bytes, and the file is stored with its <code>.php</code> extension preserved.</li>
+  <li>Request the stored file directly; the server executes the PHP payload and returns the contents of <code>/home/carlos/secret</code>. Submit the value to solve the lab.</li>
+</ol>
+<hr>
+<h2 id="analysis">🧠 Analysis</h2>
+<p><strong>Step 1 — Log in and locate the upload form</strong></p>
+<p>Navigated to the lab and logged in as <code>wiener</code>. The <code>/my-account</code> page displayed an avatar upload form with a file browse field. No avatar was currently set.</p>
+<blockquote>  <figure><img src="images/lab-6-remote-code-execution-via-polyglot-web-shell-upload/3b2b752371728074849dd46acb1498d8.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-6-remote-code-execution-via-polyglot-web-shell-upload/3b2b75237172803ba858d26268c85521.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 2 — Upload a benign image to map the upload directory</strong></p>
+<p>Selected <code>image.jpeg</code> (a legitimate JPEG photo) and submitted the avatar form. The server responded with <code>The file avatars/image.jpeg has been uploaded.</code>, and the image was immediately rendered as the account avatar. Reviewing the page source in Burp confirmed the image was served from <code>/files/avatars/image.jpeg</code>. Inspection of the upload request in Burp’s Inspector panel showed the JPEG magic bytes <code>ff d8 ff e0 \0 10 JFIF</code> present in the raw request body, indicating the server reads the file’s binary signature to validate uploads — not just the <code>Content-Type</code> header.</p>
+<blockquote>  <figure><img src="images/lab-6-remote-code-execution-via-polyglot-web-shell-upload/3b2b7523717280e4ac66e7c53d640aca.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-6-remote-code-execution-via-polyglot-web-shell-upload/3b2b752371728031b8c8e0e75cad28e1.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-6-remote-code-execution-via-polyglot-web-shell-upload/3b2b7523717280d4a702c39ffab4b4f2.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-6-remote-code-execution-via-polyglot-web-shell-upload/3b2b7523717280a6a0a8d278f6634ead.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-6-remote-code-execution-via-polyglot-web-shell-upload/3b2b7523717280cfab16e864723bfb88.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 3 — Attempt direct PHP upload to confirm content validation</strong></p>
+<p>Prepared a plain PHP web shell (<code>exploit.php</code>) containing <code>&lt;?php echo file_get_contents('/home/carlos/secret'); ?&gt;</code> and attempted to upload it as an avatar. The server returned <code>Error: file is not a valid image Sorry, there was an error uploading your file.</code> with a 403 Forbidden response. Burp showed the request with <code>filename="exploit.php"</code> and <code>Content-Type: application/x-php</code>, confirming the server’s content-based check rejected the file because it lacked valid image bytes — the <code>Content-Type</code> header alone was not sufficient to pass validation.</p>
+<blockquote>  <figure><img src="images/lab-6-remote-code-execution-via-polyglot-web-shell-upload/3b2b75237172806e97d5e4daed2ecacf.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-6-remote-code-execution-via-polyglot-web-shell-upload/3b2b7523717280a2899ff7b11a3208a3.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-6-remote-code-execution-via-polyglot-web-shell-upload/3b2b7523717280518eb3d5709f947e22.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 4 — Create the polyglot file using exiftool</strong></p>
+<p>In a local terminal, ran <code>exiftool -Comment="&lt;?php echo file_get_contents('/home/carlos/secret'); ?&gt;" image.jpeg -o image.php</code> to embed the PHP payload inside the EXIF Comment field of the original JPEG, writing the result to <code>image.php</code>. The tool confirmed <code>1 image files created</code>. The output file retains the JPEG’s original magic bytes and binary structure, satisfying content-based validation at upload time. The PHP interpreter, however, scans the entire byte stream for <code>&lt;?php</code> tags when executing a <code>.php</code> file — including tags embedded deep inside EXIF metadata — and executes any it finds.</p>
+<blockquote>  <figure><img src="images/lab-6-remote-code-execution-via-polyglot-web-shell-upload/3b2b7523717280b29e26ff74f953c9f9.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 5 — Upload the polyglot and confirm it bypasses content validation</strong></p>
+<p>Uploaded <code>image.php</code> via the avatar form. The server responded with <code>The file avatars/image.php has been uploaded.</code> — the upload was accepted because the file’s binary content validated as a JPEG image. The <code>.php</code> extension was preserved in the stored filename.</p>
+<blockquote>  <figure><img src="images/lab-6-remote-code-execution-via-polyglot-web-shell-upload/3b2b7523717280838edfd390d8f80712.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-6-remote-code-execution-via-polyglot-web-shell-upload/3b2b7523717280da85f0f5b7e4fe404e.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<p><strong>Step 6 — Trigger PHP execution and retrieve the secret</strong></p>
+<p>Navigated directly to <code>/files/avatars/image.php</code>. The server processed the file as PHP based on its extension, executing the embedded payload. The response contained the raw JPEG binary data mixed with the output of <code>file_get_contents()</code> — the secret <strong><code>tTjcUG5Lxl30dpoHksrvW8lEJIXLH70J</code></strong> was visible in the output. Submitted <strong><code>tTjcUG5Lxl30dpoHksrvW8lEJIXLH70J</code></strong> to the lab, which marked it as Solved.</p>
+<blockquote>  <figure><img src="images/lab-6-remote-code-execution-via-polyglot-web-shell-upload/3b2b7523717280bfbf35e3683f4b3cbd.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-6-remote-code-execution-via-polyglot-web-shell-upload/3b2b75237172801bb9c9d5d1de2557cd.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/lab-6-remote-code-execution-via-polyglot-web-shell-upload/3b2b752371728047aae9d4e4b26d4c65.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<h2 id="impact">🎯 Impact</h2>
+<p>An attacker with access to the file upload feature can achieve remote code execution on the server by crafting a polyglot file that simultaneously satisfies image content validation and embeds executable PHP. This grants the ability to read arbitrary files, enumerate server internals, or escalate to full server compromise depending on the PHP configuration and available functions.</p>
+<hr>
+<h2 id="references">📚 References</h2>
+<ul>
+  <li><a href="https://portswigger.net/web-security/file-upload" target="_blank" rel="noopener">PortSwigger: File upload vulnerabilities</a></li>
+  <li><a href="https://cwe.mitre.org/data/definitions/434.html" target="_blank" rel="noopener">CWE-434: Unrestricted Upload of File with Dangerous Type</a></li>
+</ul>
+<hr>
+
+</div>
+
+<footer>Built by Waseef · <a href="../../../index.html">Back to Portfolio</a></footer>
+</body>
+</html>
