@@ -352,14 +352,17 @@ def extract_meta_from_blocks(blocks):
     return meta
 
 LEVEL_CLASS = {
-    "easy": "badge-easy", "beginner": "badge-beginner", "low": "badge-easy",
+    # "beginner" reuses "badge-easy" directly (rather than its own CSS
+    # class) so it's guaranteed to always render identically to "easy" --
+    # they're the same difficulty tier, just different label text.
+    "easy": "badge-easy", "beginner": "badge-easy", "low": "badge-easy",
     "medium": "badge-medium", "hard": "badge-hard", "high": "badge-hard",
-    "critical": "badge-hard", "info": "badge-beginner",
+    "critical": "badge-critical", "info": "badge-beginner",
     "impossible": "badge-impossible",
 }
 LEVEL_ICON = {
     "easy": "🟢", "beginner": "🟢", "low": "🟢", "medium": "🟡",
-    "hard": "🔴", "high": "🔴", "critical": "🔴", "info": "⚪",
+    "hard": "🔴", "high": "🔴", "critical": "🟣", "info": "⚪",
     "impossible": "🟣",
 }
 
@@ -442,6 +445,7 @@ STYLE_BLOCK = """
     .badge-medium { background: #3a2a1a; color: #d29922; border: 1px solid #9e6a03; }
     .badge-hard { background: #3a1a1a; color: #f85149; border: 1px solid #da3633; }
     .badge-beginner { background: #1a3a2a; color: #56d364; border: 1px solid #2ea043; }
+    .badge-critical { background: #2f1f47; color: #bc8cff; border: 1px solid #6e40c9; }
     .badge-impossible { background: #2f1f47; color: #bc8cff; border: 1px solid #6e40c9; }
     .badge-os { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
     .badge-date { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
@@ -502,7 +506,7 @@ LEAF_TEMPLATE = """<!DOCTYPE html>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>__TITLE__ — Mostafa Elwaseef's Portfolio</title>
+  <title>__TITLE__ — MOSTAFA ELWASEEF's Portfolio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
   <style>__STYLE__</style>
@@ -537,7 +541,7 @@ CATEGORY_TEMPLATE = """<!DOCTYPE html>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>__TITLE__ — Mostafa Elwaseef's Portfolio</title>
+  <title>__TITLE__ — MOSTAFA ELWASEEF's Portfolio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
   <style>__STYLE__</style>
