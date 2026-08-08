@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>File Inclusion — MOSTAFA ELWASEEF's Portfolio</title>
+  <title>File Upload - Medium — MOSTAFA ELWASEEF's Portfolio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
   <style>
@@ -105,31 +105,66 @@
 
 <div class="hero">
   <div class="hero-inner">
-    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#dvwa">DVWA</a> / File Inclusion</div>
-    <h1>🧪 File Inclusion</h1>
-    <p class="desc">All File Inclusion levels completed, synced automatically from Notion.</p>
+    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#dvwa">DVWA</a> / <a href="index.html">File Upload</a> / File Upload - Medium</div>
+    <h1>File Upload - Medium</h1>
+    <div class="meta-row">
+      <span class="badge badge-platform">🖥 DVWA</span>
+      <span class="badge badge-medium">🟡 Medium</span>
+      <span class="badge badge-date">📅 2026-08-06</span>
+    </div>
   </div>
 </div>
 
 <div class="content">
-  <div class="cards">
-    <a href="file-inclusion-low.html" class="card">
-      <div class="card-header"><span class="card-title">File Inclusion - Low</span><span class="badge badge-easy">🟢 Low</span></div>
-      <div class="card-meta">DVWA</div>
-      <p class="card-desc">Identify how the File Inclusion lab loads content and determine whether the page parameter accepts arbitrary user input.</p>
-    </a>
-    <a href="file-inclusion-medium.html" class="card">
-      <div class="card-header"><span class="card-title">File Inclusion - Medium</span><span class="badge badge-medium">🟡 Medium</span></div>
-      <div class="card-meta">DVWA</div>
-      <p class="card-desc">Identify how the File Inclusion lab loads content at Medium security and determine whether the page parameter still accepts arbitrary user input despite added…</p>
-    </a>
-    <a href="file-inclusion-high.html" class="card">
-      <div class="card-header"><span class="card-title">File Inclusion - High</span><span class="badge badge-hard">🔴 High</span></div>
-      <div class="card-meta">DVWA</div>
-      <p class="card-desc">Identify how the File Inclusion lab loads content at High security and determine what filtering is applied to the page parameter.</p>
-    </a>
+<h1 id="file-upload-medium">File Upload — Medium</h1>
+<h2 id="lab-info">Lab Info</h2>
+<div class='table-wrap'><table>
+  <tr><th>Field</th><th>Value</th></tr>
+  <tr><td><strong>Lab</strong></td><td>File Upload</td></tr>
+  <tr><td><strong>Platform</strong></td><td>DVWA</td></tr>
+  <tr><td><strong>Security Level</strong></td><td>Medium</td></tr>
+  <tr><td><strong>Date</strong></td><td>2026-08-06</td></tr>
+</table></div>
+<hr>
+<h2 id="enumeration">Enumeration</h2>
+<h3 id="objective">Objective</h3>
+<p>Observe how the Medium security level behaves compared to Low — determine whether any validation has been added and confirm the upload path is still disclosed on success.</p>
+<h3 id="findings">Findings</h3>
+<p>The File Upload page presents the same form as the Low level. To confirm the upload directory and baseline behavior, a benign <code>image.png</code> was uploaded. The server accepted it and returned the success message <code>../../hackable/uploads/image.png succesfully uploaded!</code> — confirming that the upload path is still disclosed and the directory remains web-accessible.</p>
+<p><strong>PoC:</strong><br>- <strong>Tools used</strong>: Browser<br>- <strong>Command</strong>: Upload <code>image.png</code> via the form<br>- <strong>Key finding</strong>: Benign upload succeeds and discloses the upload path</p>
+<blockquote>  <figure><img src="images/file-upload-medium/3b4b7523717280209d35d9d778d93dba.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/file-upload-medium/3b4b7523717280848e14fab8749eaf89.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/file-upload-medium/3b4b752371728017b5aaf3ad196445f7.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<h2 id="exploitation-mime-type-bypass-via-content-type-header-spoofing">Exploitation — MIME Type Bypass via Content-Type Header Spoofing</h2>
+<h3 id="description">Description</h3>
+<p>The Medium level validates uploads by checking <code>$_FILES['uploaded']['type']</code> against an allowlist of <code>image/jpeg</code> and <code>image/png</code>. This value is the Content-Type header submitted by the browser inside the multipart/form-data request — a value the client fully controls and one that has no relationship to the file’s actual content. Because the server trusts this header instead of inspecting the file’s magic bytes, intercepting the upload request with a proxy and overwriting the Content-Type header allows a malicious PHP file to pass the check while keeping its real, executable <code>.php</code> extension.</p>
+<h3 id="poc-steps-to-reproduce">PoC — Steps to Reproduce</h3>
+<ol>
+  <li>The PHP webshell <code>RCE_2.php</code> (<code>&lt;?php system($_GET['cmd']); ?&gt;</code>) was selected via the Browse button.</li>
+  <li>With Burp Suite intercepting the request, the first attempt renamed only the filename field to <code>RCE_2.png</code>, leaving the original <code>Content-Type: application/x-php</code> header untouched, then forwarded the request.</li>
+  <li>The server rejected the upload: <code>Your image was not uploaded. We can only accept JPEG or PNG images.</code> — confirming the check validates the Content-Type header value, not the filename extension.</li>
+  <li>In Burp Repeater, the request was corrected: the filename was reverted to keep the real <code>.php</code> extension (<code>RCE_2.php</code>), and the <code>Content-Type</code> header was changed to <code>image/png</code>. The request was resent.</li>
+  <li>The server accepted the file: <code>../../hackable/uploads/RCE_2.php succesfully uploaded!</code> — the MIME check passed because the Content-Type header matched the allowlist, while the file was stored with its original, executable <code>.php</code> extension.</li>
+  <li>Navigating to <code>http://127.0.0.1/dvwa/hackable/uploads/RCE_2.php?cmd=id</code> executed the uploaded webshell.</li>
+  <li>The server returned: <code>uid=33(www-data) gid=33(www-data) groups=33(www-data)</code> — confirming RCE as the web server user.</li>
+</ol>
+<blockquote>  <figure><img src="images/file-upload-medium/3b4b752371728060af08e2ff478bcdbf.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/file-upload-medium/3b4b752371728068b460de990ac673d6.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/file-upload-medium/3b4b7523717280dbb064cc77b4db4e5b.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/file-upload-medium/3b4b75237172804cb610ccaa4cae6c33.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/file-upload-medium/3b4b7523717280b499ebc20e4e89843b.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/file-upload-medium/3b4b7523717280ba8af6cfdf6566144a.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/file-upload-medium/3b4b75237172800ab2baebbdad98b527.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/file-upload-medium/3b4b752371728008a41ecc1e76eb51a1.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<h2 id="lessons-learned">Lessons Learned</h2>
+<p>The Medium level’s MIME type check is entirely client-controlled and can be bypassed with any HTTP proxy capable of intercepting and modifying the upload request. <code>$_FILES['uploaded']['type']</code> reflects the Content-Type header submitted by the browser — it is not derived from the file’s actual content. An attacker who intercepts the request with a tool like Burp Suite can set this header to any value in the allowlist (<code>image/png</code>, <code>image/jpeg</code>) while leaving the malicious file’s real extension in place, so the server saves the upload as an executable script.</p>
+<p>The failed first attempt is instructive: renaming only the filename to <code>.png</code> was not enough, because the Content-Type header — not the extension — is what the server actually checks. Once the header was corrected to <code>image/png</code> while the <code>.php</code> extension was preserved, the bypass succeeded immediately.</p>
+<p>Robust server-side validation must inspect the file’s magic bytes directly (for example using PHP’s <code>finfo_file()</code>) rather than trusting the client-supplied Content-Type header, and should also enforce a strict extension allowlist independent of that header. The High level addresses part of this gap with an extension allowlist, requiring a different bypass technique.</p>
 
-  </div>
 </div>
 
 <footer>Built by Waseef · <a href="../../../index.html">Back to Portfolio</a></footer>

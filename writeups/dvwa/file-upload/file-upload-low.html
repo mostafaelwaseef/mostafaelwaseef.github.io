@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>File Inclusion — MOSTAFA ELWASEEF's Portfolio</title>
+  <title>File Upload - Low — MOSTAFA ELWASEEF's Portfolio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
   <style>
@@ -105,31 +105,58 @@
 
 <div class="hero">
   <div class="hero-inner">
-    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#dvwa">DVWA</a> / File Inclusion</div>
-    <h1>🧪 File Inclusion</h1>
-    <p class="desc">All File Inclusion levels completed, synced automatically from Notion.</p>
+    <div class="breadcrumb"><a href="../../../index.html">Portfolio</a> / <a href="../../../index.html#dvwa">DVWA</a> / <a href="index.html">File Upload</a> / File Upload - Low</div>
+    <h1>File Upload - Low</h1>
+    <div class="meta-row">
+      <span class="badge badge-platform">🖥 DVWA</span>
+      <span class="badge badge-easy">🟢 Low</span>
+      <span class="badge badge-date">📅 2026-08-06</span>
+    </div>
   </div>
 </div>
 
 <div class="content">
-  <div class="cards">
-    <a href="file-inclusion-low.html" class="card">
-      <div class="card-header"><span class="card-title">File Inclusion - Low</span><span class="badge badge-easy">🟢 Low</span></div>
-      <div class="card-meta">DVWA</div>
-      <p class="card-desc">Identify how the File Inclusion lab loads content and determine whether the page parameter accepts arbitrary user input.</p>
-    </a>
-    <a href="file-inclusion-medium.html" class="card">
-      <div class="card-header"><span class="card-title">File Inclusion - Medium</span><span class="badge badge-medium">🟡 Medium</span></div>
-      <div class="card-meta">DVWA</div>
-      <p class="card-desc">Identify how the File Inclusion lab loads content at Medium security and determine whether the page parameter still accepts arbitrary user input despite added…</p>
-    </a>
-    <a href="file-inclusion-high.html" class="card">
-      <div class="card-header"><span class="card-title">File Inclusion - High</span><span class="badge badge-hard">🔴 High</span></div>
-      <div class="card-meta">DVWA</div>
-      <p class="card-desc">Identify how the File Inclusion lab loads content at High security and determine what filtering is applied to the page parameter.</p>
-    </a>
+<h1 id="file-upload-low">File Upload — Low</h1>
+<h2 id="lab-info">Lab Info</h2>
+<div class='table-wrap'><table>
+  <tr><th>Field</th><th>Value</th></tr>
+  <tr><td><strong>Lab</strong></td><td>File Upload</td></tr>
+  <tr><td><strong>Platform</strong></td><td>DVWA</td></tr>
+  <tr><td><strong>Security Level</strong></td><td>Low</td></tr>
+  <tr><td><strong>Date</strong></td><td>2026-08-06</td></tr>
+</table></div>
+<hr>
+<h2 id="enumeration">Enumeration</h2>
+<h3 id="objective">Objective</h3>
+<p>Observe how the upload form behaves — what file types it accepts, whether any client-side or server-side restrictions exist, and where uploaded files are stored.</p>
+<h3 id="findings">Findings</h3>
+<p>The File Upload page presents a simple form prompting the user to “Choose an image to upload.” There is no visible client-side restriction on accepted file types. To probe server-side behavior, a benign image file (<code>image.png</code>) was uploaded. The server accepted it and returned the success message: <code>../../hackable/uploads/image.png succesfully uploaded!</code> — directly disclosing the relative path to the upload directory. Resolving this against the application’s base URL confirmed that uploaded files are stored at <code>/dvwa/hackable/uploads/</code> and are web-accessible, meaning any uploaded file can be retrieved directly via HTTP. No MIME type check, extension validation, or content inspection was performed.</p>
+<p><strong>PoC:</strong><br>- <strong>Tools used</strong>: Browser<br>- <strong>Command</strong>: Upload <code>image.png</code> via the form<br>- <strong>Key finding</strong>: Server response disclosed the upload path — <code>../../hackable/uploads/image.png</code> — confirming web-accessible storage with no file type restrictions</p>
+<blockquote>  <figure><img src="images/file-upload-low/3b4b752371728036997dcb702772f959.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/file-upload-low/3b4b7523717280c3a2f5e003c634f3e1.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/file-upload-low/3b4b7523717280b88f65c1085c510eef.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<h2 id="exploitation-unrestricted-file-upload-remote-code-execution">Exploitation — Unrestricted File Upload (Remote Code Execution)</h2>
+<h3 id="description">Description</h3>
+<p>The application accepts any file type without validation, allowing an attacker to upload a PHP webshell directly. Because the upload directory is web-accessible, the uploaded script can be requested through the browser and will be executed by the server-side PHP interpreter, resulting in remote code execution under the web server’s user context (<code>www-data</code>).</p>
+<h3 id="poc-steps-to-reproduce">PoC — Steps to Reproduce</h3>
+<ol>
+  <li>A PHP webshell was created — <code>RCE.php</code>, containing <code>&lt;?php system($_GET['cmd']); ?&gt;</code> — and selected via the Browse button on the DVWA File Upload page.</li>
+  <li>Click Upload — the application accepts the file with no validation error and confirms: <code>../../hackable/uploads/RCE.php succesfully uploaded!</code></li>
+  <li>Navigate to <code>http://127.0.0.1/dvwa/hackable/uploads/RCE.php?cmd=id</code> in the browser.</li>
+  <li>The server executes the command and returns: <code>uid=33(www-data) gid=33(www-data) groups=33(www-data)</code> — confirming RCE as the web server user.</li>
+</ol>
+<blockquote>  <figure><img src="images/file-upload-low/3b4b752371728039a886c177a2f2bafc.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/file-upload-low/3b4b75237172803a8a93e715db18c2fa.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/file-upload-low/3b4b752371728075b69fd51709e05007.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/file-upload-low/3b4b752371728017b1fdf93e96e2632f.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<h2 id="lessons-learned">Lessons Learned</h2>
+<p>At the Low security level, the application performs no file type validation whatsoever — not on the extension, the MIME type, or the file’s magic bytes. Any file, including executable PHP scripts, can be uploaded and then triggered directly through the browser. The disclosure of the upload path in the success message further simplifies exploitation by eliminating any need to guess where the file was stored.</p>
+<p>The fix at higher security levels involves restricting accepted MIME types on the server side, validating file extensions against an allowlist, and ideally storing uploads outside the web root so they cannot be directly requested. The Medium level introduces MIME type checking, and the High level adds extension validation — both of which require different bypass techniques.</p>
 
-  </div>
 </div>
 
 <footer>Built by Waseef · <a href="../../../index.html">Back to Portfolio</a></footer>
