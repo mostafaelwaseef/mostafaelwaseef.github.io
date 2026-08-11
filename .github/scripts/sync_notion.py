@@ -720,6 +720,34 @@ def dvwa_group_order(slug):
         return (0, DVWA_ORDER.index(slug))
     return (1, slug)
 
+# DVWA category pages have no emoji-prefixed titles to pull an icon from
+# (unlike PortSwigger roots, see extract_icon()), so icons are hardcoded
+# here instead. Where a DVWA category covers the same vulnerability class
+# as an existing PortSwigger Labs tile, it reuses that same icon so the
+# two sections read as visually consistent (e.g. File Upload / SQL
+# Injection / XSS / CSRF match their Labs counterparts). Unmatched
+# categories fall back to 🧪.
+DVWA_ICONS = {
+    "brute-force": "🔨",
+    "command-injection": "💻",
+    "csrf": "🔀",
+    "file-inclusion": "📂",
+    "file-upload": "📁",
+    "insecure-captcha": "🤖",
+    "sql-injection": "💉",
+    "sql-injection-blind": "💉",
+    "weak-session-ids": "🍪",
+    "xss-dom": "🔀",
+    "xss-reflected": "🔀",
+    "xss-stored": "🔀",
+    "csp-bypass": "🛡️",
+    "javascript-attacks": "📜",
+    "authorisation-bypass": "🔓",
+    "open-http-redirect": "↪️",
+    "cryptography": "🔐",
+    "api": "🔌",
+}
+
 def render_dvwa_group(dvwa_buckets):
     items = sorted(dvwa_buckets.items(), key=lambda kv: dvwa_group_order(kv[0]))
     if not items:
@@ -869,7 +897,7 @@ def main():
             for cat_id, cat_title in root["leaves"]:
                 cat_slug = slugify(cat_title)
                 label = cat_title
-                icon = "🧪"
+                icon = DVWA_ICONS.get(cat_slug, "🧪")
                 dvwa_data.setdefault(cat_slug, {"label": label, "icon": icon, "leaves": [], "href": ""})
                 try:
                     cat_children = get_block_children(cat_id)
