@@ -253,7 +253,7 @@ def render_blocks(blocks, ctx, depth=0):
             if b.get("_children"):
                 html += render_blocks(b["_children"], ctx, depth)
 
-        elif btype in ("heading_1", "heading_2", "heading_3"):
+        elif btype in ("heading_1", "heading_2", "heading_3", "heading_4"):
             n = btype[-1]
             text = rt(data.get("rich_text", []))
             slug_id = re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
@@ -450,9 +450,10 @@ STYLE_BLOCK = """
     .badge-os { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
     .badge-date { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
     .content { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
-    h1, h2, h3 { color: var(--text); font-weight: 600; margin: 2rem 0 .75rem; }
+    h1, h2, h3, h4 { color: var(--text); font-weight: 600; margin: 2rem 0 .75rem; }
     h2 { font-size: 1.35rem; padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
     h3 { font-size: 1.1rem; color: var(--accent); }
+    h4 { font-size: .95rem; color: var(--muted); margin-top: 1.5rem; }
     p { margin: .6rem 0; color: #c9d1d9; }
     ul, ol { margin: .5rem 0 .5rem 1.5rem; }
     li { margin: .3rem 0; color: #c9d1d9; }
@@ -462,7 +463,7 @@ STYLE_BLOCK = """
     pre { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
           padding: 1rem 1.25rem; overflow-x: auto; margin: .75rem 0; }
     code { font-family: 'Fira Code', monospace; font-size: .85rem; color: #e6edf3; }
-    p code, li code, td code, h1 code, h2 code, h3 code, blockquote code {
+    p code, li code, td code, h1 code, h2 code, h3 code, h4 code, blockquote code {
       background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; color: var(--accent); font-size: .82rem;
     }
     strong code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; }
